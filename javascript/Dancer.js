@@ -7,7 +7,7 @@
       material = new THREE.MeshBasicMaterial({
         color: 0xff0000
       });
-      this.body = new THREE.Object3D(geometry, material);
+      this.body = new THREE.Mesh(geometry, material);
       this.body.position = new THREE.Vector3(0, 0, 0);
     }
 

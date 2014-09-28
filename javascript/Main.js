@@ -14,7 +14,7 @@
       this.renderer.setClearColor(0x9C9C9C);
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      this.controls = new THREE.OrbitControls(this.camera);
+      this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
       this.controls.damping = 0.2;
       controlChange = (function(_this) {
         return function() {
@@ -24,10 +24,16 @@
       this.controls.addEventListener('change', controlChange);
       this.camera.position.z = -4;
       this.camera.position.y = 3;
+      this.controls.target = new THREE.Vector3(0, 0, 0);
       window.addEventListener('resize', this.onWindowResize, false);
       document.body.appendChild(this.renderer.domElement);
       this.visualizer = new Visualizer(this.scene, this.camera);
     }
+
+    Main.prototype.animate = function() {
+      this.render();
+      return this.controls.update();
+    };
 
     Main.prototype.render = function() {
       this.visualizer.render();
@@ -49,7 +55,7 @@
 
   window.animate = function() {
     requestAnimationFrame(window.animate);
-    return window.app.render();
+    return window.app.animate();
   };
 
   $(function() {
