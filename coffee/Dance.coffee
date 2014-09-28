@@ -1,5 +1,5 @@
 # Controls the mesh of the provided Dancer's body
-class window.Effect
+class window.Dance
   constructor: () ->
     # retain the Dancer
     # default scale Effect.

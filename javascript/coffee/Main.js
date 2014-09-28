@@ -5,7 +5,7 @@
   window.Main = (function() {
     function Main() {
       this.onWindowResize = __bind(this.onWindowResize, this);
-      var visualizer;
+      var controlChange;
       this.scene = new THREE.Scene();
       this.renderer = new THREE.WebGLRenderer({
         antialias: true,
@@ -14,14 +14,25 @@
       this.renderer.setClearColor(0x9C9C9C);
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      this.controls = new THREE.OrbitControls(this.camera);
+      this.controls.damping = 0.2;
+      controlChange = (function(_this) {
+        return function() {
+          return _this.render();
+        };
+      })(this);
+      this.controls.addEventListener('change', controlChange);
+      this.camera.position.z = -4;
+      this.camera.position.y = 3;
       window.addEventListener('resize', this.onWindowResize, false);
       document.body.appendChild(this.renderer.domElement);
-      visualizer = new Visualizer();
+      this.visualizer = new Visualizer(this.scene, this.camera);
     }
 
     Main.prototype.render = function() {
-      visualizer.render();
+      this.visualizer.render();
       this.scene.updateMatrixWorld();
+      this.camera.updateProjectionMatrix();
       this.renderer.clear();
       this.renderer.render(this.scene, this.camera);
     };
