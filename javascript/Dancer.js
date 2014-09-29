@@ -9,9 +9,12 @@
       });
       this.body = new THREE.Mesh(geometry, material);
       this.body.position = new THREE.Vector3(0, 0, 0);
+      this.dance = new Dance();
     }
 
-    Dancer.prototype.update = function(audioEvent) {};
+    Dancer.prototype.update = function(audioWindow) {
+      return this.dance.update(audioWindow, this);
+    };
 
     return Dancer;
 

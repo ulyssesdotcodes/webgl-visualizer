@@ -3,7 +3,11 @@
   window.Dance = (function() {
     function Dance() {}
 
-    Dance.prototype.update = function(audioEvent) {};
+    Dance.prototype.update = function(audioWindow, dancer) {
+      var averageDb;
+      averageDb = audioWindow.averageDb;
+      return dancer.body.scale.set(averageDb, averageDb, averageDb);
+    };
 
     return Dance;
 

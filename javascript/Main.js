@@ -28,6 +28,7 @@
       window.addEventListener('resize', this.onWindowResize, false);
       document.body.appendChild(this.renderer.domElement);
       this.visualizer = new Visualizer(this.scene, this.camera);
+      window.addEventListener('keydown', this.visualizer.onKeyDown.bind(this.visualizer), false);
     }
 
     Main.prototype.animate = function() {

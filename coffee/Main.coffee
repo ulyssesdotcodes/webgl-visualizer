@@ -27,6 +27,8 @@ class window.Main
 
     @visualizer = new Visualizer(@scene, @camera)
 
+    window.addEventListener('keydown', @visualizer.onKeyDown.bind(@visualizer), false)
+
   animate: () ->
     @render()
     @controls.update()
