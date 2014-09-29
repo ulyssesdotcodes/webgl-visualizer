@@ -1,0 +1,69 @@
+# Constructor to set up the business side of stuff. It shouldn't contain any of the visualization code.
+
+class window.Main
+  # Construct the scene
+  constructor: () ->
+    @scene = new THREE.Scene()
+    @renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } )
+    @renderer.setClearColor(0x9C9C9C)
+    @renderer.setSize( window.innerWidth, window.innerHeight )
+
+    @camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
+<<<<<<< HEAD
+    @controls = new THREE.OrbitControls( @camera, @renderer.domElement )
+=======
+    @controls = new THREE.OrbitControls( @camera )
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
+    @controls.damping = 0.2
+
+    controlChange = () =>
+      @render()
+<<<<<<< HEAD
+
+=======
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
+    @controls.addEventListener( 'change', controlChange )
+
+    @camera.position.z = -4
+    @camera.position.y = 3
+<<<<<<< HEAD
+    @controls.target = new THREE.Vector3( 0, 0, 0 )
+=======
+    # @controls.target = new THREE.Vector3( 0, 0, 0 )
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
+
+    window.addEventListener( 'resize', @onWindowResize, false )
+
+    document.body.appendChild(@renderer.domElement)
+
+    @visualizer = new Visualizer(@scene, @camera)
+
+<<<<<<< HEAD
+  animate: () ->
+    @render()
+    @controls.update()
+
+=======
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
+  render: () ->
+    @visualizer.render()  
+
+    @scene.updateMatrixWorld()
+    @camera.updateProjectionMatrix()
+    @renderer.clear()
+    @renderer.render(@scene, @camera)
+    return
+
+  onWindowResize: () =>
+    @camera.aspect = window.innerWidth / window.innerHeight
+    @camera.updateProjectionMatrix()
+    @renderer.setSize( window.innerWidth, window.innerHeight )
+
+window.animate = () ->
+  requestAnimationFrame(window.animate)
+  window.app.animate()
+
+$ ->
+  window.app = new Main()
+
+  window.animate()
