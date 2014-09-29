@@ -8,8 +8,10 @@ class window.Dancer
     material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     @body = new THREE.Mesh(geometry, material);
     @body.position = new THREE.Vector3(0, 0, 0);
-    @dance = new Dance()
+    @dance = new ScaleDance(0.7)
+    @danceMaterial = new ColorDanceMaterial(0.01);
 
   update: (audioWindow) ->
     # React to the audio event by pumping it through Effect and Shader
-    @dance.update( audioWindow, @ )
+    @dance.update(audioWindow, @)
+    @danceMaterial.update(audioWindow, @)

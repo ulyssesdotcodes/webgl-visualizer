@@ -12,7 +12,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Go.mp3');
+      this.play('audio/Glasser.mp3');
       defaultDancer = new Dancer();
       this.dancers.push(defaultDancer);
       this.scene.add(defaultDancer.body);
@@ -20,6 +20,9 @@
 
     Visualizer.prototype.render = function() {
       var dancer, _i, _len, _ref, _results;
+      if (!this.playing) {
+        return;
+      }
       this.audioWindow.update(this.analyser);
       _ref = this.dancers;
       _results = [];

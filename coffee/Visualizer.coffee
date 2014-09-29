@@ -14,7 +14,7 @@ class window.Visualizer
     @startOffset = 0
 
     # Load the sample audio
-    @play('audio/Go.mp3')
+    @play('audio/Glasser.mp3')
 
     defaultDancer = new Dancer()
     @dancers.push(defaultDancer)
@@ -22,6 +22,9 @@ class window.Visualizer
 
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
+    if !@playing
+      return
+    
     @audioWindow.update(@analyser)
     # Create event
     for dancer in @dancers
