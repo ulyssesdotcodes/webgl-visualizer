@@ -6,7 +6,11 @@ class window.Dancer
     # Construct a default Dancer using @body as the Object3D
     geometry = new THREE.BoxGeometry( 1, 1, 1 );
     material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+<<<<<<< HEAD
     @body = new THREE.Mesh(geometry, material);
+=======
+    @body = new THREE.Object3D(geometry, material);
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
     @body.position = new THREE.Vector3( 0, 0, 0 );
 
   update: (audioEvent) ->

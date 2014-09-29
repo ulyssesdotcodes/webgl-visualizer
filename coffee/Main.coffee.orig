@@ -9,17 +9,28 @@ class window.Main
     @renderer.setSize( window.innerWidth, window.innerHeight )
 
     @camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
+<<<<<<< HEAD
     @controls = new THREE.OrbitControls( @camera, @renderer.domElement )
+=======
+    @controls = new THREE.OrbitControls( @camera )
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
     @controls.damping = 0.2
 
     controlChange = () =>
       @render()
+<<<<<<< HEAD
 
+=======
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
     @controls.addEventListener( 'change', controlChange )
 
     @camera.position.z = -4
     @camera.position.y = 3
+<<<<<<< HEAD
     @controls.target = new THREE.Vector3( 0, 0, 0 )
+=======
+    # @controls.target = new THREE.Vector3( 0, 0, 0 )
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
 
     window.addEventListener( 'resize', @onWindowResize, false )
 
@@ -27,10 +38,13 @@ class window.Main
 
     @visualizer = new Visualizer(@scene, @camera)
 
+<<<<<<< HEAD
   animate: () ->
     @render()
     @controls.update()
 
+=======
+>>>>>>> a6dd7e3627b5348200c4fc609aa662182094f505
   render: () ->
     @visualizer.render()  
 
