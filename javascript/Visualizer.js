@@ -2,9 +2,10 @@
 (function() {
   window.Visualizer = (function() {
     function Visualizer(scene, camera) {
-      var defaultDancer;
+      var simpleFreqShader;
       this.scene = scene;
       this.dancers = new Array();
+      this.shaderLoader = new ShaderLoader();
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioContext = new AudioContext();
       this.audioWindow = new AudioWindow(2048, 1);
@@ -12,10 +13,16 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Glasser.mp3');
-      defaultDancer = new Dancer();
-      this.dancers.push(defaultDancer);
-      this.scene.add(defaultDancer.body);
+      this.play('audio/Go.mp3');
+      simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
+      simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
+        return function(danceMaterial) {
+          var defaultDancer;
+          defaultDancer = new CubeDancer(new PositionDance(0.2), danceMaterial);
+          _this.dancers.push(defaultDancer);
+          return _this.scene.add(defaultDancer.body);
+        };
+      })(this));
     }
 
     Visualizer.prototype.render = function() {

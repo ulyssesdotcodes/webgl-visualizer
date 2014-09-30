@@ -3,6 +3,7 @@ class window.Visualizer
   constructor: (scene, camera) ->
     @scene = scene
     @dancers = new Array()
+    @shaderLoader = new ShaderLoader()
 
     # Create the audio context
     window.AudioContext = window.AudioContext || window.webkitAudioContext
@@ -14,11 +15,13 @@ class window.Visualizer
     @startOffset = 0
 
     # Load the sample audio
-    @play('audio/Glasser.mp3')
+    @play('audio/Go.mp3')
 
-    defaultDancer = new Dancer()
-    @dancers.push(defaultDancer)
-    @scene.add(defaultDancer.body)
+    simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
+    simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
+      defaultDancer = new CubeDancer(new PositionDance(0.2), danceMaterial)
+      @dancers.push(defaultDancer)
+      @scene.add(defaultDancer.body)
 
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
