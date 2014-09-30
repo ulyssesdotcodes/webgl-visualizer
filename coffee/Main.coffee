@@ -7,6 +7,7 @@ class window.Main
     @renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } )
     @renderer.setClearColor(0x9C9C9C)
     @renderer.setSize( window.innerWidth, window.innerHeight )
+    @renderer.autoClear = false
 
     @camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
     @controls = new THREE.OrbitControls( @camera, @renderer.domElement )

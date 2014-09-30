@@ -16,8 +16,7 @@
       this.direction = direction;
       this.positionChange = audioWindow.averageDb * this.smoothingFactor + (1 - this.smoothingFactor) * this.positionChange;
       newPosition = new THREE.Vector3();
-      newPosition.addVectors(basePosition, this.direction.multiplyScalar(this.positionChange));
-      return dancer.body.position.set(newPosition.x, newPosition.y, newPosition.z);
+      return newPosition.addVectors(basePosition, this.direction.multiplyScalar(this.positionChange));
     };
 
     return PositionDance;

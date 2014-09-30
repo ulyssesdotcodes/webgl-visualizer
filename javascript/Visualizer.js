@@ -13,7 +13,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Go.mp3');
+      this.play('audio/Glasser.mp3');
       simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
       simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
         return function(danceMaterial) {

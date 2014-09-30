@@ -13,4 +13,4 @@ class window.PositionDance
 		newPosition = new THREE.Vector3()
 		newPosition.addVectors(basePosition, @direction.multiplyScalar(@positionChange))
 
-		dancer.body.position.set(newPosition.x, newPosition.y, newPosition.z)
+		# dancer.body.position.set(newPosition.x, newPosition.y, newPosition.z)

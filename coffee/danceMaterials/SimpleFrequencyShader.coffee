@@ -15,7 +15,6 @@ class window.SimpleFrequencyShader
 
   update: (audioWindow, dancer) ->
     dancer.body.material.uniforms.freqTexture.value = @reduceArray(audioWindow.frequencyBuffer)
-    dancer.body.material.uniforms.freqTexture.needsUpdate
 
   reduceArray: (freqBuf) ->
     target = 64
@@ -32,20 +31,22 @@ class window.SimpleFrequencyShader
         newBuf[Math.floor(i  / flooredRatio)] = movingSum / flooredRatio
         movingSum = 0
 
-    newTexArray = new Uint8Array(target * target * 3)
+    newTexArray = new Uint8Array(target * target * 4)
 
     for i in [0..target]
       for j in [0..target]
-        if newBuf[i] > j * 4
-          newTexArray[i * j] = 255
-          newTexArray[i * j + 1] = 255
-          newTexArray[i * j + 2] = 255
+        if newBuf[j] < i * 4
+          newTexArray[i * target + j * 4] = 255
+          newTexArray[i * target + j * 4 + 1] = 255
+          newTexArray[i * target + j * 4 + 2] = 255
+          newTexArray[i * target + j * 4 + 3] = 255
         else 
-          newTexArray[i * j] = 0
-          newTexArray[i * j + 1] = 0
-          newTexArray[i * j + 2] = 0
+          newTexArray[i * target + j * 4] = 0
+          newTexArray[i * target + j * 4 + 1] = 0
+          newTexArray[i * target + j * 4 + 2] = 0
+          newTexArray[i * target + j * 4 + 3] = 0
 
-    texture = new THREE.DataTexture(newTexArray, target, target, THREE.RGBFormat, THREE.UnsignedByte)
+    texture = new THREE.DataTexture(newTexArray, target, target, THREE.RGBAFormat, THREE.UnsignedByte)
     texture.needsUpdate = true
 
     return texture
