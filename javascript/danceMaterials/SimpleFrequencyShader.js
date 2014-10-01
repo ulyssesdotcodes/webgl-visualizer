@@ -2,7 +2,10 @@
 (function() {
   window.SimpleFrequencyShader = (function() {
     function SimpleFrequencyShader(shaderLoader) {
+      this.target = 128;
+      this.size = 1024;
       this.shaderLoader = shaderLoader;
+      this.newTexArray = new Uint8Array(this.target * this.target * 4);
     }
 
     SimpleFrequencyShader.prototype.loadShader = function(audioWindow, next) {
@@ -19,6 +22,8 @@
             }
           };
           _this.material = new THREE.ShaderMaterial(shader);
+          _this.material.side = THREE.DoubleSide;
+          _this.material.transparent = true;
           return next(_this);
         };
       })(this));
@@ -29,37 +34,43 @@
     };
 
     SimpleFrequencyShader.prototype.reduceArray = function(freqBuf) {
-      var flooredRatio, i, j, movingSum, newBuf, newTexArray, size, target, texture, _i, _j, _k;
-      target = 64;
-      size = 2048;
-      newBuf = new Array(target);
+      var baseIndex, flooredRatio, i, j, movingSum, newBuf, texture, _i, _j, _k, _ref, _ref1, _ref2;
+      newBuf = new Array(this.target);
       movingSum = 0;
-      flooredRatio = Math.floor(size / target);
-      for (i = _i = 1; 1 <= size ? _i <= size : _i >= size; i = 1 <= size ? ++_i : --_i) {
+      flooredRatio = Math.floor(this.size / this.target);
+      for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
         movingSum += freqBuf[i];
         if (((i + 1) % flooredRatio) === 0) {
           newBuf[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
           movingSum = 0;
         }
       }
-      newTexArray = new Uint8Array(target * target * 4);
-      for (i = _j = 0; 0 <= target ? _j <= target : _j >= target; i = 0 <= target ? ++_j : --_j) {
-        for (j = _k = 0; 0 <= target ? _k <= target : _k >= target; j = 0 <= target ? ++_k : --_k) {
-          if (newBuf[j] < i * 4) {
-            newTexArray[i * target + j * 4] = 255;
-            newTexArray[i * target + j * 4 + 1] = 255;
-            newTexArray[i * target + j * 4 + 2] = 255;
-            newTexArray[i * target + j * 4 + 3] = 255;
+      for (i = _j = 0, _ref1 = this.target; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+        for (j = _k = 0, _ref2 = this.target; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; j = 0 <= _ref2 ? ++_k : --_k) {
+          baseIndex = i * this.target * 4 + j * 4;
+          if (newBuf[j] > i * 2) {
+            this.newTexArray[baseIndex] = 255;
+            this.newTexArray[baseIndex + 1] = 255;
+            this.newTexArray[baseIndex + 2] = 255;
+            this.newTexArray[baseIndex + 3] = 255;
           } else {
-            newTexArray[i * target + j * 4] = 0;
-            newTexArray[i * target + j * 4 + 1] = 0;
-            newTexArray[i * target + j * 4 + 2] = 0;
-            newTexArray[i * target + j * 4 + 3] = 0;
+            this.newTexArray[baseIndex] = 0;
+            this.newTexArray[baseIndex + 1] = 0;
+            this.newTexArray[baseIndex + 2] = 0;
+            this.newTexArray[baseIndex + 3] = 0;
           }
         }
       }
-      texture = new THREE.DataTexture(newTexArray, target, target, THREE.RGBAFormat, THREE.UnsignedByte);
+      texture = new THREE.DataTexture(this.newTexArray, this.target, this.target, THREE.RGBAFormat, THREE.UnsignedByte);
       texture.needsUpdate = true;
+      texture.flipY = false;
+      texture.generateMipmaps = false;
+      texture.magFilter = THREE.LinearFilter;
+      texture.minFilter = THREE.LinearFilter;
+      texture.unpackAlignment = 1;
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.anisotropy = 4;
       return texture;
     };
 

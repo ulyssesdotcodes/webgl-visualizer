@@ -15,7 +15,7 @@ class window.Visualizer
     @startOffset = 0
 
     # Load the sample audio
-    @play('audio/Glasser.mp3')
+    @play('audio/Go.mp3')
 
     simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
     simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
