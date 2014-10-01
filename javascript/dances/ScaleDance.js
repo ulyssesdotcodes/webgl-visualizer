@@ -17,6 +17,10 @@
       return dancer.body.scale.set(this.averageDb, this.averageDb, this.averageDb);
     };
 
+    ScaleDance.prototype.reset = function(dancer) {
+      return dancer.body.scale.set(1, 1, 1);
+    };
+
     return ScaleDance;
 
   })();

@@ -5,18 +5,27 @@
       this.smoothingFactor = smoothingFactor;
       this.positionChange = 0;
       this.direction = new THREE.Vector3(0, 1, 0);
+      this.directionCopy = new THREE.Vector3();
     }
 
-    PositionDance.prototype.update = function(audioWindow, dancer, direction) {
+    PositionDance.prototype.update = function(audioWindow, dancer) {
       var basePosition, newPosition;
-      if (direction == null) {
-        direction = this.direction;
-      }
-      basePosition = dancer.body.position - this.direction.multiplyScalar(this.positionChange);
-      this.direction = direction;
+      basePosition = new THREE.Vector3();
+      this.directionCopy.copy(this.direction);
+      basePosition.subVectors(dancer.body.position, this.directionCopy.multiplyScalar(this.positionChange));
       this.positionChange = audioWindow.averageDb * this.smoothingFactor + (1 - this.smoothingFactor) * this.positionChange;
+      this.directionCopy.copy(this.direction);
       newPosition = new THREE.Vector3();
-      return newPosition.addVectors(basePosition, this.direction.multiplyScalar(this.positionChange));
+      newPosition.addVectors(basePosition, this.directionCopy.multiplyScalar(this.positionChange));
+      return dancer.body.position.set(newPosition.x, newPosition.y, newPosition.z);
+    };
+
+    PositionDance.prototype.reset = function(dancer) {
+      var basePosition;
+      this.directionCopy.copy(this.direction);
+      basePosition = new THREE.Vector3();
+      basePosition.subVectors(dancer.body.position, this.directionCopy.multiplyScalar(this.positionChange));
+      return dancer.body.position.set(basePosition.x, basePosition.y, basePosition.z);
     };
 
     return PositionDance;

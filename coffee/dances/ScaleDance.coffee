@@ -14,3 +14,5 @@ class window.ScaleDance
     	@averageDb = audioWindow.averageDb * smoothingFactor + (1 - smoothingFactor) * @averageDb
     dancer.body.scale.set(@averageDb, @averageDb, @averageDb)
 	
+  reset: (dancer) ->
+  	dancer.body.scale.set(1, 1, 1)
