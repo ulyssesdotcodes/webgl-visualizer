@@ -27,7 +27,7 @@ class window.Visualizer
     #   @dancers.push(defaultDancer)
     #   @scene.add(defaultDancer.body)
     
-    defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0))
+    defaultDancer = new CubeDancer(new PositionDance(0.2, new THREE.Vector3(0, 4.0, 0)), new ColorDanceMaterial(0))
     @dancers.push(defaultDancer)
     @scene.add(defaultDancer.body)
 
@@ -53,10 +53,10 @@ class window.Visualizer
         if @playing then @pause() else @play(@currentlyPlaying)
       when @keys.SCALE_DANCE
         @dancers[0].dance.reset(@dancers[0])
-        @dancers[0].dance = new ScaleDance(0.5)
+        @dancers[0].dance = new ScaleDance(0.2)
       when @keys.POSITION_DANCE
         @dancers[0].dance.reset(@dancers[0])
-        @dancers[0].dance = new PositionDance(0.2)
+        @dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0))
 
   # Utility methods
 

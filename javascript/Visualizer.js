@@ -20,7 +20,7 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.play('audio/Glasser.mp3');
-      defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0));
+      defaultDancer = new CubeDancer(new PositionDance(0.2, new THREE.Vector3(0, 4.0, 0)), new ColorDanceMaterial(0));
       this.dancers.push(defaultDancer);
       this.scene.add(defaultDancer.body);
     }
@@ -57,10 +57,10 @@
           break;
         case this.keys.SCALE_DANCE:
           this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new ScaleDance(0.5);
+          return this.dancers[0].dance = new ScaleDance(0.2);
         case this.keys.POSITION_DANCE:
           this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new PositionDance(0.2);
+          return this.dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0));
       }
     };
 
