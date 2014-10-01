@@ -3,10 +3,10 @@
   window.CubeDancer = (function() {
     function CubeDancer(dance, danceMaterial) {
       var geometry, material;
-      geometry = new THREE.BoxGeometry(2, 2, 2);
+      geometry = new THREE.BoxGeometry(1, 1, 1);
       material = danceMaterial.material;
       this.body = new THREE.Mesh(geometry, material);
-      this.body.position = new THREE.Vector3(0, 4, 0);
+      this.body.position = new THREE.Vector3(0, 0, 0);
       this.dance = dance;
       this.danceMaterial = danceMaterial;
     }
