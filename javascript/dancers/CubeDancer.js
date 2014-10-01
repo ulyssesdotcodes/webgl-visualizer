@@ -5,7 +5,6 @@
       var geometry, material;
       geometry = new THREE.BoxGeometry(2, 2, 2);
       material = danceMaterial.material;
-      material.side = THREE.DoubleSide;
       this.body = new THREE.Mesh(geometry, material);
       this.body.position = new THREE.Vector3(0, 4, 0);
       this.dance = dance;

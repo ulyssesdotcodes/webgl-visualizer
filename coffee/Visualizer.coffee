@@ -1,9 +1,13 @@
 class window.Visualizer
+  # Get those keys set up
+  keys: { PAUSE: 80, SCALE_DANCE: 83, POSITION_DANCE: 68 }
+
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
     @scene = scene
     @dancers = new Array()
     @shaderLoader = new ShaderLoader()
+
 
     # Create the audio context
     window.AudioContext = window.AudioContext || window.webkitAudioContext
@@ -17,11 +21,15 @@ class window.Visualizer
     # Load the sample audio
     @play('audio/Glasser.mp3')
 
-    simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
-    simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
-      defaultDancer = new CubeDancer(new PositionDance(0.2), danceMaterial)
-      @dancers.push(defaultDancer)
-      @scene.add(defaultDancer.body)
+    # simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
+    # simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
+    #   defaultDancer = new CubeDancer(new PositionDance(0.2), danceMaterial)
+    #   @dancers.push(defaultDancer)
+    #   @scene.add(defaultDancer.body)
+    
+    defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0))
+    @dancers.push(defaultDancer)
+    @scene.add(defaultDancer.body)
 
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
@@ -40,8 +48,15 @@ class window.Visualizer
 
   #Event methods
   onKeyDown: (event) ->
-    if event.keyCode == 80
-      if @playing then @pause() else @play(@currentlyPlaying)
+    switch event.keyCode
+      when @keys.PAUSE
+        if @playing then @pause() else @play(@currentlyPlaying)
+      when @keys.SCALE_DANCE
+        @dancers[0].dance.reset(@dancers[0])
+        @dancers[0].dance = new ScaleDance(0.5)
+      when @keys.POSITION_DANCE
+        @dancers[0].dance.reset(@dancers[0])
+        @dancers[0].dance = new PositionDance(0.2)
 
   # Utility methods
 

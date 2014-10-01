@@ -6,7 +6,6 @@ class window.CubeDancer
     # Construct a default Dancer using @body as the Object3D
     geometry = new THREE.BoxGeometry(2, 2, 2);
     material = danceMaterial.material;
-    material.side = THREE.DoubleSide
     @body = new THREE.Mesh(geometry, material);
     @body.position = new THREE.Vector3(0, 4, 0);
     @dance = dance
