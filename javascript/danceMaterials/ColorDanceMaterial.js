@@ -2,8 +2,8 @@
 (function() {
   window.ColorDanceMaterial = (function() {
     function ColorDanceMaterial(smoothingFactor) {
-      this.newColor = 0;
       this.smoothingFactor = smoothingFactor;
+      this.newColor = 0;
     }
 
     ColorDanceMaterial.prototype.update = function(audioWindow, dancer) {

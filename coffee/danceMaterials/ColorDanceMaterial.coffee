@@ -1,9 +1,7 @@
 class window.ColorDanceMaterial
-	constructor: (smoothingFactor) ->
+	constructor: (@smoothingFactor) ->
 		# set a default material. red?
 		@newColor = 0
-
-		@smoothingFactor = smoothingFactor
 
 	update: (audioWindow, dancer) ->
 
