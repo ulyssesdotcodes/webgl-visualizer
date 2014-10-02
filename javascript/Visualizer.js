@@ -8,7 +8,7 @@
     };
 
     function Visualizer(scene, camera) {
-      var defaultDancer;
+      var simpleFreqShader;
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
@@ -19,10 +19,16 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Glasser.mp3');
-      defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0));
-      this.dancers.push(defaultDancer);
-      this.scene.add(defaultDancer.body);
+      this.play('audio/Go.mp3');
+      simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
+      simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
+        return function(danceMaterial) {
+          var defaultDancer;
+          defaultDancer = new CubeDancer(new PositionDance(0.2), danceMaterial);
+          _this.dancers.push(defaultDancer);
+          return _this.scene.add(defaultDancer.body);
+        };
+      })(this));
     }
 
     Visualizer.prototype.render = function() {
@@ -47,20 +53,12 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
-      switch (event.keyCode) {
-        case this.keys.PAUSE:
-          if (this.playing) {
-            return this.pause();
-          } else {
-            return this.play(this.currentlyPlaying);
-          }
-          break;
-        case this.keys.SCALE_DANCE:
-          this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new ScaleDance(0.5);
-        case this.keys.POSITION_DANCE:
-          this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new PositionDance(0.2);
+      if (event.keyCode === 80) {
+        if (this.playing) {
+          return this.pause();
+        } else {
+          return this.play(this.currentlyPlaying);
+        }
       }
     };
 
