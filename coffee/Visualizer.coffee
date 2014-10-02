@@ -21,6 +21,8 @@ class window.Visualizer
     # Load the sample audio
     @play('audio/Go.mp3')
 
+    # @createLiveInput()
+
     defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.1))
     @dancers[0] = defaultDancer
     @scene.add(defaultDancer.body)
