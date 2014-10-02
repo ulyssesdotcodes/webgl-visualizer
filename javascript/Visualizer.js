@@ -23,7 +23,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Go.mp3');
+      this.createLiveInput();
       defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.1));
       this.dancers[0] = defaultDancer;
       this.scene.add(defaultDancer.body);
@@ -103,6 +103,7 @@
       var gotStream;
       gotStream = (function(_this) {
         return function(stream) {
+          _this.playing = true;
           _this.source = _this.audioContext.createMediaStreamSource(stream);
           return _this.source.connect(_this.analyser);
         };

@@ -19,9 +19,9 @@ class window.Visualizer
     @startOffset = 0
 
     # Load the sample audio
-    @play('audio/Go.mp3')
+    # @play('audio/Go.mp3')
 
-    # @createLiveInput()
+    @createLiveInput()
 
     defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.1))
     @dancers[0] = defaultDancer
@@ -89,8 +89,9 @@ class window.Visualizer
 
   createLiveInput: () ->
     gotStream = (stream) =>
-        @source = @audioContext.createMediaStreamSource stream
-        @source.connect @analyser
+      @playing = true  
+      @source = @audioContext.createMediaStreamSource stream
+      @source.connect @analyser
 
     @dbSampleBuf = new Uint8Array(2048)
 
