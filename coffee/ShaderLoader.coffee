@@ -9,7 +9,7 @@ class window.ShaderLoader
       next(@shaders[name])
     else
       @shaders[name] = {vertexShader: '', fragmentShader: ''}
-      @loadFromUrl(name, '/shaders/' + name, next)
+      @loadFromUrl(name, 'shaders/' + name, next)
 
   # Loads the shaderfrom a URL
   loadFromUrl: (name, url, next) ->

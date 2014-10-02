@@ -13,7 +13,7 @@
           vertexShader: '',
           fragmentShader: ''
         };
-        return this.loadFromUrl(name, '/shaders/' + name, next);
+        return this.loadFromUrl(name, 'shaders/' + name, next);
       }
     };
 
