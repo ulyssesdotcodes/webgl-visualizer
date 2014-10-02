@@ -6,7 +6,9 @@
       SCALE_DANCE: 83,
       POSITION_DANCE: 68,
       CUBE_SHADER: 49,
-      CUBE_COLOR: 50
+      CUBE_COLOR: 50,
+      SPHERE_SHADER: 51,
+      SPHERE_COLOR: 52
     };
 
     function Visualizer(scene, camera) {
@@ -22,7 +24,7 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.play('audio/Go.mp3');
-      defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.2));
+      defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.1));
       this.dancers[0] = defaultDancer;
       this.scene.add(defaultDancer.body);
     }
@@ -49,7 +51,7 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
-      var defaultDancer, prevDancer, simpleFreqShader;
+      var dance, defaultDancer, simpleFreqShader;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {
@@ -65,18 +67,31 @@
           this.dancers[0].dance.reset(this.dancers[0]);
           return this.dancers[0].dance = new PositionDance(0.2);
         case this.keys.CUBE_COLOR:
-          prevDancer = this.dancers.pop();
-          this.scene.remove(prevDancer.body);
-          defaultDancer = new CubeDancer(prevDancer.dance, new ColorDanceMaterial(0.2));
+          dance = this.removeLastDancer();
+          defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1));
           this.dancers[0] = defaultDancer;
           return this.scene.add(defaultDancer.body);
         case this.keys.CUBE_SHADER:
           simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
           return simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
             return function(danceMaterial) {
-              prevDancer = _this.dancers.pop();
-              _this.scene.remove(prevDancer.body);
-              defaultDancer = new CubeDancer(prevDancer.dance, danceMaterial);
+              dance = _this.removeLastDancer();
+              defaultDancer = new CubeDancer(dance, danceMaterial);
+              _this.dancers[0] = defaultDancer;
+              return _this.scene.add(defaultDancer.body);
+            };
+          })(this));
+        case this.keys.SPHERE_COLOR:
+          dance = this.removeLastDancer();
+          defaultDancer = new SphereDancer(dance, new ColorDanceMaterial(0.1));
+          this.dancers[0] = defaultDancer;
+          return this.scene.add(defaultDancer.body);
+        case this.keys.SPHERE_SHADER:
+          simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
+          return simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
+            return function(danceMaterial) {
+              dance = _this.removeLastDancer();
+              defaultDancer = new SphereDancer(dance, danceMaterial);
               _this.dancers[0] = defaultDancer;
               return _this.scene.add(defaultDancer.body);
             };
@@ -137,6 +152,13 @@
         };
       })(this);
       request.send();
+    };
+
+    Visualizer.prototype.removeLastDancer = function() {
+      var prevDancer;
+      prevDancer = this.dancers.pop();
+      this.scene.remove(prevDancer.body);
+      return prevDancer.dance;
     };
 
     Visualizer.prototype.loadFromBuffer = function(buffer) {

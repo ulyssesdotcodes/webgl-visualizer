@@ -1,7 +1,7 @@
 class window.ColorDanceMaterial
 	constructor: (@smoothingFactor) ->
-		# set a default material. red?
 		@newColor = 0
+		@material = new THREE.MeshLambertMaterial({ color: 0x00000, wireframe: true })
 
 	update: (audioWindow, dancer) ->
 
@@ -21,4 +21,5 @@ class window.ColorDanceMaterial
 
 		@newColor = @smoothingFactor * newColor + (1 - @smoothingFactor) * @newColor
 
+		dancer.body.material.emissive.setHex(@newColor)
 		dancer.body.material.color.setHex(@newColor)

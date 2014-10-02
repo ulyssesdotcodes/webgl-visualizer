@@ -4,6 +4,10 @@
     function ColorDanceMaterial(smoothingFactor) {
       this.smoothingFactor = smoothingFactor;
       this.newColor = 0;
+      this.material = new THREE.MeshLambertMaterial({
+        color: 0x00000,
+        wireframe: true
+      });
     }
 
     ColorDanceMaterial.prototype.update = function(audioWindow, dancer) {
@@ -24,6 +28,7 @@
       }
       newColor = 0xffffff * (maxIndex / maxImportantIndex);
       this.newColor = this.smoothingFactor * newColor + (1 - this.smoothingFactor) * this.newColor;
+      dancer.body.material.emissive.setHex(this.newColor);
       return dancer.body.material.color.setHex(this.newColor);
     };
 

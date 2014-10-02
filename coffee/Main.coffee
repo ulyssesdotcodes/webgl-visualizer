@@ -5,7 +5,6 @@ class window.Main
   constructor: () ->
     @scene = new THREE.Scene()
     @renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } )
-    @renderer.setClearColor(0x9C9C9C)
     @renderer.setSize( window.innerWidth, window.innerHeight )
     @renderer.autoClear = false
 

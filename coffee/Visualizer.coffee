@@ -1,6 +1,6 @@
 class window.Visualizer
   # Get those keys set up
-  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, CUBE_SHADER: 49, CUBE_COLOR: 50 }
+  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, CUBE_SHADER: 49, CUBE_COLOR: 50, SPHERE_SHADER: 51, SPHERE_COLOR: 52 }
 
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
@@ -21,7 +21,7 @@ class window.Visualizer
     # Load the sample audio
     @play('audio/Go.mp3')
 
-    defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.2))
+    defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.1))
     @dancers[0] = defaultDancer
     @scene.add(defaultDancer.body)
 
@@ -55,18 +55,30 @@ class window.Visualizer
         @dancers[0].dance = new PositionDance(0.2)
 
       when @keys.CUBE_COLOR
-        prevDancer = @dancers.pop()
-        @scene.remove(prevDancer.body) 
-        defaultDancer = new CubeDancer(prevDancer.dance, new ColorDanceMaterial(0.2))
+        dance = @removeLastDancer()
+        defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1))
         @dancers[0] = defaultDancer
         @scene.add(defaultDancer.body)
 
       when @keys.CUBE_SHADER
         simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
         simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
-          prevDancer = @dancers.pop()
-          @scene.remove(prevDancer.body)
-          defaultDancer = new CubeDancer(prevDancer.dance, danceMaterial)
+          dance = @removeLastDancer()
+          defaultDancer = new CubeDancer(dance, danceMaterial)
+          @dancers[0] = defaultDancer
+          @scene.add(defaultDancer.body)
+
+      when @keys.SPHERE_COLOR
+        dance = @removeLastDancer()
+        defaultDancer = new SphereDancer(dance, new ColorDanceMaterial(0.1))
+        @dancers[0] = defaultDancer
+        @scene.add(defaultDancer.body)
+
+      when @keys.SPHERE_SHADER
+        simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
+        simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
+          dance = @removeLastDancer()
+          defaultDancer = new SphereDancer(dance, danceMaterial)
           @dancers[0] = defaultDancer
           @scene.add(defaultDancer.body)
 
@@ -109,6 +121,13 @@ class window.Visualizer
 
     request.send()
     return
+
+  # Removes the last dancer, returns the dancer's dance
+  removeLastDancer: () ->
+    prevDancer = @dancers.pop()
+    @scene.remove(prevDancer.body) 
+    return prevDancer.dance
+
   
   loadFromBuffer: (buffer) ->
     @startTime = @audioContext.currentTime
