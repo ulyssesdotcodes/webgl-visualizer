@@ -24,7 +24,7 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.createLiveInput();
-      defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.1));
+      defaultDancer = new CubeDancer(new ScaleDance(0.5), new ColorDanceMaterial(0.1));
       this.dancers[0] = defaultDancer;
       this.scene.add(defaultDancer.body);
     }
