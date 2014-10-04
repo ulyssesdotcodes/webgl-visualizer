@@ -19,9 +19,9 @@ class window.Visualizer
     @startOffset = 0
 
     # Load the sample audio
-    # @play('audio/Go.mp3')
+    @play('audio/Go.mp3')
 
-    @createLiveInput()
+    # @createLiveInput()
 
     # simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
     # simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
@@ -55,8 +55,7 @@ class window.Visualizer
         if @playing then @pause() else @play(@currentlyPlaying)
 
       when @keys.SCALE_DANCE
-        @dancers[0].dance.reset(@dancers[0])
-        @dancers[0].dance = new ScaleDance(0.5)
+        @receiveChoreography(0, { type: SphereDancer }, { type: ScaleDance, params: 0.5 }, { type: ColorDanceMaterial, params: 0.5 })
       when @keys.POSITION_DANCE
         @dancers[0].dance.reset(@dancers[0])
         @dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0))
@@ -88,6 +87,14 @@ class window.Visualizer
           defaultDancer = new SphereDancer(dance, danceMaterial)
           @dancers[0] = defaultDancer
           @scene.add(defaultDancer.body)
+
+  receiveChoreography: (id, dancer, dance, danceMaterial) ->
+    if @dancers[id]?
+      @scene.remove @dancers[id].body
+
+    @dancers[id] = new dancer.type(new dance.type(dance.params), new danceMaterial.type(danceMaterial.params), dancer.params)
+    @scene.add @dancers[id].body
+
 
 
   # Utility methods

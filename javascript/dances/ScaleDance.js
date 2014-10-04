@@ -2,14 +2,18 @@
 (function() {
   window.ScaleDance = (function() {
     function ScaleDance(smoothingFactor) {
-      this.smoothingFactor = smoothingFactor;
       this.averageDb = 0;
+      this.smoothingFactor = smoothingFactor;
     }
 
     ScaleDance.prototype.update = function(audioWindow, dancer) {
       var smoothingFactor;
-      smoothingFactor = audioWindow.averageDb < this.averageDb ? this.smoothingFactor : Math.max(1, this.smoothingFactor * 4);
-      this.averageDb = audioWindow.averageDb * smoothingFactor + (1 - smoothingFactor) * this.averageDb;
+      if (audioWindow.averageDb < this.averageDb) {
+        this.averageDb = audioWindow.averageDb * this.smoothingFactor + (1 - this.smoothingFactor) * this.averageDb;
+      } else {
+        smoothingFactor = Math.max(1, this.smoothingFactor * 4);
+        this.averageDb = audioWindow.averageDb * smoothingFactor + (1 - smoothingFactor) * this.averageDb;
+      }
       return dancer.body.scale.set(this.averageDb, this.averageDb, this.averageDb);
     };
 

@@ -23,7 +23,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.createLiveInput();
+      this.play('audio/Go.mp3');
       defaultDancer = new CubeDancer(new PositionDance(0.2, new THREE.Vector3(0, 4.0, 0)), new ColorDanceMaterial(0.1));
       this.dancers.push(defaultDancer);
       this.scene.add(defaultDancer.body);
@@ -61,8 +61,15 @@
           }
           break;
         case this.keys.SCALE_DANCE:
-          this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new ScaleDance(0.5);
+          return this.receiveChoreography(0, {
+            type: SphereDancer
+          }, {
+            type: ScaleDance,
+            params: 0.5
+          }, {
+            type: ColorDanceMaterial,
+            params: 0.5
+          });
         case this.keys.POSITION_DANCE:
           this.dancers[0].dance.reset(this.dancers[0]);
           return this.dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0));
@@ -97,6 +104,14 @@
             };
           })(this));
       }
+    };
+
+    Visualizer.prototype.receiveChoreography = function(id, dancer, dance, danceMaterial) {
+      if (this.dancers[id] != null) {
+        this.scene.remove(this.dancers[id].body);
+      }
+      this.dancers[id] = new dancer.type(new dance.type(dance.params), new danceMaterial.type(danceMaterial.params), dancer.params);
+      return this.scene.add(this.dancers[id].body);
     };
 
     Visualizer.prototype.createLiveInput = function() {
