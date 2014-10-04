@@ -24,8 +24,8 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.createLiveInput();
-      defaultDancer = new CubeDancer(new PositionDance(0.2), new ColorDanceMaterial(0.1));
-      this.dancers[0] = defaultDancer;
+      defaultDancer = new CubeDancer(new PositionDance(0.2, new THREE.Vector3(0, 4.0, 0)), new ColorDanceMaterial(0.1));
+      this.dancers.push(defaultDancer);
       this.scene.add(defaultDancer.body);
     }
 
@@ -65,7 +65,7 @@
           return this.dancers[0].dance = new ScaleDance(0.5);
         case this.keys.POSITION_DANCE:
           this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new PositionDance(0.2);
+          return this.dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0));
         case this.keys.CUBE_COLOR:
           dance = this.removeLastDancer();
           defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1));
