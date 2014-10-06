@@ -29,9 +29,23 @@ class window.Visualizer
     #   @dancers.push(defaultDancer)
     #   @scene.add(defaultDancer.body)
     
-    defaultDancer = new CubeDancer(new PositionDance(0.2, new THREE.Vector3(0, 4.0, 0)), new ColorDanceMaterial(0.1))
-    @dancers.push(defaultDancer)
-    @scene.add(defaultDancer.body)
+    @receiveChoreography 
+      id: 0
+      dancer: 
+        type: 'CubeDancer'
+      dance:
+        type: 'PositionDance'
+        params:
+          smoothingFactor: 0.2
+          direction: [0, 4.0, 0]
+      danceMaterial:
+        type: 'ColorDanceMaterial'
+        params:
+          smoothingFactor: 0.1
+
+    # defaultDancer = new CubeDancer(new PositionDance({ smoothingFactor: 0.2, direction: [0, 4.0, 0] }), new ColorDanceMaterial({ smoothingFactor: 0.1 }))
+    # @dancers.push(defaultDancer)
+    # @scene.add(defaultDancer.body)
 
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
@@ -55,10 +69,10 @@ class window.Visualizer
         if @playing then @pause() else @play(@currentlyPlaying)
 
       when @keys.SCALE_DANCE
-        @receiveChoreography(0, { type: SphereDancer }, { type: ScaleDance, params: 0.5 }, { type: ColorDanceMaterial, params: 0.5 })
+        @receiveChoreography({ id: 0, dance: { type: 'ScaleDance', params: { smoothingFactor: 0.5 } } })
+
       when @keys.POSITION_DANCE
-        @dancers[0].dance.reset(@dancers[0])
-        @dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0))
+        @receiveChoreography({ id: 0, dance: { type: 'PositionDance', params: { smoothingFactor: 0.2, direction: [0, 2.0, 0] } } })
 
       when @keys.CUBE_COLOR
         dance = @removeLastDancer()
@@ -88,12 +102,53 @@ class window.Visualizer
           @dancers[0] = defaultDancer
           @scene.add(defaultDancer.body)
 
-  receiveChoreography: (id, dancer, dance, danceMaterial) ->
+  receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
     if @dancers[id]?
-      @scene.remove @dancers[id].body
+      # Test everything else
+      currentDancer = @dancers[id]
 
-    @dancers[id] = new dancer.type(new dance.type(dance.params), new danceMaterial.type(danceMaterial.params), dancer.params)
-    @scene.add @dancers[id].body
+      if dance? 
+        if !dancer? && !danceMaterial?
+          currentDancer.reset()
+          currentDancer.dance = new @named_classes[dance.type](dance.params)
+          return
+        else
+          newDance = new @named_classes[dance.type](dance.params)
+      else
+        newDance = currentDancer.dance
+
+      addDancer = (newDance, newMaterial) =>
+        if dancer?
+          newDancer = new @named_classes[dancer.type](newDance, newMaterial, dancer.params)
+        else
+          newDancer = new currentDancer.constructor(newDance, newMaterial, dancer.params)
+
+        currentDancer.reset()
+        @scene.remove(currentDancer.body)
+        @dancers[id] = newDancer
+        @scene.add(newDancer.body)
+
+      if danceMaterial?
+        # Special case for shaders because it has to load the shader file
+        if @named_classes[danceMaterial.type] instanceof SimpleFrequencyShader
+          newMaterial = new @named_classes[danceMaterial.type](@shaderLoader)
+          newMaterial.loadShader @audioWindow, (shaderMaterial) =>
+            addDancer newDance, shaderMaterial
+          return
+
+        newMaterial = new @named_classes[danceMaterial.type](danceMaterial.params)
+      else
+        newMaterial = currentDancer.danceMaterial
+
+      addDancer(newDance, newMaterial)
+
+      return
+    else if id?
+      @dancers[id] = new @named_classes[dancer.type](new @named_classes[dance.type](dance.params), new @named_classes[danceMaterial.type](danceMaterial.params), dancer.params)
+      @scene.add @dancers[id].body
+      return
+    else
+      return
 
 
 
@@ -152,3 +207,11 @@ class window.Visualizer
     @source.connect(@audioContext.destination)
     @playing = true
     @source.start(0, @startOffset)
+
+  named_classes:
+    CubeDancer: CubeDancer
+    SphereDancer: SphereDancer
+    ScaleDance: ScaleDance
+    PositionDance: PositionDance
+    ColorDanceMaterial: ColorDanceMaterial
+    SimpleFrequencyShader: SimpleFrequencyShader

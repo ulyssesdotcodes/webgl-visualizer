@@ -12,7 +12,6 @@
     };
 
     function Visualizer(scene, camera) {
-      var defaultDancer;
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
@@ -24,9 +23,25 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.play('audio/Go.mp3');
-      defaultDancer = new CubeDancer(new PositionDance(0.2, new THREE.Vector3(0, 4.0, 0)), new ColorDanceMaterial(0.1));
-      this.dancers.push(defaultDancer);
-      this.scene.add(defaultDancer.body);
+      this.receiveChoreography({
+        id: 0,
+        dancer: {
+          type: 'CubeDancer'
+        },
+        dance: {
+          type: 'PositionDance',
+          params: {
+            smoothingFactor: 0.2,
+            direction: [0, 4.0, 0]
+          }
+        },
+        danceMaterial: {
+          type: 'ColorDanceMaterial',
+          params: {
+            smoothingFactor: 0.1
+          }
+        }
+      });
     }
 
     Visualizer.prototype.render = function() {
@@ -61,18 +76,26 @@
           }
           break;
         case this.keys.SCALE_DANCE:
-          return this.receiveChoreography(0, {
-            type: SphereDancer
-          }, {
-            type: ScaleDance,
-            params: 0.5
-          }, {
-            type: ColorDanceMaterial,
-            params: 0.5
+          return this.receiveChoreography({
+            id: 0,
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
           });
         case this.keys.POSITION_DANCE:
-          this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0));
+          return this.receiveChoreography({
+            id: 0,
+            dance: {
+              type: 'PositionDance',
+              params: {
+                smoothingFactor: 0.2,
+                direction: [0, 2.0, 0]
+              }
+            }
+          });
         case this.keys.CUBE_COLOR:
           dance = this.removeLastDancer();
           defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1));
@@ -106,12 +129,57 @@
       }
     };
 
-    Visualizer.prototype.receiveChoreography = function(id, dancer, dance, danceMaterial) {
+    Visualizer.prototype.receiveChoreography = function(_arg) {
+      var addDancer, currentDancer, dance, danceMaterial, dancer, id, newDance, newMaterial;
+      id = _arg.id, dancer = _arg.dancer, dance = _arg.dance, danceMaterial = _arg.danceMaterial;
       if (this.dancers[id] != null) {
-        this.scene.remove(this.dancers[id].body);
+        currentDancer = this.dancers[id];
+        if (dance != null) {
+          if ((dancer == null) && (danceMaterial == null)) {
+            currentDancer.reset();
+            currentDancer.dance = new this.named_classes[dance.type](dance.params);
+            return;
+          } else {
+            newDance = new this.named_classes[dance.type](dance.params);
+          }
+        } else {
+          newDance = currentDancer.dance;
+        }
+        addDancer = (function(_this) {
+          return function(newDance, newMaterial) {
+            var newDancer;
+            if (dancer != null) {
+              newDancer = new _this.named_classes[dancer.type](newDance, newMaterial, dancer.params);
+            } else {
+              newDancer = new currentDancer.constructor(newDance, newMaterial, dancer.params);
+            }
+            currentDancer.reset();
+            _this.scene.remove(currentDancer.body);
+            _this.dancers[id] = newDancer;
+            return _this.scene.add(newDancer.body);
+          };
+        })(this);
+        if (danceMaterial != null) {
+          if (this.named_classes[danceMaterial.type] instanceof SimpleFrequencyShader) {
+            newMaterial = new this.named_classes[danceMaterial.type](this.shaderLoader);
+            newMaterial.loadShader(this.audioWindow, (function(_this) {
+              return function(shaderMaterial) {
+                return addDancer(newDance, shaderMaterial);
+              };
+            })(this));
+            return;
+          }
+          newMaterial = new this.named_classes[danceMaterial.type](danceMaterial.params);
+        } else {
+          newMaterial = currentDancer.danceMaterial;
+        }
+        addDancer(newDance, newMaterial);
+      } else if (id != null) {
+        this.dancers[id] = new this.named_classes[dancer.type](new this.named_classes[dance.type](dance.params), new this.named_classes[danceMaterial.type](danceMaterial.params), dancer.params);
+        this.scene.add(this.dancers[id].body);
+      } else {
+
       }
-      this.dancers[id] = new dancer.type(new dance.type(dance.params), new danceMaterial.type(danceMaterial.params), dancer.params);
-      return this.scene.add(this.dancers[id].body);
     };
 
     Visualizer.prototype.createLiveInput = function() {
@@ -185,6 +253,15 @@
       this.source.connect(this.audioContext.destination);
       this.playing = true;
       return this.source.start(0, this.startOffset);
+    };
+
+    Visualizer.prototype.named_classes = {
+      CubeDancer: CubeDancer,
+      SphereDancer: SphereDancer,
+      ScaleDance: ScaleDance,
+      PositionDance: PositionDance,
+      ColorDanceMaterial: ColorDanceMaterial,
+      SimpleFrequencyShader: SimpleFrequencyShader
     };
 
     return Visualizer;
