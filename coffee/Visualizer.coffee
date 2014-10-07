@@ -38,7 +38,7 @@ class window.Visualizer
     if !@playing
       return
     
-    @audioWindow.update(@analyser)
+    @audioWindow.update(@analyser, @audioContext.currentTime)
     # Create event
     for dancer in @dancers
       dancer.update(@audioWindow)

@@ -12,7 +12,7 @@
     };
 
     function Visualizer(scene, camera) {
-      var defaultDancer;
+      var defaultDancer, pointCloudDancer;
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
@@ -34,7 +34,7 @@
       if (!this.playing) {
         return;
       }
-      this.audioWindow.update(this.analyser);
+      this.audioWindow.update(this.analyser, this.audioContext.currentTime);
       _ref = this.dancers;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -61,15 +61,15 @@
           }
           break;
         case this.keys.SCALE_DANCE:
-          this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new ScaleDance(0.5);
+          this.dancers[1].dance.reset(this.dancers[0]);
+          return this.dancers[1].dance = new ScaleDance(0.5);
         case this.keys.POSITION_DANCE:
           this.dancers[0].dance.reset(this.dancers[0]);
           return this.dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0));
         case this.keys.CUBE_COLOR:
           dance = this.removeLastDancer();
           defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1));
-          this.dancers[0] = defaultDancer;
+          this.dancers[1] = defaultDancer;
           return this.scene.add(defaultDancer.body);
         case this.keys.CUBE_SHADER:
           simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
@@ -77,14 +77,14 @@
             return function(danceMaterial) {
               dance = _this.removeLastDancer();
               defaultDancer = new CubeDancer(dance, danceMaterial);
-              _this.dancers[0] = defaultDancer;
+              _this.dancers[1] = defaultDancer;
               return _this.scene.add(defaultDancer.body);
             };
           })(this));
         case this.keys.SPHERE_COLOR:
           dance = this.removeLastDancer();
           defaultDancer = new SphereDancer(dance, new ColorDanceMaterial(0.1));
-          this.dancers[0] = defaultDancer;
+          this.dancers[1] = defaultDancer;
           return this.scene.add(defaultDancer.body);
         case this.keys.SPHERE_SHADER:
           simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
@@ -92,7 +92,7 @@
             return function(danceMaterial) {
               dance = _this.removeLastDancer();
               defaultDancer = new SphereDancer(dance, danceMaterial);
-              _this.dancers[0] = defaultDancer;
+              _this.dancers[1] = defaultDancer;
               return _this.scene.add(defaultDancer.body);
             };
           })(this));
