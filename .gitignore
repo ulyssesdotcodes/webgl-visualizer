@@ -1,5 +1,6 @@
-# Ignore audio files
+# Ignore audio files and compiled javascript
 audio/*
+javascript/*
 
 #############
 ## Windows detritus

@@ -5,14 +5,14 @@
       PAUSE: 32,
       SCALE_DANCE: 83,
       POSITION_DANCE: 68,
-      CUBE_SHADER: 49,
-      CUBE_COLOR: 50,
-      SPHERE_SHADER: 51,
-      SPHERE_COLOR: 52
+      SHADER: 49,
+      COLOR: 50,
+      SPHERE: 51,
+      CUBE: 52,
+      NEXT: 78
     };
 
     function Visualizer(scene, camera) {
-      var defaultDancer;
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
@@ -24,9 +24,121 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.createLiveInput();
-      defaultDancer = new CubeDancer(new ScaleDance(0.5), new ColorDanceMaterial(0.1));
-      this.dancers[0] = defaultDancer;
-      this.scene.add(defaultDancer.body);
+      this.choreography = [
+        [
+          {
+            id: -1
+          }, {
+            id: 1,
+            dancer: {
+              type: 'CubeDancer'
+            },
+            dance: {
+              type: 'PositionDance',
+              params: {
+                smoothingFactor: 0.5,
+                direction: [0, 4.0, 0]
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          }, {
+            id: 0,
+            dancer: {
+              type: 'PointCloudDancer'
+            },
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5,
+                min: [1.0, 1.0, 1.0],
+                max: [1.2, 1.2, 1.2]
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          }
+        ], [
+          {
+            id: 1,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [0.5, 0, 0.5]
+              }
+            }
+          }, {
+            id: 2,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [0.5, 0, -0.5]
+              }
+            },
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          }, {
+            id: 3,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [-0.5, 0, 0.5]
+              }
+            },
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          }, {
+            id: 4,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [-0.5, 0, -0.5]
+              }
+            },
+            dance: {
+              type: 'PositionDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          }
+        ]
+      ];
+      this.choreographyBeat = 0;
     }
 
     Visualizer.prototype.render = function() {
@@ -34,7 +146,7 @@
       if (!this.playing) {
         return;
       }
-      this.audioWindow.update(this.analyser);
+      this.audioWindow.update(this.analyser, this.audioContext.currentTime);
       _ref = this.dancers;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -51,7 +163,7 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
-      var dance, defaultDancer, simpleFreqShader;
+      var change, moment, _i, _len, _results;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {
@@ -61,41 +173,134 @@
           }
           break;
         case this.keys.SCALE_DANCE:
-          this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new ScaleDance(0.5);
+          return this.receiveChoreography({
+            id: 0,
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          });
         case this.keys.POSITION_DANCE:
-          this.dancers[0].dance.reset(this.dancers[0]);
-          return this.dancers[0].dance = new PositionDance(0.2);
-        case this.keys.CUBE_COLOR:
-          dance = this.removeLastDancer();
-          defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1));
-          this.dancers[0] = defaultDancer;
-          return this.scene.add(defaultDancer.body);
-        case this.keys.CUBE_SHADER:
-          simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
-          return simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
-            return function(danceMaterial) {
-              dance = _this.removeLastDancer();
-              defaultDancer = new CubeDancer(dance, danceMaterial);
-              _this.dancers[0] = defaultDancer;
-              return _this.scene.add(defaultDancer.body);
-            };
-          })(this));
-        case this.keys.SPHERE_COLOR:
-          dance = this.removeLastDancer();
-          defaultDancer = new SphereDancer(dance, new ColorDanceMaterial(0.1));
-          this.dancers[0] = defaultDancer;
-          return this.scene.add(defaultDancer.body);
-        case this.keys.SPHERE_SHADER:
-          simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
-          return simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
-            return function(danceMaterial) {
-              dance = _this.removeLastDancer();
-              defaultDancer = new SphereDancer(dance, danceMaterial);
-              _this.dancers[0] = defaultDancer;
-              return _this.scene.add(defaultDancer.body);
-            };
-          })(this));
+          return this.receiveChoreography({
+            id: 0,
+            dance: {
+              type: 'PositionDance',
+              params: {
+                smoothingFactor: 0.2,
+                direction: [0, 2.0, 0]
+              }
+            }
+          });
+        case this.keys.COLOR:
+          return this.receiveChoreography({
+            id: 1,
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          });
+        case this.keys.SHADER:
+          return this.receiveChoreography({
+            id: 1,
+            danceMaterial: {
+              type: 'SimpleFrequencyShader'
+            }
+          });
+        case this.keys.SPHERE:
+          return this.receiveChoreography({
+            id: 1,
+            dancer: {
+              type: 'SphereDancer'
+            }
+          });
+        case this.keys.CUBE:
+          return this.receiveChoreography({
+            id: 1,
+            dancer: {
+              type: 'CubeDancer'
+            }
+          });
+        case this.keys.NEXT:
+          if (this.choreographyBeat === this.choreography.length) {
+            this.choreographyBeat = 0;
+          }
+          moment = this.choreography[this.choreographyBeat++];
+          _results = [];
+          for (_i = 0, _len = moment.length; _i < _len; _i++) {
+            change = moment[_i];
+            _results.push(this.receiveChoreography(change));
+          }
+          return _results;
+      }
+    };
+
+    Visualizer.prototype.receiveChoreography = function(_arg) {
+      var addDancer, currentDancer, dance, danceMaterial, dancer, id, newDance, newMaterial, _i, _len, _ref;
+      id = _arg.id, dancer = _arg.dancer, dance = _arg.dance, danceMaterial = _arg.danceMaterial;
+      if (id === -1) {
+        _ref = this.dancers;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          dancer = _ref[_i];
+          this.scene.remove(dancer.body);
+        }
+        this.dancers = [];
+        return;
+      }
+      if (this.dancers[id] != null) {
+        currentDancer = this.dancers[id];
+        if ((dancer == null) && !dance && !danceMaterial) {
+          this.scene.remove(currentDancer.body);
+          this.dancers.splice(this.dancers.indexOf(id), 1);
+        }
+        if (dance != null) {
+          if ((dancer == null) && (danceMaterial == null)) {
+            currentDancer.reset();
+            currentDancer.dance = new this.named_classes[dance.type](dance.params);
+            return;
+          } else {
+            newDance = new this.named_classes[dance.type](dance.params);
+          }
+        } else {
+          newDance = currentDancer.dance;
+        }
+        addDancer = (function(_this) {
+          return function(newDance, newMaterial) {
+            var newDancer;
+            if (dancer != null) {
+              newDancer = new _this.named_classes[dancer.type](newDance, newMaterial, dancer.params);
+            } else {
+              newDancer = new currentDancer.constructor(newDance, newMaterial);
+            }
+            currentDancer.reset();
+            _this.scene.remove(currentDancer.body);
+            _this.dancers[id] = newDancer;
+            return _this.scene.add(newDancer.body);
+          };
+        })(this);
+        if (danceMaterial != null) {
+          if (danceMaterial.type.indexOf('Shader') > -1) {
+            newMaterial = new this.named_classes[danceMaterial.type](this.shaderLoader);
+            newMaterial.loadShader(this.audioWindow, (function(_this) {
+              return function(shaderMaterial) {
+                return addDancer(newDance, shaderMaterial);
+              };
+            })(this));
+            return;
+          }
+          newMaterial = new this.named_classes[danceMaterial.type](danceMaterial.params);
+        } else {
+          newMaterial = currentDancer.danceMaterial;
+        }
+        addDancer(newDance, newMaterial);
+      } else if (id != null) {
+        this.dancers[id] = new this.named_classes[dancer.type](new this.named_classes[dance.type](dance.params), new this.named_classes[danceMaterial.type](danceMaterial.params), dancer.params);
+        this.scene.add(this.dancers[id].body);
+      } else {
+
       }
     };
 
@@ -170,6 +375,16 @@
       this.source.connect(this.audioContext.destination);
       this.playing = true;
       return this.source.start(0, this.startOffset);
+    };
+
+    Visualizer.prototype.named_classes = {
+      CubeDancer: CubeDancer,
+      SphereDancer: SphereDancer,
+      ScaleDance: ScaleDance,
+      PositionDance: PositionDance,
+      ColorDanceMaterial: ColorDanceMaterial,
+      SimpleFrequencyShader: SimpleFrequencyShader,
+      PointCloudDancer: PointCloudDancer
     };
 
     return Visualizer;

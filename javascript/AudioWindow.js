@@ -6,13 +6,18 @@
       this.bufferSize = bufferSize;
       this.frequencyBuffer = new Uint8Array(bufferSize);
       this.dbBuffer = new Uint8Array(bufferSize);
+      this.time = 0;
+      this.deltaTime = 0;
     }
 
-    AudioWindow.prototype.update = function(analyser) {
-      var buf, rms, val, _i, _len, _ref;
+    AudioWindow.prototype.update = function(analyser, time) {
+      var buf, newTime, rms, val, _i, _len, _ref;
       if (!analyser) {
         return;
       }
+      newTime = time * 1000;
+      this.deltaTime = newTime - this.time;
+      this.time = newTime;
       analyser.getByteTimeDomainData(this.dbBuffer);
       analyser.getByteFrequencyData(this.frequencyBuffer);
       rms = 0;
