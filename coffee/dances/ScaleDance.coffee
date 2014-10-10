@@ -1,9 +1,8 @@
 # Controls the mesh of the provided Dancer's body
 class window.ScaleDance
-  constructor: (smoothingFactor) ->
-    # default scale Effect.
+  constructor: (options) ->
+    { @smoothingFactor } = options
     @averageDb = 0
-    @smoothingFactor = smoothingFactor
 
   update: (audioWindow, dancer) ->
     # update the Dancer's body mesh to reflect the audio event

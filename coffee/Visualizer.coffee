@@ -1,6 +1,6 @@
 class window.Visualizer
   # Get those keys set up
-  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, CUBE_SHADER: 49, CUBE_COLOR: 50, SPHERE_SHADER: 51, SPHERE_COLOR: 52 }
+  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, SHADER: 49, COLOR: 50, SPHERE: 51, CUBE: 52 }
 
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
@@ -19,7 +19,8 @@ class window.Visualizer
     @startOffset = 0
 
     # Load the sample audio
-    @play('audio/Go.mp3')
+    # @play('audio/Go.mp3')
+    @play('audio/OnMyMind.mp3')
 
     # @createLiveInput()
 
@@ -36,12 +37,12 @@ class window.Visualizer
       dance:
         type: 'PositionDance'
         params:
-          smoothingFactor: 0.2
+          smoothingFactor: 0.5
           direction: [0, 4.0, 0]
       danceMaterial:
         type: 'ColorDanceMaterial'
         params:
-          smoothingFactor: 0.1
+          smoothingFactor: 0.5
 
     # defaultDancer = new CubeDancer(new PositionDance({ smoothingFactor: 0.2, direction: [0, 4.0, 0] }), new ColorDanceMaterial({ smoothingFactor: 0.1 }))
     # @dancers.push(defaultDancer)
@@ -74,33 +75,31 @@ class window.Visualizer
       when @keys.POSITION_DANCE
         @receiveChoreography({ id: 0, dance: { type: 'PositionDance', params: { smoothingFactor: 0.2, direction: [0, 2.0, 0] } } })
 
-      when @keys.CUBE_COLOR
-        dance = @removeLastDancer()
-        defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1))
-        @dancers[0] = defaultDancer
-        @scene.add(defaultDancer.body)
+      when @keys.COLOR
+        @receiveChoreography
+          id: 0
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
 
-      when @keys.CUBE_SHADER
-        simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
-        simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
-          dance = @removeLastDancer()
-          defaultDancer = new CubeDancer(dance, danceMaterial)
-          @dancers[0] = defaultDancer
-          @scene.add(defaultDancer.body)
+      when @keys.SHADER
+        @receiveChoreography
+          id: 0
+          danceMaterial:
+            type: 'SimpleFrequencyShader'
 
-      when @keys.SPHERE_COLOR
-        dance = @removeLastDancer()
-        defaultDancer = new SphereDancer(dance, new ColorDanceMaterial(0.1))
-        @dancers[0] = defaultDancer
-        @scene.add(defaultDancer.body)
+      when @keys.SPHERE
+        @receiveChoreography
+          id: 0
+          dancer:
+            type: 'SphereDancer'
 
-      when @keys.SPHERE_SHADER
-        simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
-        simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
-          dance = @removeLastDancer()
-          defaultDancer = new SphereDancer(dance, danceMaterial)
-          @dancers[0] = defaultDancer
-          @scene.add(defaultDancer.body)
+      when @keys.CUBE
+        @receiveChoreography
+          id: 0
+          dancer:
+            type: 'CubeDancer'
 
   receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
     if @dancers[id]?
@@ -121,7 +120,7 @@ class window.Visualizer
         if dancer?
           newDancer = new @named_classes[dancer.type](newDance, newMaterial, dancer.params)
         else
-          newDancer = new currentDancer.constructor(newDance, newMaterial, dancer.params)
+          newDancer = new currentDancer.constructor(newDance, newMaterial)
 
         currentDancer.reset()
         @scene.remove(currentDancer.body)
@@ -130,7 +129,8 @@ class window.Visualizer
 
       if danceMaterial?
         # Special case for shaders because it has to load the shader file
-        if @named_classes[danceMaterial.type] instanceof SimpleFrequencyShader
+        # This is a really hacky way of checking if it's a shader. Should change.
+        if danceMaterial.type.indexOf('Shader') > -1
           newMaterial = new @named_classes[danceMaterial.type](@shaderLoader)
           newMaterial.loadShader @audioWindow, (shaderMaterial) =>
             addDancer newDance, shaderMaterial

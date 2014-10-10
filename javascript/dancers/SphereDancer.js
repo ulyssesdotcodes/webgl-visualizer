@@ -6,13 +6,13 @@
   window.SphereDancer = (function(_super) {
     __extends(SphereDancer, _super);
 
-    function SphereDancer() {
-      return SphereDancer.__super__.constructor.apply(this, arguments);
+    function SphereDancer(dance, danceMaterial, options) {
+      var position, scale;
+      if (options != null) {
+        position = options.position, scale = options.scale;
+      }
+      SphereDancer.__super__.constructor.call(this, new THREE.SphereGeometry(1, 32, 24), dance, danceMaterial, position, scale);
     }
-
-    SphereDancer.constructor = function() {
-      return SphereDancer.__super__.constructor.constructor.call(this, new THREE.SphereGeometry(1, 32, 24), dance, danceMaterial, position, scale);
-    };
 
     return SphereDancer;
 

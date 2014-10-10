@@ -6,7 +6,11 @@
   window.CubeDancer = (function(_super) {
     __extends(CubeDancer, _super);
 
-    function CubeDancer(dance, danceMaterial, position, scale) {
+    function CubeDancer(dance, danceMaterial, options) {
+      var position, scale;
+      if (options != null) {
+        position = options.position, scale = options.scale;
+      }
       CubeDancer.__super__.constructor.call(this, new THREE.BoxGeometry(1, 1, 1), dance, danceMaterial, position, scale);
     }
 

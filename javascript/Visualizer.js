@@ -5,10 +5,10 @@
       PAUSE: 32,
       SCALE_DANCE: 83,
       POSITION_DANCE: 68,
-      CUBE_SHADER: 49,
-      CUBE_COLOR: 50,
-      SPHERE_SHADER: 51,
-      SPHERE_COLOR: 52
+      SHADER: 49,
+      COLOR: 50,
+      SPHERE: 51,
+      CUBE: 52
     };
 
     function Visualizer(scene, camera) {
@@ -22,7 +22,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Go.mp3');
+      this.play('audio/OnMyMind.mp3');
       this.receiveChoreography({
         id: 0,
         dancer: {
@@ -31,14 +31,14 @@
         dance: {
           type: 'PositionDance',
           params: {
-            smoothingFactor: 0.2,
+            smoothingFactor: 0.5,
             direction: [0, 4.0, 0]
           }
         },
         danceMaterial: {
           type: 'ColorDanceMaterial',
           params: {
-            smoothingFactor: 0.1
+            smoothingFactor: 0.5
           }
         }
       });
@@ -66,7 +66,6 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
-      var dance, defaultDancer, simpleFreqShader;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {
@@ -96,36 +95,37 @@
               }
             }
           });
-        case this.keys.CUBE_COLOR:
-          dance = this.removeLastDancer();
-          defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1));
-          this.dancers[0] = defaultDancer;
-          return this.scene.add(defaultDancer.body);
-        case this.keys.CUBE_SHADER:
-          simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
-          return simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
-            return function(danceMaterial) {
-              dance = _this.removeLastDancer();
-              defaultDancer = new CubeDancer(dance, danceMaterial);
-              _this.dancers[0] = defaultDancer;
-              return _this.scene.add(defaultDancer.body);
-            };
-          })(this));
-        case this.keys.SPHERE_COLOR:
-          dance = this.removeLastDancer();
-          defaultDancer = new SphereDancer(dance, new ColorDanceMaterial(0.1));
-          this.dancers[0] = defaultDancer;
-          return this.scene.add(defaultDancer.body);
-        case this.keys.SPHERE_SHADER:
-          simpleFreqShader = new SimpleFrequencyShader(this.shaderLoader);
-          return simpleFreqShader.loadShader(this.audioWindow, (function(_this) {
-            return function(danceMaterial) {
-              dance = _this.removeLastDancer();
-              defaultDancer = new SphereDancer(dance, danceMaterial);
-              _this.dancers[0] = defaultDancer;
-              return _this.scene.add(defaultDancer.body);
-            };
-          })(this));
+        case this.keys.COLOR:
+          return this.receiveChoreography({
+            id: 0,
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          });
+        case this.keys.SHADER:
+          return this.receiveChoreography({
+            id: 0,
+            danceMaterial: {
+              type: 'SimpleFrequencyShader'
+            }
+          });
+        case this.keys.SPHERE:
+          return this.receiveChoreography({
+            id: 0,
+            dancer: {
+              type: 'SphereDancer'
+            }
+          });
+        case this.keys.CUBE:
+          return this.receiveChoreography({
+            id: 0,
+            dancer: {
+              type: 'CubeDancer'
+            }
+          });
       }
     };
 
@@ -151,7 +151,7 @@
             if (dancer != null) {
               newDancer = new _this.named_classes[dancer.type](newDance, newMaterial, dancer.params);
             } else {
-              newDancer = new currentDancer.constructor(newDance, newMaterial, dancer.params);
+              newDancer = new currentDancer.constructor(newDance, newMaterial);
             }
             currentDancer.reset();
             _this.scene.remove(currentDancer.body);
@@ -160,7 +160,7 @@
           };
         })(this);
         if (danceMaterial != null) {
-          if (this.named_classes[danceMaterial.type] instanceof SimpleFrequencyShader) {
+          if (danceMaterial.type.indexOf('Shader') > -1) {
             newMaterial = new this.named_classes[danceMaterial.type](this.shaderLoader);
             newMaterial.loadShader(this.audioWindow, (function(_this) {
               return function(shaderMaterial) {
