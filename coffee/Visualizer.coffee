@@ -1,6 +1,6 @@
 class window.Visualizer
   # Get those keys set up
-  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, CUBE_SHADER: 49, CUBE_COLOR: 50, SPHERE_SHADER: 51, SPHERE_COLOR: 52 }
+  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, SHADER: 49, COLOR: 50, SPHERE: 51, CUBE: 52, NEXT: 78 }
 
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
@@ -20,18 +20,91 @@ class window.Visualizer
 
     # Load the sample audio
     # @play('audio/Go.mp3')
+    @play('audio/Glasser.mp3')
+    # @play('audio/OnMyMind.mp3')
 
-    @createLiveInput()
+    # @createLiveInput()
 
     # simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
     # simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
     #   defaultDancer = new CubeDancer(new PositionDance(0.2), danceMaterial)
     #   @dancers.push(defaultDancer)
     #   @scene.add(defaultDancer.body)
-    
-    defaultDancer = new CubeDancer(new PositionDance(0.2, new THREE.Vector3(0, 4.0, 0)), new ColorDanceMaterial(0.1))
-    @dancers.push(defaultDancer)
-    @scene.add(defaultDancer.body)
+    @choreography = [
+      [
+        { id: -1 },
+        {
+          id: 0
+          dancer: 
+            type: 'CubeDancer'
+          dance:
+            type: 'PositionDance'
+            params:
+              smoothingFactor: 0.5
+              direction: [0, 4.0, 0]
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        }
+      ],
+      [
+        { 
+          id: 0
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [0.5, 0, 0.5]
+        },
+        { 
+          id: 1
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [0.5, 0, -0.5]
+          dance:
+            type: 'ScaleDance'
+            params:
+              smoothingFactor: 0.5
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        },
+        { 
+          id: 2
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [-0.5, 0, 0.5]
+          dance:
+            type: 'ScaleDance'
+            params:
+              smoothingFactor: 0.5
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        },
+        { 
+          id: 3
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [-0.5, 0, -0.5]
+          dance:
+            type: 'PositionDance'
+            params:
+              smoothingFactor: 0.5
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        },
+      ]
+    ]
+
+    @choreographyBeat = 0
 
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
@@ -55,39 +128,104 @@ class window.Visualizer
         if @playing then @pause() else @play(@currentlyPlaying)
 
       when @keys.SCALE_DANCE
-        @dancers[0].dance.reset(@dancers[0])
-        @dancers[0].dance = new ScaleDance(0.5)
+        @receiveChoreography({ id: 0, dance: { type: 'ScaleDance', params: { smoothingFactor: 0.5 } } })
+
       when @keys.POSITION_DANCE
-        @dancers[0].dance.reset(@dancers[0])
-        @dancers[0].dance = new PositionDance(0.2, new THREE.Vector3(0, 2.0, 0))
+        @receiveChoreography({ id: 0, dance: { type: 'PositionDance', params: { smoothingFactor: 0.2, direction: [0, 2.0, 0] } } })
 
-      when @keys.CUBE_COLOR
-        dance = @removeLastDancer()
-        defaultDancer = new CubeDancer(dance, new ColorDanceMaterial(0.1))
-        @dancers[0] = defaultDancer
-        @scene.add(defaultDancer.body)
+      when @keys.COLOR
+        @receiveChoreography
+          id: 0
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
 
-      when @keys.CUBE_SHADER
-        simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
-        simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
-          dance = @removeLastDancer()
-          defaultDancer = new CubeDancer(dance, danceMaterial)
-          @dancers[0] = defaultDancer
-          @scene.add(defaultDancer.body)
+      when @keys.SHADER
+        @receiveChoreography
+          id: 0
+          danceMaterial:
+            type: 'SimpleFrequencyShader'
 
-      when @keys.SPHERE_COLOR
-        dance = @removeLastDancer()
-        defaultDancer = new SphereDancer(dance, new ColorDanceMaterial(0.1))
-        @dancers[0] = defaultDancer
-        @scene.add(defaultDancer.body)
+      when @keys.SPHERE
+        @receiveChoreography
+          id: 0
+          dancer:
+            type: 'SphereDancer'
 
-      when @keys.SPHERE_SHADER
-        simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
-        simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
-          dance = @removeLastDancer()
-          defaultDancer = new SphereDancer(dance, danceMaterial)
-          @dancers[0] = defaultDancer
-          @scene.add(defaultDancer.body)
+      when @keys.CUBE
+        @receiveChoreography
+          id: 0
+          dancer:
+            type: 'CubeDancer'
+
+      when @keys.NEXT
+        if @choreographyBeat == @choreography.length
+          @choreographyBeat = 0
+
+        moment = @choreography[@choreographyBeat++]
+        for change in moment
+          @receiveChoreography change
+
+  receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
+    if id == -1
+      for dancer in @dancers
+        @scene.remove(dancer.body)
+      @dancers = []
+      return
+    if @dancers[id]?
+      # Test everything else
+      currentDancer = @dancers[id]
+
+      # If no parameters are set, but an id is, then remove the object
+      if !dancer? && !dance && !danceMaterial
+        @scene.remove(currentDancer.body)
+        @dancers.splice(@dancers.indexOf(id), 1)
+
+      if dance? 
+        if !dancer? && !danceMaterial?
+          currentDancer.reset()
+          currentDancer.dance = new @named_classes[dance.type](dance.params)
+          return
+        else
+          newDance = new @named_classes[dance.type](dance.params)
+      else
+        newDance = currentDancer.dance
+
+      addDancer = (newDance, newMaterial) =>
+        if dancer?
+          newDancer = new @named_classes[dancer.type](newDance, newMaterial, dancer.params)
+        else
+          newDancer = new currentDancer.constructor(newDance, newMaterial)
+
+        currentDancer.reset()
+        @scene.remove(currentDancer.body)
+        @dancers[id] = newDancer
+        @scene.add(newDancer.body)
+
+      if danceMaterial?
+        # Special case for shaders because it has to load the shader file
+        # This is a really hacky way of checking if it's a shader. Should change.
+        if danceMaterial.type.indexOf('Shader') > -1
+          newMaterial = new @named_classes[danceMaterial.type](@shaderLoader)
+          newMaterial.loadShader @audioWindow, (shaderMaterial) =>
+            addDancer newDance, shaderMaterial
+          return
+
+        newMaterial = new @named_classes[danceMaterial.type](danceMaterial.params)
+      else
+        newMaterial = currentDancer.danceMaterial
+
+      addDancer(newDance, newMaterial)
+
+      return
+    else if id?
+      @dancers[id] = new @named_classes[dancer.type](new @named_classes[dance.type](dance.params), new @named_classes[danceMaterial.type](danceMaterial.params), dancer.params)
+      @scene.add @dancers[id].body
+      return
+    else
+      return
+
 
 
   # Utility methods
@@ -145,3 +283,11 @@ class window.Visualizer
     @source.connect(@audioContext.destination)
     @playing = true
     @source.start(0, @startOffset)
+
+  named_classes:
+    CubeDancer: CubeDancer
+    SphereDancer: SphereDancer
+    ScaleDance: ScaleDance
+    PositionDance: PositionDance
+    ColorDanceMaterial: ColorDanceMaterial
+    SimpleFrequencyShader: SimpleFrequencyShader

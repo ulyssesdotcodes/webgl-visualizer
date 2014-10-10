@@ -1,7 +1,7 @@
 # Controls the mesh of the provided Dancer's body
 class window.ScaleDance
-  constructor: (@smoothingFactor, @min, @max) ->
-    # default scale Effect.
+  constructor: (options) ->
+    { @smoothingFactor, @min, @max } = options
     @averageDb = 0
     @min ?= new THREE.Vector3(0.5, 0.5, 0.5)
     @max ?= new THREE.Vector3(1.5, 1.5, 1.5)
