@@ -20,10 +20,10 @@ class window.Visualizer
 
     # Load the sample audio
     # @play('audio/Go.mp3')
-    @play('audio/Glasser.mp3')
+    # @play('audio/Glasser.mp3')
     # @play('audio/OnMyMind.mp3')
 
-    # @createLiveInput()
+    @createLiveInput()
 
     # simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
     # simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
@@ -34,7 +34,7 @@ class window.Visualizer
       [
         { id: -1 },
         {
-          id: 0
+          id: 1
           dancer: 
             type: 'CubeDancer'
           dance:
@@ -47,17 +47,32 @@ class window.Visualizer
             params:
               smoothingFactor: 0.5
         }
+        {
+          id: 0
+          dancer: 
+            type: 'PointCloudDancer'
+          dance:
+            type: 'ScaleDance'
+            params:
+              smoothingFactor: 0.5
+              min: [1.0, 1.0, 1.0]
+              max: [1.2, 1.2, 1.2]
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        }
       ],
       [
         { 
-          id: 0
+          id: 1
           dancer:
             type: 'SphereDancer'
             params:
               position: [0.5, 0, 0.5]
         },
         { 
-          id: 1
+          id: 2
           dancer:
             type: 'SphereDancer'
             params:
@@ -72,7 +87,7 @@ class window.Visualizer
               smoothingFactor: 0.5
         },
         { 
-          id: 2
+          id: 3
           dancer:
             type: 'SphereDancer'
             params:
@@ -87,7 +102,7 @@ class window.Visualizer
               smoothingFactor: 0.5
         },
         { 
-          id: 3
+          id: 4
           dancer:
             type: 'SphereDancer'
             params:
@@ -135,7 +150,7 @@ class window.Visualizer
 
       when @keys.COLOR
         @receiveChoreography
-          id: 0
+          id: 1
           danceMaterial:
             type: 'ColorDanceMaterial'
             params:
@@ -143,19 +158,19 @@ class window.Visualizer
 
       when @keys.SHADER
         @receiveChoreography
-          id: 0
+          id: 1
           danceMaterial:
             type: 'SimpleFrequencyShader'
 
       when @keys.SPHERE
         @receiveChoreography
-          id: 0
+          id: 1
           dancer:
             type: 'SphereDancer'
 
       when @keys.CUBE
         @receiveChoreography
-          id: 0
+          id: 1
           dancer:
             type: 'CubeDancer'
 
@@ -291,3 +306,4 @@ class window.Visualizer
     PositionDance: PositionDance
     ColorDanceMaterial: ColorDanceMaterial
     SimpleFrequencyShader: SimpleFrequencyShader
+    PointCloudDancer: PointCloudDancer

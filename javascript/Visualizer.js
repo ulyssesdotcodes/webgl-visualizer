@@ -13,7 +13,6 @@
     };
 
     function Visualizer(scene, camera) {
-      var defaultDancer, pointCloudDancer;
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
@@ -24,13 +23,13 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/OnMyMind.mp3');
+      this.createLiveInput();
       this.choreography = [
         [
           {
             id: -1
           }, {
-            id: 0,
+            id: 1,
             dancer: {
               type: 'CubeDancer'
             },
@@ -47,10 +46,29 @@
                 smoothingFactor: 0.5
               }
             }
+          }, {
+            id: 0,
+            dancer: {
+              type: 'PointCloudDancer'
+            },
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5,
+                min: [1.0, 1.0, 1.0],
+                max: [1.2, 1.2, 1.2]
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
           }
         ], [
           {
-            id: 0,
+            id: 1,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -58,7 +76,7 @@
               }
             }
           }, {
-            id: 1,
+            id: 2,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -78,7 +96,7 @@
               }
             }
           }, {
-            id: 2,
+            id: 3,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -98,7 +116,7 @@
               }
             }
           }, {
-            id: 3,
+            id: 4,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -155,8 +173,9 @@
           }
           break;
         case this.keys.SCALE_DANCE:
-          this.dancers[1].dance.reset(this.dancers[0]);
-          return this.dancers[1].dance = new ScaleDance(0.5);
+          return this.receiveChoreography({
+            id: 0,
+            dance: {
               type: 'ScaleDance',
               params: {
                 smoothingFactor: 0.5
@@ -176,7 +195,7 @@
           });
         case this.keys.COLOR:
           return this.receiveChoreography({
-            id: 0,
+            id: 1,
             danceMaterial: {
               type: 'ColorDanceMaterial',
               params: {
@@ -186,21 +205,21 @@
           });
         case this.keys.SHADER:
           return this.receiveChoreography({
-            id: 0,
+            id: 1,
             danceMaterial: {
               type: 'SimpleFrequencyShader'
             }
           });
         case this.keys.SPHERE:
           return this.receiveChoreography({
-            id: 0,
+            id: 1,
             dancer: {
               type: 'SphereDancer'
             }
           });
         case this.keys.CUBE:
           return this.receiveChoreography({
-            id: 0,
+            id: 1,
             dancer: {
               type: 'CubeDancer'
             }
@@ -217,7 +236,7 @@
           }
           return _results;
       }
-          this.dancers[1] = defaultDancer;
+    };
 
     Visualizer.prototype.receiveChoreography = function(_arg) {
       var addDancer, currentDancer, dance, danceMaterial, dancer, id, newDance, newMaterial, _i, _len, _ref;
@@ -240,7 +259,7 @@
         if (dance != null) {
           if ((dancer == null) && (danceMaterial == null)) {
             currentDancer.reset();
-              _this.dancers[1] = defaultDancer;
+            currentDancer.dance = new this.named_classes[dance.type](dance.params);
             return;
           } else {
             newDance = new this.named_classes[dance.type](dance.params);
@@ -258,8 +277,8 @@
             }
             currentDancer.reset();
             _this.scene.remove(currentDancer.body);
-          this.dancers[1] = defaultDancer;
-          return this.scene.add(defaultDancer.body);
+            _this.dancers[id] = newDancer;
+            return _this.scene.add(newDancer.body);
           };
         })(this);
         if (danceMaterial != null) {
@@ -274,8 +293,8 @@
           }
           newMaterial = new this.named_classes[danceMaterial.type](danceMaterial.params);
         } else {
-              _this.dancers[1] = defaultDancer;
-              return _this.scene.add(defaultDancer.body);
+          newMaterial = currentDancer.danceMaterial;
+        }
         addDancer(newDance, newMaterial);
       } else if (id != null) {
         this.dancers[id] = new this.named_classes[dancer.type](new this.named_classes[dance.type](dance.params), new this.named_classes[danceMaterial.type](danceMaterial.params), dancer.params);
@@ -364,7 +383,8 @@
       ScaleDance: ScaleDance,
       PositionDance: PositionDance,
       ColorDanceMaterial: ColorDanceMaterial,
-      SimpleFrequencyShader: SimpleFrequencyShader
+      SimpleFrequencyShader: SimpleFrequencyShader,
+      PointCloudDancer: PointCloudDancer
     };
 
     return Visualizer;

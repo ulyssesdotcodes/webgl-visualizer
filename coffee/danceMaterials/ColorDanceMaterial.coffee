@@ -1,6 +1,7 @@
 class window.ColorDanceMaterial
 	constructor: (options) ->
-		{ @smoothingFactor } = options
+		{ @smoothingFactor, @color } = options
+		@color ?= new THREE.Color(1.0, 0, 0)
 		@material = new THREE.MeshLambertMaterial({ color: 0x00000, wireframe: true })
 		@appliedColor = @color.clone()
 

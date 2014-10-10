@@ -1,10 +1,10 @@
 # Controls the mesh of the provided Dancer's body
 class window.ScaleDance
   constructor: (options) ->
-    { @smoothingFactor, @min, @max } = options
+    { @smoothingFactor, min, max } = options
     @averageDb = 0
-    @min ?= new THREE.Vector3(0.5, 0.5, 0.5)
-    @max ?= new THREE.Vector3(1.5, 1.5, 1.5)
+    @min = if min then new THREE.Vector3(min[0], min[1], min[2]) else new THREE.Vector3(0.5, 0.5, 0.5)
+    @max = if max then new THREE.Vector3(max[0], max[1], max[2]) else new THREE.Vector3(1, 1, 1)
     @scale = new THREE.Vector3()
 
   update: (audioWindow, dancer) ->
