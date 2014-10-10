@@ -8,7 +8,8 @@
       SHADER: 49,
       COLOR: 50,
       SPHERE: 51,
-      CUBE: 52
+      CUBE: 52,
+      NEXT: 78
     };
 
     function Visualizer(scene, camera) {
@@ -23,25 +24,102 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.play('audio/OnMyMind.mp3');
-      this.receiveChoreography({
-        id: 0,
-        dancer: {
-          type: 'CubeDancer'
-        },
-        dance: {
-          type: 'PositionDance',
-          params: {
-            smoothingFactor: 0.5,
-            direction: [0, 4.0, 0]
+      this.choreography = [
+        [
+          {
+            id: -1
+          }, {
+            id: 0,
+            dancer: {
+              type: 'CubeDancer'
+            },
+            dance: {
+              type: 'PositionDance',
+              params: {
+                smoothingFactor: 0.5,
+                direction: [0, 4.0, 0]
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
           }
-        },
-        danceMaterial: {
-          type: 'ColorDanceMaterial',
-          params: {
-            smoothingFactor: 0.5
+        ], [
+          {
+            id: 0,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [0.5, 0, 0.5]
+              }
+            }
+          }, {
+            id: 1,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [0.5, 0, -0.5]
+              }
+            },
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          }, {
+            id: 2,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [-0.5, 0, 0.5]
+              }
+            },
+            dance: {
+              type: 'ScaleDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
+          }, {
+            id: 3,
+            dancer: {
+              type: 'SphereDancer',
+              params: {
+                position: [-0.5, 0, -0.5]
+              }
+            },
+            dance: {
+              type: 'PositionDance',
+              params: {
+                smoothingFactor: 0.5
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
+              params: {
+                smoothingFactor: 0.5
+              }
+            }
           }
-        }
-      });
+        ]
+      ];
+      this.choreographyBeat = 0;
     }
 
     Visualizer.prototype.render = function() {
@@ -66,6 +144,7 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
+      var change, moment, _i, _len, _results;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {
@@ -126,14 +205,38 @@
               type: 'CubeDancer'
             }
           });
+        case this.keys.NEXT:
+          if (this.choreographyBeat === this.choreography.length) {
+            this.choreographyBeat = 0;
+          }
+          moment = this.choreography[this.choreographyBeat++];
+          _results = [];
+          for (_i = 0, _len = moment.length; _i < _len; _i++) {
+            change = moment[_i];
+            _results.push(this.receiveChoreography(change));
+          }
+          return _results;
       }
     };
 
     Visualizer.prototype.receiveChoreography = function(_arg) {
-      var addDancer, currentDancer, dance, danceMaterial, dancer, id, newDance, newMaterial;
+      var addDancer, currentDancer, dance, danceMaterial, dancer, id, newDance, newMaterial, _i, _len, _ref;
       id = _arg.id, dancer = _arg.dancer, dance = _arg.dance, danceMaterial = _arg.danceMaterial;
+      if (id === -1) {
+        _ref = this.dancers;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          dancer = _ref[_i];
+          this.scene.remove(dancer.body);
+        }
+        this.dancers = [];
+        return;
+      }
       if (this.dancers[id] != null) {
         currentDancer = this.dancers[id];
+        if ((dancer == null) && !dance && !danceMaterial) {
+          this.scene.remove(currentDancer.body);
+          this.dancers.splice(this.dancers.indexOf(id), 1);
+        }
         if (dance != null) {
           if ((dancer == null) && (danceMaterial == null)) {
             currentDancer.reset();

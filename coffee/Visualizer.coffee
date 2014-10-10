@@ -1,6 +1,6 @@
 class window.Visualizer
   # Get those keys set up
-  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, SHADER: 49, COLOR: 50, SPHERE: 51, CUBE: 52 }
+  keys: { PAUSE: 32, SCALE_DANCE: 83, POSITION_DANCE: 68, SHADER: 49, COLOR: 50, SPHERE: 51, CUBE: 52, NEXT: 78 }
 
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
@@ -29,20 +29,81 @@ class window.Visualizer
     #   defaultDancer = new CubeDancer(new PositionDance(0.2), danceMaterial)
     #   @dancers.push(defaultDancer)
     #   @scene.add(defaultDancer.body)
-    
-    @receiveChoreography 
-      id: 0
-      dancer: 
-        type: 'CubeDancer'
-      dance:
-        type: 'PositionDance'
-        params:
-          smoothingFactor: 0.5
-          direction: [0, 4.0, 0]
-      danceMaterial:
-        type: 'ColorDanceMaterial'
-        params:
-          smoothingFactor: 0.5
+    @choreography = [
+      [
+        { id: -1 },
+        {
+          id: 0
+          dancer: 
+            type: 'CubeDancer'
+          dance:
+            type: 'PositionDance'
+            params:
+              smoothingFactor: 0.5
+              direction: [0, 4.0, 0]
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        }
+      ],
+      [
+        { 
+          id: 0
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [0.5, 0, 0.5]
+        },
+        { 
+          id: 1
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [0.5, 0, -0.5]
+          dance:
+            type: 'ScaleDance'
+            params:
+              smoothingFactor: 0.5
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        },
+        { 
+          id: 2
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [-0.5, 0, 0.5]
+          dance:
+            type: 'ScaleDance'
+            params:
+              smoothingFactor: 0.5
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        },
+        { 
+          id: 3
+          dancer:
+            type: 'SphereDancer'
+            params:
+              position: [-0.5, 0, -0.5]
+          dance:
+            type: 'PositionDance'
+            params:
+              smoothingFactor: 0.5
+          danceMaterial:
+            type: 'ColorDanceMaterial'
+            params:
+              smoothingFactor: 0.5
+        },
+      ]
+    ]
+
+    @choreographyBeat = 0
 
     # defaultDancer = new CubeDancer(new PositionDance({ smoothingFactor: 0.2, direction: [0, 4.0, 0] }), new ColorDanceMaterial({ smoothingFactor: 0.1 }))
     # @dancers.push(defaultDancer)
@@ -101,10 +162,28 @@ class window.Visualizer
           dancer:
             type: 'CubeDancer'
 
+      when @keys.NEXT
+        if @choreographyBeat == @choreography.length
+          @choreographyBeat = 0
+
+        moment = @choreography[@choreographyBeat++]
+        for change in moment
+          @receiveChoreography change
+
   receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
+    if id == -1
+      for dancer in @dancers
+        @scene.remove(dancer.body)
+      @dancers = []
+      return
     if @dancers[id]?
       # Test everything else
       currentDancer = @dancers[id]
+
+      # If no parameters are set, but an id is, then remove the object
+      if !dancer? && !dance && !danceMaterial
+        @scene.remove(currentDancer.body)
+        @dancers.splice(@dancers.indexOf(id), 1)
 
       if dance? 
         if !dancer? && !danceMaterial?
