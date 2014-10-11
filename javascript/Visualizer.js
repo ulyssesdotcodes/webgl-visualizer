@@ -23,7 +23,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.createLiveInput();
+      this.play('audio/OnMyMind.mp3');
       this.choreography = [
         [
           {
@@ -62,7 +62,8 @@
             danceMaterial: {
               type: 'ColorDanceMaterial',
               params: {
-                smoothingFactor: 0.5
+                smoothingFactor: 0.5,
+                minL: 0.0
               }
             }
           }
@@ -139,6 +140,7 @@
         ]
       ];
       this.choreographyBeat = 0;
+      this.nextChoreography();
     }
 
     Visualizer.prototype.render = function() {
@@ -163,7 +165,6 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
-      var change, moment, _i, _len, _results;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {
@@ -225,17 +226,22 @@
             }
           });
         case this.keys.NEXT:
-          if (this.choreographyBeat === this.choreography.length) {
-            this.choreographyBeat = 0;
-          }
-          moment = this.choreography[this.choreographyBeat++];
-          _results = [];
-          for (_i = 0, _len = moment.length; _i < _len; _i++) {
-            change = moment[_i];
-            _results.push(this.receiveChoreography(change));
-          }
-          return _results;
+          return this.nextChoreography();
       }
+    };
+
+    Visualizer.prototype.nextChoreography = function() {
+      var change, moment, _i, _len, _results;
+      if (this.choreographyBeat === this.choreography.length) {
+        this.choreographyBeat = 0;
+      }
+      moment = this.choreography[this.choreographyBeat++];
+      _results = [];
+      for (_i = 0, _len = moment.length; _i < _len; _i++) {
+        change = moment[_i];
+        _results.push(this.receiveChoreography(change));
+      }
+      return _results;
     };
 
     Visualizer.prototype.receiveChoreography = function(_arg) {

@@ -2,10 +2,14 @@
 (function() {
   window.ColorDanceMaterial = (function() {
     function ColorDanceMaterial(options) {
-      this.smoothingFactor = options.smoothingFactor, this.color = options.color;
-      if (this.color == null) {
-        this.color = new THREE.Color(1.0, 0, 0);
+      this.smoothingFactor = options.smoothingFactor, this.minL = options.minL, this.minS = options.minS;
+      if (this.minL == null) {
+        this.minL = 0.1;
       }
+      if (this.minS == null) {
+        this.minS = 0.3;
+      }
+      this.color = new THREE.Color(1.0, 0, 0);
       this.material = new THREE.MeshLambertMaterial({
         color: 0x00000,
         wireframe: true
@@ -14,7 +18,7 @@
     }
 
     ColorDanceMaterial.prototype.update = function(audioWindow, dancer) {
-      var freq, hsl, i, maxImportantIndex, maxIndex, maxValue, newColorH, newColorL, newColorS, oldColorHSL, value, _i, _ref;
+      var freq, hsl, i, l, maxImportantIndex, maxIndex, maxValue, newColorH, newColorL, newColorS, oldColorHSL, s, value, _i, _ref;
       maxValue = 0;
       maxIndex = -1;
       maxImportantIndex = 1;
@@ -31,9 +35,11 @@
       newColorS = this.smoothingFactor * newColorS + (1 - this.smoothingFactor) * oldColorHSL.s;
       newColorL = audioWindow.averageDb;
       newColorL = this.smoothingFactor * newColorL + (1 - this.smoothingFactor) * oldColorHSL.l;
-      newColorH = (360 * (oldColorHSL.h + audioWindow.time) % 360) / 360;
+      l = this.minL + newColorL * (1.0 - this.minL);
+      s = this.minS + newColorS * (1.0 - this.minS);
+      newColorH = (360 * (audioWindow.time / 10000) % 360) / 360;
       hsl = this.color.getHSL();
-      this.appliedColor.setHSL(newColorH, newColorS, newColorL);
+      this.appliedColor.setHSL(newColorH, s, l);
       if (dancer != null) {
         if (dancer.body.material.emissive != null) {
           dancer.body.material.emissive.copy(this.appliedColor);

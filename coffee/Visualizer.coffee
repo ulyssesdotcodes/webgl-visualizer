@@ -21,9 +21,9 @@ class window.Visualizer
     # Load the sample audio
     # @play('audio/Go.mp3')
     # @play('audio/Glasser.mp3')
-    # @play('audio/OnMyMind.mp3')
+    @play('audio/OnMyMind.mp3')
 
-    @createLiveInput()
+    # @createLiveInput()
 
     # simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
     # simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
@@ -61,6 +61,7 @@ class window.Visualizer
             type: 'ColorDanceMaterial'
             params:
               smoothingFactor: 0.5
+              minL: 0.0
         }
       ],
       [
@@ -121,6 +122,8 @@ class window.Visualizer
 
     @choreographyBeat = 0
 
+    @nextChoreography()
+
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
     if !@playing
@@ -175,12 +178,15 @@ class window.Visualizer
             type: 'CubeDancer'
 
       when @keys.NEXT
-        if @choreographyBeat == @choreography.length
-          @choreographyBeat = 0
+        @nextChoreography()
 
-        moment = @choreography[@choreographyBeat++]
-        for change in moment
-          @receiveChoreography change
+  nextChoreography: () ->
+    if @choreographyBeat == @choreography.length
+      @choreographyBeat = 0
+
+    moment = @choreography[@choreographyBeat++]
+    for change in moment
+      @receiveChoreography change
 
   receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
     if id == -1

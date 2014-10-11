@@ -1,7 +1,9 @@
 class window.ColorDanceMaterial
 	constructor: (options) ->
-		{ @smoothingFactor, @color } = options
-		@color ?= new THREE.Color(1.0, 0, 0)
+		{ @smoothingFactor, @minL, @minS } = options
+		@minL ?= 0.1
+		@minS ?= 0.3
+		@color = new THREE.Color(1.0, 0, 0)
 		@material = new THREE.MeshLambertMaterial({ color: 0x00000, wireframe: true })
 		@appliedColor = @color.clone()
 
@@ -25,10 +27,13 @@ class window.ColorDanceMaterial
 		newColorL = audioWindow.averageDb
 		newColorL = @smoothingFactor * newColorL + (1 - @smoothingFactor) * oldColorHSL.l
 
-		newColorH = (360 * (oldColorHSL.h + audioWindow.time) % 360) / 360
+		l = @minL + newColorL * (1.0 - @minL)
+		s = @minS + newColorS * (1.0 - @minS)
+
+		newColorH = (360 * (audioWindow.time / 10000) % 360) / 360
 
 		hsl = @color.getHSL()
-		@appliedColor.setHSL(newColorH, newColorS, newColorL)
+		@appliedColor.setHSL(newColorH, s, l)
 
 		if dancer?
 			if dancer.body.material.emissive?
