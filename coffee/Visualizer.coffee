@@ -206,16 +206,16 @@ class window.Visualizer
       if dance? 
         if !dancer? && !danceMaterial?
           currentDancer.reset()
-          currentDancer.dance = new @named_classes[dance.type](dance.params)
+          currentDancer.dance = new @danceTypes[dance.type](dance.params)
           return
         else
-          newDance = new @named_classes[dance.type](dance.params)
+          newDance = new @danceTypes[dance.type](dance.params)
       else
         newDance = currentDancer.dance
 
       addDancer = (newDance, newMaterial) =>
         if dancer?
-          newDancer = new @named_classes[dancer.type](newDance, newMaterial, dancer.params)
+          newDancer = new @dancerTypes[dancer.type](newDance, newMaterial, dancer.params)
         else
           newDancer = new currentDancer.constructor(newDance, newMaterial)
 
@@ -228,12 +228,12 @@ class window.Visualizer
         # Special case for shaders because it has to load the shader file
         # This is a really hacky way of checking if it's a shader. Should change.
         if danceMaterial.type.indexOf('Shader') > -1
-          newMaterial = new @named_classes[danceMaterial.type](@shaderLoader)
+          newMaterial = new @danceMaterialTypes[danceMaterial.type](@shaderLoader)
           newMaterial.loadShader @audioWindow, (shaderMaterial) =>
             addDancer newDance, shaderMaterial
           return
 
-        newMaterial = new @named_classes[danceMaterial.type](danceMaterial.params)
+        newMaterial = new @danceMaterialTypes[danceMaterial.type](danceMaterial.params)
       else
         newMaterial = currentDancer.danceMaterial
 
@@ -241,7 +241,7 @@ class window.Visualizer
 
       return
     else if id?
-      @dancers[id] = new @named_classes[dancer.type](new @named_classes[dance.type](dance.params), new @named_classes[danceMaterial.type](danceMaterial.params), dancer.params)
+      @dancers[id] = new @dancerTypes[dancer.type](new @danceTypes[dance.type](dance.params), new @danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params)
       @scene.add @dancers[id].body
       return
     else
@@ -305,11 +305,15 @@ class window.Visualizer
     @playing = true
     @source.start(0, @startOffset)
 
-  named_classes:
+  dancerTypes:
     CubeDancer: CubeDancer
     SphereDancer: SphereDancer
+    PointCloudDancer: PointCloudDancer
+
+  danceTypes:
     ScaleDance: ScaleDance
     PositionDance: PositionDance
+
+  danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial
     SimpleFrequencyShader: SimpleFrequencyShader
-    PointCloudDancer: PointCloudDancer

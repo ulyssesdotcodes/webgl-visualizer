@@ -1,5 +1,5 @@
 class window.Dancer
-  @type = Dancer
+  @params: ['position', 'scale']
 
   constructor: (geometry, dance, danceMaterial, position, scale) ->
     # Construct a default Dancer using @body as the Object3D

@@ -265,10 +265,10 @@
         if (dance != null) {
           if ((dancer == null) && (danceMaterial == null)) {
             currentDancer.reset();
-            currentDancer.dance = new this.named_classes[dance.type](dance.params);
+            currentDancer.dance = new this.danceTypes[dance.type](dance.params);
             return;
           } else {
-            newDance = new this.named_classes[dance.type](dance.params);
+            newDance = new this.danceTypes[dance.type](dance.params);
           }
         } else {
           newDance = currentDancer.dance;
@@ -277,7 +277,7 @@
           return function(newDance, newMaterial) {
             var newDancer;
             if (dancer != null) {
-              newDancer = new _this.named_classes[dancer.type](newDance, newMaterial, dancer.params);
+              newDancer = new _this.dancerTypes[dancer.type](newDance, newMaterial, dancer.params);
             } else {
               newDancer = new currentDancer.constructor(newDance, newMaterial);
             }
@@ -289,7 +289,7 @@
         })(this);
         if (danceMaterial != null) {
           if (danceMaterial.type.indexOf('Shader') > -1) {
-            newMaterial = new this.named_classes[danceMaterial.type](this.shaderLoader);
+            newMaterial = new this.danceMaterialTypes[danceMaterial.type](this.shaderLoader);
             newMaterial.loadShader(this.audioWindow, (function(_this) {
               return function(shaderMaterial) {
                 return addDancer(newDance, shaderMaterial);
@@ -297,13 +297,13 @@
             })(this));
             return;
           }
-          newMaterial = new this.named_classes[danceMaterial.type](danceMaterial.params);
+          newMaterial = new this.danceMaterialTypes[danceMaterial.type](danceMaterial.params);
         } else {
           newMaterial = currentDancer.danceMaterial;
         }
         addDancer(newDance, newMaterial);
       } else if (id != null) {
-        this.dancers[id] = new this.named_classes[dancer.type](new this.named_classes[dance.type](dance.params), new this.named_classes[danceMaterial.type](danceMaterial.params), dancer.params);
+        this.dancers[id] = new this.dancerTypes[dancer.type](new this.danceTypes[dance.type](dance.params), new this.danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params);
         this.scene.add(this.dancers[id].body);
       } else {
 
@@ -383,14 +383,20 @@
       return this.source.start(0, this.startOffset);
     };
 
-    Visualizer.prototype.named_classes = {
+    Visualizer.prototype.dancerTypes = {
       CubeDancer: CubeDancer,
       SphereDancer: SphereDancer,
-      ScaleDance: ScaleDance,
-      PositionDance: PositionDance,
-      ColorDanceMaterial: ColorDanceMaterial,
-      SimpleFrequencyShader: SimpleFrequencyShader,
       PointCloudDancer: PointCloudDancer
+    };
+
+    Visualizer.prototype.danceTypes = {
+      ScaleDance: ScaleDance,
+      PositionDance: PositionDance
+    };
+
+    Visualizer.prototype.danceMaterialTypes = {
+      ColorDanceMaterial: ColorDanceMaterial,
+      SimpleFrequencyShader: SimpleFrequencyShader
     };
 
     return Visualizer;

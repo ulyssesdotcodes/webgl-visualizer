@@ -1,5 +1,6 @@
 # Controls the mesh of the provided Dancer's body
 class window.ScaleDance
+  @params: ['smoothingFactor', 'min', 'max']
   constructor: (options) ->
     { @smoothingFactor, min, max } = options
     @averageDb = 0
