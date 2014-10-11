@@ -8,6 +8,8 @@ class window.Visualizer
     @dancers = new Array()
     @shaderLoader = new ShaderLoader()
 
+    @setupGUI()
+
 
     # Create the audio context
     window.AudioContext = window.AudioContext || window.webkitAudioContext
@@ -124,6 +126,17 @@ class window.Visualizer
 
     @nextChoreography()
 
+  setupGUI: () ->
+    currentMove = new ChoreographyMove()
+    currentMove.visualizer = @
+
+    gui = new dat.GUI()
+    gui.add(currentMove, 'id')
+    gui.add(currentMove, 'dancer')
+    gui.add(currentMove, 'dance')
+    gui.add(currentMove, 'danceMaterial')
+    gui.add(currentMove, 'move')
+
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
     if !@playing
@@ -141,6 +154,7 @@ class window.Visualizer
 
   #Event methods
   onKeyDown: (event) ->
+    return
     switch event.keyCode
       when @keys.PAUSE
         if @playing then @pause() else @play(@currentlyPlaying)

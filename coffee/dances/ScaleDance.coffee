@@ -2,7 +2,8 @@
 class window.ScaleDance
   @params: ['smoothingFactor', 'min', 'max']
   constructor: (options) ->
-    { @smoothingFactor, min, max } = options
+    if options? then { @smoothingFactor, min, max } = options
+    @smoothingFactor ?= 0.5
     @averageDb = 0
     @min = if min then new THREE.Vector3(min[0], min[1], min[2]) else new THREE.Vector3(0.5, 0.5, 0.5)
     @max = if max then new THREE.Vector3(max[0], max[1], max[2]) else new THREE.Vector3(1, 1, 1)

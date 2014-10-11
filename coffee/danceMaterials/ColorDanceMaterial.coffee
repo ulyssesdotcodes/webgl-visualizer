@@ -1,8 +1,9 @@
 class window.ColorDanceMaterial
 	@params: ['smoothingFactor', 'minL', 'minS']
-	
+
 	constructor: (options) ->
-		{ @smoothingFactor, @minL, @minS } = options
+		if options? then { @smoothingFactor, @minL, @minS } = options
+		@smoothingFactor ?= 0.5
 		@minL ?= 0.1
 		@minS ?= 0.3
 		@color = new THREE.Color(1.0, 0, 0)

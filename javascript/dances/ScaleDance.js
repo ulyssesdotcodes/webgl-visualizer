@@ -5,7 +5,12 @@
 
     function ScaleDance(options) {
       var max, min;
-      this.smoothingFactor = options.smoothingFactor, min = options.min, max = options.max;
+      if (options != null) {
+        this.smoothingFactor = options.smoothingFactor, min = options.min, max = options.max;
+      }
+      if (this.smoothingFactor == null) {
+        this.smoothingFactor = 0.5;
+      }
       this.averageDb = 0;
       this.min = min ? new THREE.Vector3(min[0], min[1], min[2]) : new THREE.Vector3(0.5, 0.5, 0.5);
       this.max = max ? new THREE.Vector3(max[0], max[1], max[2]) : new THREE.Vector3(1, 1, 1);

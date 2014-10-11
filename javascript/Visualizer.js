@@ -16,6 +16,7 @@
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
+      this.setupGUI();
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioContext = new AudioContext();
       this.audioWindow = new AudioWindow(2048, 1);
@@ -143,6 +144,18 @@
       this.nextChoreography();
     }
 
+    Visualizer.prototype.setupGUI = function() {
+      var currentMove, gui;
+      currentMove = new ChoreographyMove();
+      currentMove.visualizer = this;
+      gui = new dat.GUI();
+      gui.add(currentMove, 'id');
+      gui.add(currentMove, 'dancer');
+      gui.add(currentMove, 'dance');
+      gui.add(currentMove, 'danceMaterial');
+      return gui.add(currentMove, 'move');
+    };
+
     Visualizer.prototype.render = function() {
       var dancer, _i, _len, _ref, _results;
       if (!this.playing) {
@@ -165,6 +178,7 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
+      return;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {

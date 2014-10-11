@@ -4,7 +4,12 @@
     ColorDanceMaterial.params = ['smoothingFactor', 'minL', 'minS'];
 
     function ColorDanceMaterial(options) {
-      this.smoothingFactor = options.smoothingFactor, this.minL = options.minL, this.minS = options.minS;
+      if (options != null) {
+        this.smoothingFactor = options.smoothingFactor, this.minL = options.minL, this.minS = options.minS;
+      }
+      if (this.smoothingFactor == null) {
+        this.smoothingFactor = 0.5;
+      }
       if (this.minL == null) {
         this.minL = 0.1;
       }
