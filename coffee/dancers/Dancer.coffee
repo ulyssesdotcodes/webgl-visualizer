@@ -17,8 +17,8 @@ class window.Dancer
     @dance = dance
     @danceMaterial = danceMaterial;
     @body = new THREE.Mesh(geometry, material);
-    @body.position = if position? then position else new THREE.Vector3(0, 0, 0)
-    @body.scale = if scale? then scale else new THREE.Vector3(1, 1, 1)
+    if position? && position.length == 3 then @body.position.set(position[0], position[1], position[2])
+    if scale? && scale.length == 3 then @body.scale.set(scale[0], scale[1], scale[2])
 
   geometry: () ->
     new THREE.PlaneGeometry(1, 1)

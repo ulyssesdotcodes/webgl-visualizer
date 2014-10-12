@@ -19,8 +19,12 @@
       this.dance = dance;
       this.danceMaterial = danceMaterial;
       this.body = new THREE.Mesh(geometry, material);
-      this.body.position = position != null ? position : new THREE.Vector3(0, 0, 0);
-      this.body.scale = scale != null ? scale : new THREE.Vector3(1, 1, 1);
+      if ((position != null) && position.length === 3) {
+        this.body.position.set(position[0], position[1], position[2]);
+      }
+      if ((scale != null) && scale.length === 3) {
+        this.body.scale.set(scale[0], scale[1], scale[2]);
+      }
     }
 
     Dancer.prototype.geometry = function() {

@@ -139,7 +139,7 @@ class window.Visualizer
         dancerFolder.remove(controller)
 
       for param in @dancerTypes[value].params
-        currentMove.dancerParams[param.name] = param.default 
+        currentMove.dancerParams[param.name] = param.default
         dancerFolder.add(currentMove.dancerParams, param.name)
 
     gui.add(currentMove, 'dance')
