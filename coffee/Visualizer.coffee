@@ -132,35 +132,35 @@ class window.Visualizer
 
     gui = new dat.GUI()
     gui.add(currentMove, 'id')
-    dancerController  = gui.add(currentMove, 'dancer')
+    dancerController  = gui.add(currentMove, 'dancer', Object.keys(@dancerTypes))
     dancerFolder = gui.addFolder('Dancer parameters')
     dancerFolder.open()
-    dancerController.onChange (value) =>
+    dancerController.onFinishChange (value) =>
       if !@dancerTypes[value]?
         return
 
-      for controller in dancerFolder.__controllers
-        dancerFolder.remove(controller)
+      while dancerFolder.__controllers[0]?
+        dancerFolder.remove(dancerFolder.__controllers[0])
 
       for param in @dancerTypes[value].params
         currentMove.dancerParams[param.name] = param.default
         dancerFolder.add(currentMove.dancerParams, param.name)
 
-    danceController = gui.add(currentMove, 'dance')
+    danceController = gui.add(currentMove, 'dance', Object.keys(@danceTypes))
     danceFolder = gui.addFolder('Dance parameters')
     danceFolder.open()
     danceController.onChange (value) =>
       if !@danceTypes[value]?
         return
 
-      for controller in danceFolder.__controllers
-        danceFolder.remove(controller)
+      while danceFolder.__controllers[0]?
+        danceFolder.remove(danceFolder.__controllers[0])
 
       for param in @danceTypes[value].params
         currentMove.danceParams[param.name] = param.default
         danceFolder.add(currentMove.danceParams, param.name)
     
-    danceMaterialController = gui.add(currentMove, 'danceMaterial')
+    danceMaterialController = gui.add(currentMove, 'danceMaterial', Object.keys(@danceMaterialTypes))
 
     danceMaterialFolder = gui.addFolder('Dance material parameters')
     danceMaterialFolder.open()
@@ -168,8 +168,8 @@ class window.Visualizer
       if !@danceMaterialTypes[value]?
         return
 
-      for controller in danceMaterialFolder.__controllers
-        danceMaterialFolder.remove(controller)
+      while danceMaterialFolder.__controllers[0]?
+        danceMaterialFolder.remove(danceMaterialFolder.__controllers[0])
 
       for param in @danceMaterialTypes[value].params
         currentMove.danceMaterialParams[param.name] = param.default
