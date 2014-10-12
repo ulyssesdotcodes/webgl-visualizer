@@ -132,7 +132,16 @@ class window.Visualizer
 
     gui = new dat.GUI()
     gui.add(currentMove, 'id')
-    gui.add(currentMove, 'dancer')
+    dancerController  = gui.add(currentMove, 'dancer')
+    dancerFolder = gui.addFolder('Dancer parameters')
+    dancerController.onFinishChange (value) =>
+      for controller in dancerFolder.__controllers
+        dancerFolder.remove(controller)
+
+      for param in @dancerTypes[value].params
+        currentMove.dancerParams[param.name] = param.default 
+        dancerFolder.add(currentMove.dancerParams, param.name)
+
     gui.add(currentMove, 'dance')
     gui.add(currentMove, 'danceMaterial')
     gui.add(currentMove, 'move')

@@ -145,12 +145,31 @@
     }
 
     Visualizer.prototype.setupGUI = function() {
-      var currentMove, gui;
+      var currentMove, dancerController, dancerFolder, gui;
       currentMove = new ChoreographyMove();
       currentMove.visualizer = this;
       gui = new dat.GUI();
       gui.add(currentMove, 'id');
-      gui.add(currentMove, 'dancer');
+      dancerController = gui.add(currentMove, 'dancer');
+      dancerFolder = gui.addFolder('Dancer parameters');
+      dancerController.onFinishChange((function(_this) {
+        return function(value) {
+          var controller, param, _i, _j, _len, _len1, _ref, _ref1, _results;
+          _ref = dancerFolder.__controllers;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            controller = _ref[_i];
+            dancerFolder.remove(controller);
+          }
+          _ref1 = _this.dancerTypes[value].params;
+          _results = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            param = _ref1[_j];
+            currentMove.dancerParams[param.name] = param["default"];
+            _results.push(dancerFolder.add(currentMove.dancerParams, param.name));
+          }
+          return _results;
+        };
+      })(this));
       gui.add(currentMove, 'dance');
       gui.add(currentMove, 'danceMaterial');
       return gui.add(currentMove, 'move');

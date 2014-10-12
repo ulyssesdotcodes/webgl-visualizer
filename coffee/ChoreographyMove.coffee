@@ -4,6 +4,9 @@ class window.ChoreographyMove
     @dancer = "CubeDancer"
     @dance = "ScaleDance"
     @danceMaterial = "ColorDanceMaterial"
+    @dancerParams = {}
+    @danceParams = {}
+    @danceMaterialParams = {}
 
   move: () ->
     @visualizer.receiveChoreography
