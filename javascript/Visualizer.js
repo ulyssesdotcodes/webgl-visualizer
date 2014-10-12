@@ -145,16 +145,20 @@
     }
 
     Visualizer.prototype.setupGUI = function() {
-      var currentMove, dancerController, dancerFolder, gui;
+      var currentMove, danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui;
       currentMove = new ChoreographyMove();
       currentMove.visualizer = this;
       gui = new dat.GUI();
       gui.add(currentMove, 'id');
       dancerController = gui.add(currentMove, 'dancer');
       dancerFolder = gui.addFolder('Dancer parameters');
-      dancerController.onFinishChange((function(_this) {
+      dancerFolder.open();
+      dancerController.onChange((function(_this) {
         return function(value) {
           var controller, param, _i, _j, _len, _len1, _ref, _ref1, _results;
+          if (_this.dancerTypes[value] == null) {
+            return;
+          }
           _ref = dancerFolder.__controllers;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             controller = _ref[_i];
@@ -170,8 +174,54 @@
           return _results;
         };
       })(this));
-      gui.add(currentMove, 'dance');
-      gui.add(currentMove, 'danceMaterial');
+      danceController = gui.add(currentMove, 'dance');
+      danceFolder = gui.addFolder('Dance parameters');
+      danceFolder.open();
+      danceController.onChange((function(_this) {
+        return function(value) {
+          var controller, param, _i, _j, _len, _len1, _ref, _ref1, _results;
+          if (_this.danceTypes[value] == null) {
+            return;
+          }
+          _ref = danceFolder.__controllers;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            controller = _ref[_i];
+            danceFolder.remove(controller);
+          }
+          _ref1 = _this.danceTypes[value].params;
+          _results = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            param = _ref1[_j];
+            currentMove.danceParams[param.name] = param["default"];
+            _results.push(danceFolder.add(currentMove.danceParams, param.name));
+          }
+          return _results;
+        };
+      })(this));
+      danceMaterialController = gui.add(currentMove, 'danceMaterial');
+      danceMaterialFolder = gui.addFolder('Dance material parameters');
+      danceMaterialFolder.open();
+      danceMaterialController.onChange((function(_this) {
+        return function(value) {
+          var controller, param, _i, _j, _len, _len1, _ref, _ref1, _results;
+          if (_this.danceMaterialTypes[value] == null) {
+            return;
+          }
+          _ref = danceMaterialFolder.__controllers;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            controller = _ref[_i];
+            danceMaterialFolder.remove(controller);
+          }
+          _ref1 = _this.danceMaterialTypes[value].params;
+          _results = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            param = _ref1[_j];
+            currentMove.danceMaterialParams[param.name] = param["default"];
+            _results.push(danceMaterialFolder.add(currentMove.danceMaterialParams, param.name));
+          }
+          return _results;
+        };
+      })(this));
       return gui.add(currentMove, 'move');
     };
 

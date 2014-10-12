@@ -7,7 +7,7 @@ class window.Dancer
     },
     {
       name: 'scale'
-      default: [0, 0, 0]
+      default: [1, 1, 1]
     }
   ]
 

@@ -1,5 +1,19 @@
 class window.PointCloudDancer extends Dancer
-  @params: ['minDistance', 'maxDistance', 'count']  
+  @params: 
+    [
+      {
+        name: 'minDistance',
+        default: 5.0
+      }, 
+      {
+        name: 'maxDistance',
+        default: 10.0
+      }, 
+      {
+        name: 'count',
+        default: 500
+      }
+    ]  
   constructor: (@dance, @danceMaterial, options) ->
     if options? then { @minDistance, @maxDistance, @count } = options
     @minDistance ?= 5.0

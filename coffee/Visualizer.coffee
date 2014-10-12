@@ -134,7 +134,11 @@ class window.Visualizer
     gui.add(currentMove, 'id')
     dancerController  = gui.add(currentMove, 'dancer')
     dancerFolder = gui.addFolder('Dancer parameters')
-    dancerController.onFinishChange (value) =>
+    dancerFolder.open()
+    dancerController.onChange (value) =>
+      if !@dancerTypes[value]?
+        return
+
       for controller in dancerFolder.__controllers
         dancerFolder.remove(controller)
 
@@ -142,8 +146,35 @@ class window.Visualizer
         currentMove.dancerParams[param.name] = param.default
         dancerFolder.add(currentMove.dancerParams, param.name)
 
-    gui.add(currentMove, 'dance')
-    gui.add(currentMove, 'danceMaterial')
+    danceController = gui.add(currentMove, 'dance')
+    danceFolder = gui.addFolder('Dance parameters')
+    danceFolder.open()
+    danceController.onChange (value) =>
+      if !@danceTypes[value]?
+        return
+
+      for controller in danceFolder.__controllers
+        danceFolder.remove(controller)
+
+      for param in @danceTypes[value].params
+        currentMove.danceParams[param.name] = param.default
+        danceFolder.add(currentMove.danceParams, param.name)
+    
+    danceMaterialController = gui.add(currentMove, 'danceMaterial')
+
+    danceMaterialFolder = gui.addFolder('Dance material parameters')
+    danceMaterialFolder.open()
+    danceMaterialController.onChange (value) =>
+      if !@danceMaterialTypes[value]?
+        return
+
+      for controller in danceMaterialFolder.__controllers
+        danceMaterialFolder.remove(controller)
+
+      for param in @danceMaterialTypes[value].params
+        currentMove.danceMaterialParams[param.name] = param.default
+        danceMaterialFolder.add(currentMove.danceMaterialParams, param.name)
+
     gui.add(currentMove, 'move')
 
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
