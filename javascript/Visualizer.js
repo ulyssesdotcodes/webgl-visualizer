@@ -16,6 +16,7 @@
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
+      this.setupGUI();
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioContext = new AudioContext();
       this.audioWindow = new AudioWindow(2048, 1);
@@ -23,7 +24,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/OnMyMind.mp3');
+      this.createLiveInput();
       this.choreography = [
         [
           {
@@ -143,6 +144,81 @@
       this.nextChoreography();
     }
 
+    Visualizer.prototype.setupGUI = function() {
+      var currentMove, danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui;
+      currentMove = new ChoreographyMove();
+      currentMove.visualizer = this;
+      gui = new dat.GUI();
+      gui.add(currentMove, 'id');
+      dancerController = gui.add(currentMove, 'dancer', Object.keys(this.dancerTypes));
+      dancerFolder = gui.addFolder('Dancer parameters');
+      dancerFolder.open();
+      dancerController.onFinishChange((function(_this) {
+        return function(value) {
+          var param, _i, _len, _ref, _results;
+          if (_this.dancerTypes[value] == null) {
+            return;
+          }
+          while (dancerFolder.__controllers[0] != null) {
+            dancerFolder.remove(dancerFolder.__controllers[0]);
+          }
+          _ref = _this.dancerTypes[value].params;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            param = _ref[_i];
+            currentMove.dancerParams[param.name] = param["default"];
+            _results.push(dancerFolder.add(currentMove.dancerParams, param.name));
+          }
+          return _results;
+        };
+      })(this));
+      danceController = gui.add(currentMove, 'dance', Object.keys(this.danceTypes));
+      danceFolder = gui.addFolder('Dance parameters');
+      danceFolder.open();
+      danceController.onChange((function(_this) {
+        return function(value) {
+          var param, _i, _len, _ref, _results;
+          if (_this.danceTypes[value] == null) {
+            return;
+          }
+          while (danceFolder.__controllers[0] != null) {
+            danceFolder.remove(danceFolder.__controllers[0]);
+          }
+          _ref = _this.danceTypes[value].params;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            param = _ref[_i];
+            currentMove.danceParams[param.name] = param["default"];
+            _results.push(danceFolder.add(currentMove.danceParams, param.name));
+          }
+          return _results;
+        };
+      })(this));
+      danceMaterialController = gui.add(currentMove, 'danceMaterial', Object.keys(this.danceMaterialTypes));
+      danceMaterialFolder = gui.addFolder('Dance material parameters');
+      danceMaterialFolder.open();
+      danceMaterialController.onChange((function(_this) {
+        return function(value) {
+          var param, _i, _len, _ref, _results;
+          if (_this.danceMaterialTypes[value] == null) {
+            return;
+          }
+          while (danceMaterialFolder.__controllers[0] != null) {
+            danceMaterialFolder.remove(danceMaterialFolder.__controllers[0]);
+          }
+          _ref = _this.danceMaterialTypes[value].params;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            param = _ref[_i];
+            currentMove.danceMaterialParams[param.name] = param["default"];
+            _results.push(danceMaterialFolder.add(currentMove.danceMaterialParams, param.name));
+          }
+          return _results;
+        };
+      })(this));
+      return gui.add(currentMove, 'move');
+    };
+
     Visualizer.prototype.render = function() {
       var dancer, _i, _len, _ref, _results;
       if (!this.playing) {
@@ -165,6 +241,7 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
+      return;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {
@@ -265,10 +342,10 @@
         if (dance != null) {
           if ((dancer == null) && (danceMaterial == null)) {
             currentDancer.reset();
-            currentDancer.dance = new this.named_classes[dance.type](dance.params);
+            currentDancer.dance = new this.danceTypes[dance.type](dance.params);
             return;
           } else {
-            newDance = new this.named_classes[dance.type](dance.params);
+            newDance = new this.danceTypes[dance.type](dance.params);
           }
         } else {
           newDance = currentDancer.dance;
@@ -277,7 +354,7 @@
           return function(newDance, newMaterial) {
             var newDancer;
             if (dancer != null) {
-              newDancer = new _this.named_classes[dancer.type](newDance, newMaterial, dancer.params);
+              newDancer = new _this.dancerTypes[dancer.type](newDance, newMaterial, dancer.params);
             } else {
               newDancer = new currentDancer.constructor(newDance, newMaterial);
             }
@@ -289,7 +366,7 @@
         })(this);
         if (danceMaterial != null) {
           if (danceMaterial.type.indexOf('Shader') > -1) {
-            newMaterial = new this.named_classes[danceMaterial.type](this.shaderLoader);
+            newMaterial = new this.danceMaterialTypes[danceMaterial.type](this.shaderLoader);
             newMaterial.loadShader(this.audioWindow, (function(_this) {
               return function(shaderMaterial) {
                 return addDancer(newDance, shaderMaterial);
@@ -297,13 +374,13 @@
             })(this));
             return;
           }
-          newMaterial = new this.named_classes[danceMaterial.type](danceMaterial.params);
+          newMaterial = new this.danceMaterialTypes[danceMaterial.type](danceMaterial.params);
         } else {
           newMaterial = currentDancer.danceMaterial;
         }
         addDancer(newDance, newMaterial);
       } else if (id != null) {
-        this.dancers[id] = new this.named_classes[dancer.type](new this.named_classes[dance.type](dance.params), new this.named_classes[danceMaterial.type](danceMaterial.params), dancer.params);
+        this.dancers[id] = new this.dancerTypes[dancer.type](new this.danceTypes[dance.type](dance.params), new this.danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params);
         this.scene.add(this.dancers[id].body);
       } else {
 
@@ -383,14 +460,20 @@
       return this.source.start(0, this.startOffset);
     };
 
-    Visualizer.prototype.named_classes = {
+    Visualizer.prototype.dancerTypes = {
       CubeDancer: CubeDancer,
       SphereDancer: SphereDancer,
-      ScaleDance: ScaleDance,
-      PositionDance: PositionDance,
-      ColorDanceMaterial: ColorDanceMaterial,
-      SimpleFrequencyShader: SimpleFrequencyShader,
       PointCloudDancer: PointCloudDancer
+    };
+
+    Visualizer.prototype.danceTypes = {
+      ScaleDance: ScaleDance,
+      PositionDance: PositionDance
+    };
+
+    Visualizer.prototype.danceMaterialTypes = {
+      ColorDanceMaterial: ColorDanceMaterial,
+      SimpleFrequencyShader: SimpleFrequencyShader
     };
 
     return Visualizer;

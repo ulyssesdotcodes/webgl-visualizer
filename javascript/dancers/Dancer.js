@@ -3,20 +3,28 @@
   window.Dancer = (function() {
     Dancer.type = Dancer;
 
+    Dancer.params = [
+      {
+        name: 'position',
+        "default": [0, 0, 0]
+      }, {
+        name: 'scale',
+        "default": [1, 1, 1]
+      }
+    ];
+
     function Dancer(geometry, dance, danceMaterial, position, scale) {
       var material;
       material = danceMaterial.material;
       this.dance = dance;
       this.danceMaterial = danceMaterial;
       this.body = new THREE.Mesh(geometry, material);
-      if (position == null) {
-        position = [0, 1, 0];
+      if ((position != null) && position.length === 3) {
+        this.body.position.set(position[0], position[1], position[2]);
       }
-      this.body.position.set(position[0], position[1], position[2]);
-      if (scale == null) {
-        scale = [1, 1, 1];
+      if ((scale != null) && scale.length === 3) {
+        this.body.scale.set(scale[0], scale[1], scale[2]);
       }
-      this.body.scale.set(scale[0], scale[1], scale[2]);
     }
 
     Dancer.prototype.geometry = function() {

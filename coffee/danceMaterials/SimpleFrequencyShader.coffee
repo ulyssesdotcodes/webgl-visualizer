@@ -1,4 +1,6 @@
 class window.SimpleFrequencyShader
+  @params: []
+  
   constructor: (shaderLoader) ->
     @target = 128
     @size = 1024

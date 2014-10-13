@@ -61,7 +61,18 @@
 
   $(function() {
     window.app = new Main();
-    return window.animate();
+    window.animate();
+    return dat.GUI.prototype.removeFolder = function(name) {
+      var folder;
+      folder = this.__folders[name];
+      if (!folder) {
+        return;
+      }
+      folder.close();
+      this.__ul.removeChild(folder.domElement.parentNode);
+      delete this.__folders[name];
+      return this.onResize();
+    };
   });
 
 }).call(this);

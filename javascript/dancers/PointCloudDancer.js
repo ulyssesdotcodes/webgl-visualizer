@@ -6,6 +6,19 @@
   window.PointCloudDancer = (function(_super) {
     __extends(PointCloudDancer, _super);
 
+    PointCloudDancer.params = [
+      {
+        name: 'minDistance',
+        "default": 5.0
+      }, {
+        name: 'maxDistance',
+        "default": 10.0
+      }, {
+        name: 'count',
+        "default": 500
+      }
+    ];
+
     function PointCloudDancer(dance, danceMaterial, options) {
       var direction, geometry, i, material, position, positions, _i, _ref;
       this.dance = dance;

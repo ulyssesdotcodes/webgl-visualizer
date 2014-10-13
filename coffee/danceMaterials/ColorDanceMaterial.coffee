@@ -1,42 +1,59 @@
 class window.ColorDanceMaterial
-	constructor: (options) ->
-		{ @smoothingFactor, @minL, @minS } = options
-		@minL ?= 0.1
-		@minS ?= 0.3
-		@color = new THREE.Color(1.0, 0, 0)
-		@material = new THREE.MeshLambertMaterial({ color: 0x00000, wireframe: true })
-		@appliedColor = @color.clone()
+  @params: 
+    [
+      {
+        name: 'smoothingFactor',
+        default: 0.5
+      }, 
+      {
+        name: 'minL',
+        default: 0.1
+      }, 
+      {
+        name: 'minS',
+        default: 0.3
+      }
+    ]
 
-	update: (audioWindow, dancer) ->
+  constructor: (options) ->
+    if options? then { @smoothingFactor, @minL, @minS } = options
+    @smoothingFactor ?= 0.5
+    @minL ?= 0.1
+    @minS ?= 0.3
+    @color = new THREE.Color(1.0, 0, 0)
+    @material = new THREE.MeshLambertMaterial({ color: 0x00000, wireframe: true })
+    @appliedColor = @color.clone()
 
-		maxValue = 0
-		maxIndex = -1
-		maxImportantIndex = 1
-		for i in [1..audioWindow.bufferSize]
-			freq = audioWindow.frequencyBuffer[i]
-			value = freq * i
-			if (value > maxValue)
-				maxValue = value
-				maxIndex = i
+  update: (audioWindow, dancer) ->
 
-		oldColorHSL = @appliedColor.getHSL()
+    maxValue = 0
+    maxIndex = -1
+    maxImportantIndex = 1
+    for i in [1..audioWindow.bufferSize]
+      freq = audioWindow.frequencyBuffer[i]
+      value = freq * i
+      if (value > maxValue)
+        maxValue = value
+        maxIndex = i
 
-		newColorS = maxIndex / audioWindow.bufferSize;
-		newColorS = @smoothingFactor * newColorS + (1 - @smoothingFactor) * oldColorHSL.s
+    oldColorHSL = @appliedColor.getHSL()
 
-		newColorL = audioWindow.averageDb
-		newColorL = @smoothingFactor * newColorL + (1 - @smoothingFactor) * oldColorHSL.l
+    newColorS = maxIndex / audioWindow.bufferSize;
+    newColorS = @smoothingFactor * newColorS + (1 - @smoothingFactor) * oldColorHSL.s
 
-		l = @minL + newColorL * (1.0 - @minL)
-		s = @minS + newColorS * (1.0 - @minS)
+    newColorL = audioWindow.averageDb
+    newColorL = @smoothingFactor * newColorL + (1 - @smoothingFactor) * oldColorHSL.l
 
-		newColorH = (360 * (audioWindow.time / 10000) % 360) / 360
+    l = @minL + newColorL * (1.0 - @minL)
+    s = @minS + newColorS * (1.0 - @minS)
 
-		hsl = @color.getHSL()
-		@appliedColor.setHSL(newColorH, s, l)
+    newColorH = (360 * (audioWindow.time / 10000) % 360) / 360
 
-		if dancer?
-			if dancer.body.material.emissive?
-				dancer.body.material.emissive.copy(@appliedColor)
+    hsl = @color.getHSL()
+    @appliedColor.setHSL(newColorH, s, l)
 
-			dancer.body.material.color.copy(@appliedColor)
+    if dancer?
+      if dancer.body.material.emissive?
+        dancer.body.material.emissive.copy(@appliedColor)
+
+      dancer.body.material.color.copy(@appliedColor)

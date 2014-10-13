@@ -1,5 +1,15 @@
 class window.Dancer
   @type = Dancer
+  @params = [
+    {
+      name: 'position'
+      default: [0, 0, 0]
+    },
+    {
+      name: 'scale'
+      default: [1, 1, 1]
+    }
+  ]
 
   constructor: (geometry, dance, danceMaterial, position, scale) ->
     # Construct a default Dancer using @body as the Object3D
@@ -7,10 +17,8 @@ class window.Dancer
     @dance = dance
     @danceMaterial = danceMaterial;
     @body = new THREE.Mesh(geometry, material);
-    position ?= [0, 1, 0]
-    @body.position.set(position[0], position[1], position[2])
-    scale ?= [1, 1, 1]
-    @body.scale.set(scale[0], scale[1], scale[2])
+    if position? && position.length == 3 then @body.position.set(position[0], position[1], position[2])
+    if scale? && scale.length == 3 then @body.scale.set(scale[0], scale[1], scale[2])
 
   geometry: () ->
     new THREE.PlaneGeometry(1, 1)

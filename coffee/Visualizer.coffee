@@ -8,6 +8,8 @@ class window.Visualizer
     @dancers = new Array()
     @shaderLoader = new ShaderLoader()
 
+    @setupGUI()
+
 
     # Create the audio context
     window.AudioContext = window.AudioContext || window.webkitAudioContext
@@ -21,9 +23,9 @@ class window.Visualizer
     # Load the sample audio
     # @play('audio/Go.mp3')
     # @play('audio/Glasser.mp3')
-    @play('audio/OnMyMind.mp3')
+    # @play('audio/OnMyMind.mp3')
 
-    # @createLiveInput()
+    @createLiveInput()
 
     # simpleFreqShader = new SimpleFrequencyShader(@shaderLoader)
     # simpleFreqShader.loadShader @audioWindow, (danceMaterial) =>
@@ -124,6 +126,57 @@ class window.Visualizer
 
     @nextChoreography()
 
+  setupGUI: () ->
+    currentMove = new ChoreographyMove()
+    currentMove.visualizer = @
+
+    gui = new dat.GUI()
+    gui.add(currentMove, 'id')
+    dancerController  = gui.add(currentMove, 'dancer', Object.keys(@dancerTypes))
+    dancerFolder = gui.addFolder('Dancer parameters')
+    dancerFolder.open()
+    dancerController.onFinishChange (value) =>
+      if !@dancerTypes[value]?
+        return
+
+      while dancerFolder.__controllers[0]?
+        dancerFolder.remove(dancerFolder.__controllers[0])
+
+      for param in @dancerTypes[value].params
+        currentMove.dancerParams[param.name] = param.default
+        dancerFolder.add(currentMove.dancerParams, param.name)
+
+    danceController = gui.add(currentMove, 'dance', Object.keys(@danceTypes))
+    danceFolder = gui.addFolder('Dance parameters')
+    danceFolder.open()
+    danceController.onChange (value) =>
+      if !@danceTypes[value]?
+        return
+
+      while danceFolder.__controllers[0]?
+        danceFolder.remove(danceFolder.__controllers[0])
+
+      for param in @danceTypes[value].params
+        currentMove.danceParams[param.name] = param.default
+        danceFolder.add(currentMove.danceParams, param.name)
+    
+    danceMaterialController = gui.add(currentMove, 'danceMaterial', Object.keys(@danceMaterialTypes))
+
+    danceMaterialFolder = gui.addFolder('Dance material parameters')
+    danceMaterialFolder.open()
+    danceMaterialController.onChange (value) =>
+      if !@danceMaterialTypes[value]?
+        return
+
+      while danceMaterialFolder.__controllers[0]?
+        danceMaterialFolder.remove(danceMaterialFolder.__controllers[0])
+
+      for param in @danceMaterialTypes[value].params
+        currentMove.danceMaterialParams[param.name] = param.default
+        danceMaterialFolder.add(currentMove.danceMaterialParams, param.name)
+
+    gui.add(currentMove, 'move')
+
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: () ->
     if !@playing
@@ -141,6 +194,7 @@ class window.Visualizer
 
   #Event methods
   onKeyDown: (event) ->
+    return
     switch event.keyCode
       when @keys.PAUSE
         if @playing then @pause() else @play(@currentlyPlaying)
@@ -206,16 +260,16 @@ class window.Visualizer
       if dance? 
         if !dancer? && !danceMaterial?
           currentDancer.reset()
-          currentDancer.dance = new @named_classes[dance.type](dance.params)
+          currentDancer.dance = new @danceTypes[dance.type](dance.params)
           return
         else
-          newDance = new @named_classes[dance.type](dance.params)
+          newDance = new @danceTypes[dance.type](dance.params)
       else
         newDance = currentDancer.dance
 
       addDancer = (newDance, newMaterial) =>
         if dancer?
-          newDancer = new @named_classes[dancer.type](newDance, newMaterial, dancer.params)
+          newDancer = new @dancerTypes[dancer.type](newDance, newMaterial, dancer.params)
         else
           newDancer = new currentDancer.constructor(newDance, newMaterial)
 
@@ -228,12 +282,12 @@ class window.Visualizer
         # Special case for shaders because it has to load the shader file
         # This is a really hacky way of checking if it's a shader. Should change.
         if danceMaterial.type.indexOf('Shader') > -1
-          newMaterial = new @named_classes[danceMaterial.type](@shaderLoader)
+          newMaterial = new @danceMaterialTypes[danceMaterial.type](@shaderLoader)
           newMaterial.loadShader @audioWindow, (shaderMaterial) =>
             addDancer newDance, shaderMaterial
           return
 
-        newMaterial = new @named_classes[danceMaterial.type](danceMaterial.params)
+        newMaterial = new @danceMaterialTypes[danceMaterial.type](danceMaterial.params)
       else
         newMaterial = currentDancer.danceMaterial
 
@@ -241,7 +295,7 @@ class window.Visualizer
 
       return
     else if id?
-      @dancers[id] = new @named_classes[dancer.type](new @named_classes[dance.type](dance.params), new @named_classes[danceMaterial.type](danceMaterial.params), dancer.params)
+      @dancers[id] = new @dancerTypes[dancer.type](new @danceTypes[dance.type](dance.params), new @danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params)
       @scene.add @dancers[id].body
       return
     else
@@ -305,11 +359,15 @@ class window.Visualizer
     @playing = true
     @source.start(0, @startOffset)
 
-  named_classes:
+  dancerTypes:
     CubeDancer: CubeDancer
     SphereDancer: SphereDancer
+    PointCloudDancer: PointCloudDancer
+
+  danceTypes:
     ScaleDance: ScaleDance
     PositionDance: PositionDance
+
+  danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial
     SimpleFrequencyShader: SimpleFrequencyShader
-    PointCloudDancer: PointCloudDancer
