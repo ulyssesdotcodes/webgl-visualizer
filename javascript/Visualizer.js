@@ -3,12 +3,6 @@
   window.Visualizer = (function() {
     Visualizer.prototype.keys = {
       PAUSE: 32,
-      SCALE_DANCE: 83,
-      POSITION_DANCE: 68,
-      SHADER: 49,
-      COLOR: 50,
-      SPHERE: 51,
-      CUBE: 52,
       NEXT: 78
     };
 
@@ -24,133 +18,17 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.createLiveInput();
-      this.choreography = [
-        [
-          {
-            id: -1
-          }, {
-            id: 1,
-            dancer: {
-              type: 'CubeDancer'
-            },
-            dance: {
-              type: 'PositionDance',
-              params: {
-                smoothingFactor: 0.5,
-                direction: [0, 4.0, 0]
-              }
-            },
-            danceMaterial: {
-              type: 'ColorDanceMaterial',
-              params: {
-                smoothingFactor: 0.5
-              }
-            }
-          }, {
-            id: 0,
-            dancer: {
-              type: 'PointCloudDancer'
-            },
-            dance: {
-              type: 'ScaleDance',
-              params: {
-                smoothingFactor: 0.5,
-                min: [1.0, 1.0, 1.0],
-                max: [1.2, 1.2, 1.2]
-              }
-            },
-            danceMaterial: {
-              type: 'ColorDanceMaterial',
-              params: {
-                smoothingFactor: 0.5,
-                minL: 0.0
-              }
-            }
-          }
-        ], [
-          {
-            id: 1,
-            dancer: {
-              type: 'SphereDancer',
-              params: {
-                position: [0.5, 0, 0.5]
-              }
-            }
-          }, {
-            id: 2,
-            dancer: {
-              type: 'SphereDancer',
-              params: {
-                position: [0.5, 0, -0.5]
-              }
-            },
-            dance: {
-              type: 'ScaleDance',
-              params: {
-                smoothingFactor: 0.5
-              }
-            },
-            danceMaterial: {
-              type: 'ColorDanceMaterial',
-              params: {
-                smoothingFactor: 0.5
-              }
-            }
-          }, {
-            id: 3,
-            dancer: {
-              type: 'SphereDancer',
-              params: {
-                position: [-0.5, 0, 0.5]
-              }
-            },
-            dance: {
-              type: 'ScaleDance',
-              params: {
-                smoothingFactor: 0.5
-              }
-            },
-            danceMaterial: {
-              type: 'ColorDanceMaterial',
-              params: {
-                smoothingFactor: 0.5
-              }
-            }
-          }, {
-            id: 4,
-            dancer: {
-              type: 'SphereDancer',
-              params: {
-                position: [-0.5, 0, -0.5]
-              }
-            },
-            dance: {
-              type: 'PositionDance',
-              params: {
-                smoothingFactor: 0.5
-              }
-            },
-            danceMaterial: {
-              type: 'ColorDanceMaterial',
-              params: {
-                smoothingFactor: 0.5
-              }
-            }
-          }
-        ]
-      ];
-      this.choreographyBeat = 0;
-      this.nextChoreography();
+      this.play('audio/OnMyMind.mp3');
+      this.choreographyRoutine.playNext();
     }
 
     Visualizer.prototype.setupGUI = function() {
-      var currentMove, danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui;
-      currentMove = new ChoreographyMove();
-      currentMove.visualizer = this;
+      var danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui;
+      this.choreographyRoutine = new ChoreographyRoutine();
+      this.choreographyRoutine.visualizer = this;
       gui = new dat.GUI();
-      gui.add(currentMove, 'id');
-      dancerController = gui.add(currentMove, 'dancer', Object.keys(this.dancerTypes));
+      gui.add(this.choreographyRoutine, 'id');
+      dancerController = gui.add(this.choreographyRoutine, 'dancer', Object.keys(this.dancerTypes));
       dancerFolder = gui.addFolder('Dancer parameters');
       dancerFolder.open();
       dancerController.onFinishChange((function(_this) {
@@ -166,13 +44,13 @@
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             param = _ref[_i];
-            currentMove.dancerParams[param.name] = param["default"];
-            _results.push(dancerFolder.add(currentMove.dancerParams, param.name));
+            _this.choreographyRoutine.dancerParams[param.name] = param["default"];
+            _results.push(dancerFolder.add(_this.choreographyRoutine.dancerParams, param.name));
           }
           return _results;
         };
       })(this));
-      danceController = gui.add(currentMove, 'dance', Object.keys(this.danceTypes));
+      danceController = gui.add(this.choreographyRoutine, 'dance', Object.keys(this.danceTypes));
       danceFolder = gui.addFolder('Dance parameters');
       danceFolder.open();
       danceController.onChange((function(_this) {
@@ -188,13 +66,13 @@
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             param = _ref[_i];
-            currentMove.danceParams[param.name] = param["default"];
-            _results.push(danceFolder.add(currentMove.danceParams, param.name));
+            _this.choreographyRoutine.danceParams[param.name] = param["default"];
+            _results.push(danceFolder.add(_this.choreographyRoutine.danceParams, param.name));
           }
           return _results;
         };
       })(this));
-      danceMaterialController = gui.add(currentMove, 'danceMaterial', Object.keys(this.danceMaterialTypes));
+      danceMaterialController = gui.add(this.choreographyRoutine, 'danceMaterial', Object.keys(this.danceMaterialTypes));
       danceMaterialFolder = gui.addFolder('Dance material parameters');
       danceMaterialFolder.open();
       danceMaterialController.onChange((function(_this) {
@@ -210,26 +88,30 @@
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             param = _ref[_i];
-            currentMove.danceMaterialParams[param.name] = param["default"];
-            _results.push(danceMaterialFolder.add(currentMove.danceMaterialParams, param.name));
+            _this.choreographyRoutine.danceMaterialParams[param.name] = param["default"];
+            _results.push(danceMaterialFolder.add(_this.choreographyRoutine.danceMaterialParams, param.name));
           }
           return _results;
         };
       })(this));
-      return gui.add(currentMove, 'move');
+      gui.add(this.choreographyRoutine, 'preview');
+      gui.add(this.choreographyRoutine, 'add');
+      gui.add(this.choreographyRoutine, 'insertBeat');
+      gui.add(this.choreographyRoutine, 'playNext');
+      return gui.add(this.choreographyRoutine, 'reset');
     };
 
     Visualizer.prototype.render = function() {
-      var dancer, _i, _len, _ref, _results;
+      var id, _i, _len, _ref, _results;
       if (!this.playing) {
         return;
       }
       this.audioWindow.update(this.analyser, this.audioContext.currentTime);
-      _ref = this.dancers;
+      _ref = Object.keys(this.dancers);
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        dancer = _ref[_i];
-        _results.push(dancer.update(this.audioWindow));
+        id = _ref[_i];
+        _results.push(this.dancers[id].update(this.audioWindow));
       }
       return _results;
     };
@@ -241,7 +123,6 @@
     };
 
     Visualizer.prototype.onKeyDown = function(event) {
-      return;
       switch (event.keyCode) {
         case this.keys.PAUSE:
           if (this.playing) {
@@ -250,75 +131,9 @@
             return this.play(this.currentlyPlaying);
           }
           break;
-        case this.keys.SCALE_DANCE:
-          return this.receiveChoreography({
-            id: 0,
-            dance: {
-              type: 'ScaleDance',
-              params: {
-                smoothingFactor: 0.5
-              }
-            }
-          });
-        case this.keys.POSITION_DANCE:
-          return this.receiveChoreography({
-            id: 0,
-            dance: {
-              type: 'PositionDance',
-              params: {
-                smoothingFactor: 0.2,
-                direction: [0, 2.0, 0]
-              }
-            }
-          });
-        case this.keys.COLOR:
-          return this.receiveChoreography({
-            id: 1,
-            danceMaterial: {
-              type: 'ColorDanceMaterial',
-              params: {
-                smoothingFactor: 0.5
-              }
-            }
-          });
-        case this.keys.SHADER:
-          return this.receiveChoreography({
-            id: 1,
-            danceMaterial: {
-              type: 'SimpleFrequencyShader'
-            }
-          });
-        case this.keys.SPHERE:
-          return this.receiveChoreography({
-            id: 1,
-            dancer: {
-              type: 'SphereDancer'
-            }
-          });
-        case this.keys.CUBE:
-          return this.receiveChoreography({
-            id: 1,
-            dancer: {
-              type: 'CubeDancer'
-            }
-          });
         case this.keys.NEXT:
-          return this.nextChoreography();
+          return this.choreographyRoutine.playNext();
       }
-    };
-
-    Visualizer.prototype.nextChoreography = function() {
-      var change, moment, _i, _len, _results;
-      if (this.choreographyBeat === this.choreography.length) {
-        this.choreographyBeat = 0;
-      }
-      moment = this.choreography[this.choreographyBeat++];
-      _results = [];
-      for (_i = 0, _len = moment.length; _i < _len; _i++) {
-        change = moment[_i];
-        _results.push(this.receiveChoreography(change));
-      }
-      return _results;
     };
 
     Visualizer.prototype.receiveChoreography = function(_arg) {
