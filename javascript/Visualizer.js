@@ -18,7 +18,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/OnMyMind.mp3');
+      this.createLiveInput();
       this.choreographyRoutine.playNext();
     }
 

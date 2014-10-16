@@ -23,9 +23,9 @@ class window.Visualizer
     # Load the sample audio
     # @play('audio/Go.mp3')
     # @play('audio/Glasser.mp3')
-    @play('audio/OnMyMind.mp3')
+    # @play('audio/OnMyMind.mp3')
 
-    # @createLiveInput()
+    @createLiveInput()
 
     @choreographyRoutine.playNext()
 
