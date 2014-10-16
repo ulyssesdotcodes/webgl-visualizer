@@ -11,6 +11,8 @@ class window.PositionDance
       }
     ]
 
+  @name: "PositionDance"
+
   constructor: (options) ->
     { @smoothingFactor, direction } = options
     @smoothingFactor ?= 0.2

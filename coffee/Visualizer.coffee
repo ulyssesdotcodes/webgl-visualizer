@@ -34,11 +34,12 @@ class window.Visualizer
     @choreographyRoutine.visualizer = @
 
     gui = new dat.GUI()
-    gui.add(@choreographyRoutine, 'id')
+    idController = gui.add(@choreographyRoutine, 'id')
+
     dancerController  = gui.add(@choreographyRoutine, 'dancer', Object.keys(@dancerTypes))
     dancerFolder = gui.addFolder('Dancer parameters')
     dancerFolder.open()
-    dancerController.onFinishChange (value) =>
+    updateDancerFolder = (value) =>
       if !@dancerTypes[value]?
         return
 
@@ -47,12 +48,14 @@ class window.Visualizer
 
       for param in @dancerTypes[value].params
         @choreographyRoutine.dancerParams[param.name] = param.default
-        dancerFolder.add(@choreographyRoutine.dancerParams, param.name)
+        dancerFolder.add(@choreographyRoutine.dancerParams, param.name) 
+
+    dancerController.onFinishChange updateDancerFolder
 
     danceController = gui.add(@choreographyRoutine, 'dance', Object.keys(@danceTypes))
     danceFolder = gui.addFolder('Dance parameters')
     danceFolder.open()
-    danceController.onChange (value) =>
+    updateDanceFolder = (value) =>
       if !@danceTypes[value]?
         return
 
@@ -62,12 +65,13 @@ class window.Visualizer
       for param in @danceTypes[value].params
         @choreographyRoutine.danceParams[param.name] = param.default
         danceFolder.add(@choreographyRoutine.danceParams, param.name)
+    danceController.onChange updateDanceFolder
     
     danceMaterialController = gui.add(@choreographyRoutine, 'danceMaterial', Object.keys(@danceMaterialTypes))
 
     danceMaterialFolder = gui.addFolder('Dance material parameters')
     danceMaterialFolder.open()
-    danceMaterialController.onChange (value) =>
+    updateDanceMaterialFolder = (value) =>
       if !@danceMaterialTypes[value]?
         return
 
@@ -77,6 +81,17 @@ class window.Visualizer
       for param in @danceMaterialTypes[value].params
         @choreographyRoutine.danceMaterialParams[param.name] = param.default
         danceMaterialFolder.add(@choreographyRoutine.danceMaterialParams, param.name)
+    danceMaterialController.onChange updateDanceMaterialFolder
+
+    idController.onChange (value) =>
+      if @dancers[value]?
+        @choreographyRoutine.updateDancer @dancers[value]
+        for controller in gui.__controllers
+          controller.updateDisplay()
+        
+        updateDancerFolder(@choreographyRoutine.dancer)
+        updateDanceMaterialFolder(@choreographyRoutine.danceMaterial)
+        updateDanceFolder(@choreographyRoutine.dance)
 
     gui.add(@choreographyRoutine, 'preview')
     gui.add(@choreographyRoutine, 'add')

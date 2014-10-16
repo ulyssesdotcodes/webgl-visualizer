@@ -15,6 +15,8 @@ class window.ColorDanceMaterial
       }
     ]
 
+  @name: "ColorDanceMaterial"
+
   constructor: (options) ->
     if options? then { @smoothingFactor, @minL, @minS } = options
     @smoothingFactor ?= 0.5

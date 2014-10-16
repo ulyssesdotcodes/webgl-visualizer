@@ -23,15 +23,15 @@
     }
 
     Visualizer.prototype.setupGUI = function() {
-      var danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui;
+      var danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui, idController, updateDanceFolder, updateDanceMaterialFolder, updateDancerFolder;
       this.choreographyRoutine = new ChoreographyRoutine();
       this.choreographyRoutine.visualizer = this;
       gui = new dat.GUI();
-      gui.add(this.choreographyRoutine, 'id');
+      idController = gui.add(this.choreographyRoutine, 'id');
       dancerController = gui.add(this.choreographyRoutine, 'dancer', Object.keys(this.dancerTypes));
       dancerFolder = gui.addFolder('Dancer parameters');
       dancerFolder.open();
-      dancerController.onFinishChange((function(_this) {
+      updateDancerFolder = (function(_this) {
         return function(value) {
           var param, _i, _len, _ref, _results;
           if (_this.dancerTypes[value] == null) {
@@ -49,11 +49,12 @@
           }
           return _results;
         };
-      })(this));
+      })(this);
+      dancerController.onFinishChange(updateDancerFolder);
       danceController = gui.add(this.choreographyRoutine, 'dance', Object.keys(this.danceTypes));
       danceFolder = gui.addFolder('Dance parameters');
       danceFolder.open();
-      danceController.onChange((function(_this) {
+      updateDanceFolder = (function(_this) {
         return function(value) {
           var param, _i, _len, _ref, _results;
           if (_this.danceTypes[value] == null) {
@@ -71,11 +72,12 @@
           }
           return _results;
         };
-      })(this));
+      })(this);
+      danceController.onChange(updateDanceFolder);
       danceMaterialController = gui.add(this.choreographyRoutine, 'danceMaterial', Object.keys(this.danceMaterialTypes));
       danceMaterialFolder = gui.addFolder('Dance material parameters');
       danceMaterialFolder.open();
-      danceMaterialController.onChange((function(_this) {
+      updateDanceMaterialFolder = (function(_this) {
         return function(value) {
           var param, _i, _len, _ref, _results;
           if (_this.danceMaterialTypes[value] == null) {
@@ -92,6 +94,23 @@
             _results.push(danceMaterialFolder.add(_this.choreographyRoutine.danceMaterialParams, param.name));
           }
           return _results;
+        };
+      })(this);
+      danceMaterialController.onChange(updateDanceMaterialFolder);
+      idController.onChange((function(_this) {
+        return function(value) {
+          var controller, _i, _len, _ref;
+          if (_this.dancers[value] != null) {
+            _this.choreographyRoutine.updateDancer(_this.dancers[value]);
+            _ref = gui.__controllers;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              controller = _ref[_i];
+              controller.updateDisplay();
+            }
+            updateDancerFolder(_this.choreographyRoutine.dancer);
+            updateDanceMaterialFolder(_this.choreographyRoutine.danceMaterial);
+            return updateDanceFolder(_this.choreographyRoutine.dance);
+          }
         };
       })(this));
       gui.add(this.choreographyRoutine, 'preview');

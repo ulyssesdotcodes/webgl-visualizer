@@ -16,6 +16,8 @@ class window.ScaleDance
       }
     ]
 
+  @name: "ScaleDance"
+
   constructor: (options) ->
     if options? then { @smoothingFactor, min, max } = options
     @smoothingFactor ?= 0.5

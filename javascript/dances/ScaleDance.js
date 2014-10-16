@@ -14,6 +14,8 @@
       }
     ];
 
+    ScaleDance.name = "ScaleDance";
+
     function ScaleDance(options) {
       var max, min;
       if (options != null) {

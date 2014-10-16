@@ -14,6 +14,8 @@
       }
     ];
 
+    ColorDanceMaterial.name = "ColorDanceMaterial";
+
     function ColorDanceMaterial(options) {
       if (options != null) {
         this.smoothingFactor = options.smoothingFactor, this.minL = options.minL, this.minS = options.minS;

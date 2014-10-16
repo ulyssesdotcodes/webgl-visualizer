@@ -19,6 +19,8 @@
       }
     ];
 
+    PointCloudDancer.name = "PointCloudDancer";
+
     function PointCloudDancer(dance, danceMaterial, options) {
       var direction, geometry, i, material, position, positions, _i, _ref;
       this.dance = dance;

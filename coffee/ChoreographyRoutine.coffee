@@ -129,7 +129,7 @@ class window.ChoreographyRoutine
         type: @danceMaterial
         params: @danceMaterialParams
 
-    @elem.text(JSON.stringify(@routine))
+    @updateText()
 
   insertBeat: () ->
     @routineMoment = []
@@ -151,3 +151,9 @@ class window.ChoreographyRoutine
 
   updateText: () ->
     @elem.html(JSON.stringify(@routine, undefined, 2))
+
+  updateDancer: (dancer) ->
+    @dancer = dancer.constructor.name
+    @danceMaterial = dancer.danceMaterial.constructor.name
+    @dance = dancer.dance.constructor.name
+

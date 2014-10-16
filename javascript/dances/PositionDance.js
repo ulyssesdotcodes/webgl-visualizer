@@ -11,6 +11,8 @@
       }
     ];
 
+    PositionDance.name = "PositionDance";
+
     function PositionDance(options) {
       var direction;
       this.smoothingFactor = options.smoothingFactor, direction = options.direction;

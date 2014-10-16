@@ -6,6 +6,8 @@
   window.CubeDancer = (function(_super) {
     __extends(CubeDancer, _super);
 
+    CubeDancer.name = "CubeDancer";
+
     function CubeDancer(dance, danceMaterial, options) {
       var position, scale;
       if (options != null) {

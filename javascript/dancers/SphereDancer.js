@@ -6,6 +6,8 @@
   window.SphereDancer = (function(_super) {
     __extends(SphereDancer, _super);
 
+    SphereDancer.name = "SphereDancer";
+
     function SphereDancer(dance, danceMaterial, options) {
       var position, scale;
       if (options != null) {
