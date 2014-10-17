@@ -9,6 +9,7 @@
       this.dancerParams = {};
       this.danceParams = {};
       this.danceMaterialParams = {};
+      this.elem = $('#routine');
       this.reset();
       this.routine = [
         [
@@ -125,6 +126,7 @@
           }
         ]
       ];
+      this.updateText();
     }
 
     ChoreographyRoutine.prototype.preview = function() {
@@ -146,7 +148,7 @@
     };
 
     ChoreographyRoutine.prototype.add = function() {
-      return this.routineMoment.push({
+      this.routineMoment.push({
         id: this.id,
         dancer: {
           type: this.dancer,
@@ -161,11 +163,13 @@
           params: this.danceMaterialParams
         }
       });
+      return this.updateText();
     };
 
     ChoreographyRoutine.prototype.insertBeat = function() {
       this.routineMoment = [];
-      return this.routine.splice(++this.routineBeat, 0, this.routineMoment);
+      this.routine.splice(++this.routineBeat, 0, this.routineMoment);
+      return this.updateText();
     };
 
     ChoreographyRoutine.prototype.playNext = function() {
@@ -187,6 +191,16 @@
       this.routine = [];
       this.routineMoment = [];
       return this.routineBeat = -1;
+    };
+
+    ChoreographyRoutine.prototype.updateText = function() {
+      return this.elem.html(JSON.stringify(this.routine, void 0, 2));
+    };
+
+    ChoreographyRoutine.prototype.updateDancer = function(dancer) {
+      this.dancer = dancer.constructor.name;
+      this.danceMaterial = dancer.danceMaterial.constructor.name;
+      return this.dance = dancer.dance.constructor.name;
     };
 
     return ChoreographyRoutine;
