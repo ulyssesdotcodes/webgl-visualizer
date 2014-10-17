@@ -10,7 +10,6 @@
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
-      this.setupGUI();
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioContext = new AudioContext();
       this.audioWindow = new AudioWindow(2048, 1);
@@ -18,6 +17,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
+      this.setupGUI();
       this.createLiveInput();
       this.choreographyRoutine.playNext();
     }
@@ -27,13 +27,14 @@
       this.choreographyRoutine = new ChoreographyRoutine();
       this.choreographyRoutine.visualizer = this;
       gui = new dat.GUI();
+      gui.add(this.audioWindow, 'responsiveness', 0.0, 5.0);
       idController = gui.add(this.choreographyRoutine, 'id');
       dancerController = gui.add(this.choreographyRoutine, 'dancer', Object.keys(this.dancerTypes));
       dancerFolder = gui.addFolder('Dancer parameters');
       dancerFolder.open();
       updateDancerFolder = (function(_this) {
-        return function(value) {
-          var param, _i, _len, _ref, _results;
+        return function(value, obj) {
+          var param, _i, _len, _ref, _ref1, _results;
           if (_this.dancerTypes[value] == null) {
             return;
           }
@@ -44,7 +45,7 @@
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             param = _ref[_i];
-            _this.choreographyRoutine.dancerParams[param.name] = param["default"];
+            _this.choreographyRoutine.dancerParams[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
             _results.push(dancerFolder.add(_this.choreographyRoutine.dancerParams, param.name));
           }
           return _results;
@@ -55,8 +56,8 @@
       danceFolder = gui.addFolder('Dance parameters');
       danceFolder.open();
       updateDanceFolder = (function(_this) {
-        return function(value) {
-          var param, _i, _len, _ref, _results;
+        return function(value, obj) {
+          var param, _i, _len, _ref, _ref1, _results;
           if (_this.danceTypes[value] == null) {
             return;
           }
@@ -67,7 +68,7 @@
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             param = _ref[_i];
-            _this.choreographyRoutine.danceParams[param.name] = param["default"];
+            _this.choreographyRoutine.danceParams[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
             _results.push(danceFolder.add(_this.choreographyRoutine.danceParams, param.name));
           }
           return _results;
@@ -78,8 +79,8 @@
       danceMaterialFolder = gui.addFolder('Dance material parameters');
       danceMaterialFolder.open();
       updateDanceMaterialFolder = (function(_this) {
-        return function(value) {
-          var param, _i, _len, _ref, _results;
+        return function(value, obj) {
+          var param, _i, _len, _ref, _ref1, _results;
           if (_this.danceMaterialTypes[value] == null) {
             return;
           }
@@ -90,7 +91,7 @@
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             param = _ref[_i];
-            _this.choreographyRoutine.danceMaterialParams[param.name] = param["default"];
+            _this.choreographyRoutine.danceMaterialParams[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
             _results.push(danceMaterialFolder.add(_this.choreographyRoutine.danceMaterialParams, param.name));
           }
           return _results;
@@ -107,9 +108,9 @@
               controller = _ref[_i];
               controller.updateDisplay();
             }
-            updateDancerFolder(_this.choreographyRoutine.dancer);
-            updateDanceMaterialFolder(_this.choreographyRoutine.danceMaterial);
-            return updateDanceFolder(_this.choreographyRoutine.dance);
+            updateDancerFolder(_this.choreographyRoutine.dancer, _this.dancers[value]);
+            updateDanceMaterialFolder(_this.choreographyRoutine.danceMaterial, _this.dancers[value].danceMaterial);
+            return updateDanceFolder(_this.choreographyRoutine.dance, _this.dancers[value].dance);
           }
         };
       })(this));

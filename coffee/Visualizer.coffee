@@ -8,9 +8,6 @@ class window.Visualizer
     @dancers = new Array()
     @shaderLoader = new ShaderLoader()
 
-    @setupGUI()
-
-
     # Create the audio context
     window.AudioContext = window.AudioContext || window.webkitAudioContext
     @audioContext = new AudioContext()
@@ -19,6 +16,9 @@ class window.Visualizer
     @analyser = @audioContext.createAnalyser()
     @analyser.fftSize = 2048
     @startOffset = 0
+
+
+    @setupGUI()
 
     # Load the sample audio
     # @play('audio/Go.mp3')
@@ -34,12 +34,15 @@ class window.Visualizer
     @choreographyRoutine.visualizer = @
 
     gui = new dat.GUI()
+
+    gui.add(@audioWindow, 'responsiveness', 0.0, 5.0)
+
     idController = gui.add(@choreographyRoutine, 'id')
 
     dancerController  = gui.add(@choreographyRoutine, 'dancer', Object.keys(@dancerTypes))
     dancerFolder = gui.addFolder('Dancer parameters')
     dancerFolder.open()
-    updateDancerFolder = (value) =>
+    updateDancerFolder = (value, obj) =>
       if !@dancerTypes[value]?
         return
 
@@ -47,7 +50,12 @@ class window.Visualizer
         dancerFolder.remove(dancerFolder.__controllers[0])
 
       for param in @dancerTypes[value].params
-        @choreographyRoutine.dancerParams[param.name] = param.default
+        @choreographyRoutine.dancerParams[param.name] = 
+          if obj?.options?[param.name]
+            obj.options[param.name]
+          else
+            param.default
+
         dancerFolder.add(@choreographyRoutine.dancerParams, param.name) 
 
     dancerController.onFinishChange updateDancerFolder
@@ -55,7 +63,7 @@ class window.Visualizer
     danceController = gui.add(@choreographyRoutine, 'dance', Object.keys(@danceTypes))
     danceFolder = gui.addFolder('Dance parameters')
     danceFolder.open()
-    updateDanceFolder = (value) =>
+    updateDanceFolder = (value, obj) =>
       if !@danceTypes[value]?
         return
 
@@ -63,7 +71,11 @@ class window.Visualizer
         danceFolder.remove(danceFolder.__controllers[0])
 
       for param in @danceTypes[value].params
-        @choreographyRoutine.danceParams[param.name] = param.default
+        @choreographyRoutine.danceParams[param.name] = 
+          if obj?.options?[param.name]
+            obj.options[param.name]
+          else
+            param.default
         danceFolder.add(@choreographyRoutine.danceParams, param.name)
     danceController.onChange updateDanceFolder
     
@@ -71,7 +83,7 @@ class window.Visualizer
 
     danceMaterialFolder = gui.addFolder('Dance material parameters')
     danceMaterialFolder.open()
-    updateDanceMaterialFolder = (value) =>
+    updateDanceMaterialFolder = (value, obj) =>
       if !@danceMaterialTypes[value]?
         return
 
@@ -79,7 +91,11 @@ class window.Visualizer
         danceMaterialFolder.remove(danceMaterialFolder.__controllers[0])
 
       for param in @danceMaterialTypes[value].params
-        @choreographyRoutine.danceMaterialParams[param.name] = param.default
+        @choreographyRoutine.danceMaterialParams[param.name] = 
+          if obj?.options?[param.name]
+            obj.options[param.name]
+          else
+            param.default
         danceMaterialFolder.add(@choreographyRoutine.danceMaterialParams, param.name)
     danceMaterialController.onChange updateDanceMaterialFolder
 
@@ -89,9 +105,9 @@ class window.Visualizer
         for controller in gui.__controllers
           controller.updateDisplay()
         
-        updateDancerFolder(@choreographyRoutine.dancer)
-        updateDanceMaterialFolder(@choreographyRoutine.danceMaterial)
-        updateDanceFolder(@choreographyRoutine.dance)
+        updateDancerFolder(@choreographyRoutine.dancer, @dancers[value])
+        updateDanceMaterialFolder(@choreographyRoutine.danceMaterial, @dancers[value].danceMaterial)
+        updateDanceFolder(@choreographyRoutine.dance, @dancers[value].dance)
 
     gui.add(@choreographyRoutine, 'preview')
     gui.add(@choreographyRoutine, 'add')

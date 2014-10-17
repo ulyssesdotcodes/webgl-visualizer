@@ -22,11 +22,12 @@
     PointCloudDancer.name = "PointCloudDancer";
 
     function PointCloudDancer(dance, danceMaterial, options) {
-      var direction, geometry, i, material, position, positions, _i, _ref;
+      var direction, geometry, i, material, position, positions, _i, _ref, _ref1;
       this.dance = dance;
       this.danceMaterial = danceMaterial;
-      if (options != null) {
-        this.minDistance = options.minDistance, this.maxDistance = options.maxDistance, this.count = options.count;
+      this.options = options;
+      if (this.options != null) {
+        _ref = this.options, this.minDistance = _ref.minDistance, this.maxDistance = _ref.maxDistance, this.count = _ref.count;
       }
       if (this.minDistance == null) {
         this.minDistance = 5.0;
@@ -41,7 +42,7 @@
       position = new THREE.Vector3(0, 0, 0);
       geometry = new THREE.BufferGeometry();
       positions = new Float32Array(this.count * 3);
-      for (i = _i = 0, _ref = this.count; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = _i = 0, _ref1 = this.count; 0 <= _ref1 ? _i < _ref1 : _i > _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
         direction.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
         direction.normalize();
         direction.multiplyScalar(this.minDistance + Math.random() * (this.maxDistance - this.minDistance));

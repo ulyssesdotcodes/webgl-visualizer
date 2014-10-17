@@ -13,8 +13,8 @@ class window.PositionDance
 
   @name: "PositionDance"
 
-  constructor: (options) ->
-    { @smoothingFactor, direction } = options
+  constructor: (@options) ->
+    if @options? then { @smoothingFactor, direction } = @options
     @smoothingFactor ?= 0.2
     @direction = 
       if direction? 

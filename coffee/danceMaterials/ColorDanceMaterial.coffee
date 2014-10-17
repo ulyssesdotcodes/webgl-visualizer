@@ -12,18 +12,23 @@ class window.ColorDanceMaterial
       {
         name: 'minS',
         default: 0.3
+      },
+      {
+        name: 'wireframe'
+        default: false
       }
     ]
 
   @name: "ColorDanceMaterial"
 
-  constructor: (options) ->
-    if options? then { @smoothingFactor, @minL, @minS } = options
+  constructor: (@options) ->
+    if @options? then { @smoothingFactor, @minL, @minS, @wireframe } = @options
     @smoothingFactor ?= 0.5
     @minL ?= 0.1
     @minS ?= 0.3
+    @wireframe ?= false
     @color = new THREE.Color(1.0, 0, 0)
-    @material = new THREE.MeshLambertMaterial({ color: 0x00000, wireframe: true })
+    @material = new THREE.MeshLambertMaterial({ color: 0x00000, wireframe: @wireframe })
     @appliedColor = @color.clone()
 
   update: (audioWindow, dancer) ->

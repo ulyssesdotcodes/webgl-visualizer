@@ -14,8 +14,11 @@
     PositionDance.name = "PositionDance";
 
     function PositionDance(options) {
-      var direction;
-      this.smoothingFactor = options.smoothingFactor, direction = options.direction;
+      var direction, _ref;
+      this.options = options;
+      if (this.options != null) {
+        _ref = this.options, this.smoothingFactor = _ref.smoothingFactor, direction = _ref.direction;
+      }
       if (this.smoothingFactor == null) {
         this.smoothingFactor = 0.2;
       }

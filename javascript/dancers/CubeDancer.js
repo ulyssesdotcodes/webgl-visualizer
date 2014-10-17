@@ -9,9 +9,10 @@
     CubeDancer.name = "CubeDancer";
 
     function CubeDancer(dance, danceMaterial, options) {
-      var position, scale;
-      if (options != null) {
-        position = options.position, scale = options.scale;
+      var position, scale, _ref;
+      this.options = options;
+      if (this.options != null) {
+        _ref = this.options, position = _ref.position, scale = _ref.scale;
       }
       CubeDancer.__super__.constructor.call(this, new THREE.BoxGeometry(1, 1, 1), dance, danceMaterial, position, scale);
     }
