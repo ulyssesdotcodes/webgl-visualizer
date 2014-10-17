@@ -14,10 +14,13 @@
       }
     ];
 
+    ScaleDance.name = "ScaleDance";
+
     function ScaleDance(options) {
-      var max, min;
-      if (options != null) {
-        this.smoothingFactor = options.smoothingFactor, min = options.min, max = options.max;
+      var max, min, _ref;
+      this.options = options;
+      if (this.options != null) {
+        _ref = this.options, this.smoothingFactor = _ref.smoothingFactor, min = _ref.min, max = _ref.max;
       }
       if (this.smoothingFactor == null) {
         this.smoothingFactor = 0.5;

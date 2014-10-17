@@ -3,6 +3,8 @@
   window.SimpleFrequencyShader = (function() {
     SimpleFrequencyShader.params = [];
 
+    SimpleFrequencyShader.name = "SimpleFrequencyShader";
+
     function SimpleFrequencyShader(shaderLoader) {
       this.target = 128;
       this.size = 1024;

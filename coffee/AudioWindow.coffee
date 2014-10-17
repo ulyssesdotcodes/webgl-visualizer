@@ -1,7 +1,7 @@
 # Contains the frequencySamples and dbSamples for audio
 class window.AudioWindow
-  constructor: (bufferSize, volume) ->
-    @volume = volume
+  constructor: (bufferSize, responsiveness) ->
+    @responsiveness = responsiveness
     @bufferSize = bufferSize
     @frequencyBuffer = new Uint8Array(bufferSize)
     @dbBuffer = new Uint8Array(bufferSize)
@@ -26,5 +26,5 @@ class window.AudioWindow
         val = (buf - 128) / 128
         rms += val*val
 
-    @averageDb = Math.sqrt(rms / @bufferSize) * @volume
+    @averageDb = Math.sqrt(rms / @bufferSize) * @responsiveness
     # TODO: smooth

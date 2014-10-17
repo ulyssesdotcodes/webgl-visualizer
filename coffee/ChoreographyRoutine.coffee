@@ -8,6 +8,8 @@ class window.ChoreographyRoutine
     @danceParams = {}
     @danceMaterialParams = {}
 
+    @elem = $('#routine')
+
     @reset()
     @routine = [
       [
@@ -99,6 +101,8 @@ class window.ChoreographyRoutine
       ]
     ]
 
+    @updateText()
+
   preview: () ->
     @visualizer.receiveChoreography
       id: @id
@@ -125,9 +129,12 @@ class window.ChoreographyRoutine
         type: @danceMaterial
         params: @danceMaterialParams
 
+    @updateText()
+
   insertBeat: () ->
     @routineMoment = []
     @routine.splice(++@routineBeat, 0, @routineMoment)
+    @updateText()
 
   playNext: () ->
     if @routineBeat == @routine.length - 1
@@ -141,3 +148,12 @@ class window.ChoreographyRoutine
     @routine = []
     @routineMoment = []
     @routineBeat = -1
+
+  updateText: () ->
+    @elem.html(JSON.stringify(@routine, undefined, 2))
+
+  updateDancer: (dancer) ->
+    @dancer = dancer.constructor.name
+    @danceMaterial = dancer.danceMaterial.constructor.name
+    @dance = dancer.dance.constructor.name
+

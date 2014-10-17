@@ -11,12 +11,19 @@
       }, {
         name: 'minS',
         "default": 0.3
+      }, {
+        name: 'wireframe',
+        "default": false
       }
     ];
 
+    ColorDanceMaterial.name = "ColorDanceMaterial";
+
     function ColorDanceMaterial(options) {
-      if (options != null) {
-        this.smoothingFactor = options.smoothingFactor, this.minL = options.minL, this.minS = options.minS;
+      var _ref;
+      this.options = options;
+      if (this.options != null) {
+        _ref = this.options, this.smoothingFactor = _ref.smoothingFactor, this.minL = _ref.minL, this.minS = _ref.minS, this.wireframe = _ref.wireframe;
       }
       if (this.smoothingFactor == null) {
         this.smoothingFactor = 0.5;
@@ -27,10 +34,13 @@
       if (this.minS == null) {
         this.minS = 0.3;
       }
+      if (this.wireframe == null) {
+        this.wireframe = false;
+      }
       this.color = new THREE.Color(1.0, 0, 0);
       this.material = new THREE.MeshLambertMaterial({
         color: 0x00000,
-        wireframe: true
+        wireframe: this.wireframe
       });
       this.appliedColor = this.color.clone();
     }

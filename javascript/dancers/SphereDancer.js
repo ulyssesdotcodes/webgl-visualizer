@@ -6,10 +6,13 @@
   window.SphereDancer = (function(_super) {
     __extends(SphereDancer, _super);
 
+    SphereDancer.name = "SphereDancer";
+
     function SphereDancer(dance, danceMaterial, options) {
-      var position, scale;
-      if (options != null) {
-        position = options.position, scale = options.scale;
+      var position, scale, _ref;
+      this.options = options;
+      if (this.options != null) {
+        _ref = this.options, position = _ref.position, scale = _ref.scale;
       }
       SphereDancer.__super__.constructor.call(this, new THREE.SphereGeometry(1, 32, 24), dance, danceMaterial, position, scale);
     }
