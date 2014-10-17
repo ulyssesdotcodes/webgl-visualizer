@@ -7,6 +7,10 @@
     };
 
     function Visualizer(scene, camera) {
+      var popupURL;
+      this.domain = window.location.protocol + '//' + window.location.host;
+      popupURL = this.domain + '/visualizerViewer.html';
+      this.popup = window.open(popupURL, 'myWindow');
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
@@ -156,9 +160,10 @@
       }
     };
 
-    Visualizer.prototype.receiveChoreography = function(_arg) {
+    Visualizer.prototype.receiveChoreography = function(move) {
       var addDancer, currentDancer, dance, danceMaterial, dancer, id, newDance, newMaterial, _i, _len, _ref;
-      id = _arg.id, dancer = _arg.dancer, dance = _arg.dance, danceMaterial = _arg.danceMaterial;
+      this.popup.postMessage(move, this.domain);
+      id = move.id, dancer = move.dancer, dance = move.dance, danceMaterial = move.danceMaterial;
       if (id === -1) {
         _ref = this.dancers;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {

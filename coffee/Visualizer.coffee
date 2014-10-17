@@ -4,6 +4,9 @@ class window.Visualizer
 
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
+    @domain = window.location.protocol + '//' + window.location.host
+    popupURL = @domain + '/visualizerViewer.html'
+    @popup = window.open(popupURL, 'myWindow')
     @scene = scene
     @dancers = new Array()
     @shaderLoader = new ShaderLoader()
@@ -139,7 +142,10 @@ class window.Visualizer
       when @keys.NEXT
         @choreographyRoutine.playNext()
 
-  receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
+  receiveChoreography: (move) ->
+    @popup.postMessage(move, @domain)
+
+    {id, dancer, dance, danceMaterial } = move
     if id == -1
       for dancer in @dancers
         @scene.remove(dancer.body)
