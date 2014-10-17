@@ -15,7 +15,7 @@ class window.ChoreographyRoutine
       [
         { id: -1 },
         {
-          id: 1
+          id: 2
           dancer: 
             type: 'CubeDancer'
           dance:
@@ -27,17 +27,30 @@ class window.ChoreographyRoutine
             type: 'ColorDanceMaterial'
             params:
               smoothingFactor: 0.5
-        }
+        },
         {
           id: 0
           dancer: 
             type: 'PointCloudDancer'
           dance:
-            type: 'ScaleDance'
+            type: 'RotateDance'
+            params:
+              axis: [-1, -1, 0]
+          danceMaterial:
+            type: 'ColorDanceMaterial'
             params:
               smoothingFactor: 0.5
-              min: [1.0, 1.0, 1.0]
-              max: [1.2, 1.2, 1.2]
+              minL: 0.0
+        },
+        {
+          id: 1
+          dancer: 
+            type: 'PointCloudDancer'
+          dance:
+            type: 'RotateDance'
+            params:
+              axis: [0, 1, 1]
+              speed: 0.5
           danceMaterial:
             type: 'ColorDanceMaterial'
             params:
@@ -47,14 +60,14 @@ class window.ChoreographyRoutine
       ],
       [
         { 
-          id: 1
+          id: 2
           dancer:
             type: 'SphereDancer'
             params:
               position: [0.5, 0, 0.5]
         },
         { 
-          id: 2
+          id: 3
           dancer:
             type: 'SphereDancer'
             params:
@@ -67,9 +80,10 @@ class window.ChoreographyRoutine
             type: 'ColorDanceMaterial'
             params:
               smoothingFactor: 0.5
+              wireframe: true
         },
         { 
-          id: 3
+          id: 4
           dancer:
             type: 'SphereDancer'
             params:
@@ -82,9 +96,10 @@ class window.ChoreographyRoutine
             type: 'ColorDanceMaterial'
             params:
               smoothingFactor: 0.5
+              wireframe: true
         },
         { 
-          id: 4
+          id: 5
           dancer:
             type: 'SphereDancer'
             params:
@@ -97,6 +112,7 @@ class window.ChoreographyRoutine
             type: 'ColorDanceMaterial'
             params:
               smoothingFactor: 0.5
+              wireframe: true
         },
       ]
     ]

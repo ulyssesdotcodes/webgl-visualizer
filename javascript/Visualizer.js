@@ -18,7 +18,7 @@
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
       this.setupGUI();
-      this.createLiveInput();
+      this.play('audio/Go.mp3');
       this.choreographyRoutine.playNext();
     }
 
@@ -303,7 +303,8 @@
 
     Visualizer.prototype.danceTypes = {
       ScaleDance: ScaleDance,
-      PositionDance: PositionDance
+      PositionDance: PositionDance,
+      RotateDance: RotateDance
     };
 
     Visualizer.prototype.danceMaterialTypes = {

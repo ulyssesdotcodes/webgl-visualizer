@@ -22,7 +22,10 @@
       if (this.smoothingFactor == null) {
         this.smoothingFactor = 0.2;
       }
-      this.direction = direction != null ? new THREE.Vector3(direction[0], direction[1], direction[2]) : new THREE.Vector3(0, 1, 0);
+      if (direction == null) {
+        direction = [0, 1, 0];
+      }
+      this.direction = new THREE.Vector3(direction[0], direction[1], direction[2]);
       this.directionCopy = new THREE.Vector3();
       this.positionChange = 0;
     }

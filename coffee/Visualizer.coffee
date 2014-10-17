@@ -21,11 +21,11 @@ class window.Visualizer
     @setupGUI()
 
     # Load the sample audio
-    # @play('audio/Go.mp3')
+    @play('audio/Go.mp3')
     # @play('audio/Glasser.mp3')
     # @play('audio/OnMyMind.mp3')
 
-    @createLiveInput()
+    # @createLiveInput()
 
     @choreographyRoutine.playNext()
 
@@ -264,6 +264,7 @@ class window.Visualizer
   danceTypes:
     ScaleDance: ScaleDance
     PositionDance: PositionDance
+    RotateDance: RotateDance
 
   danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial

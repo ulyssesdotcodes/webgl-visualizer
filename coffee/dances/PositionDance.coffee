@@ -16,11 +16,10 @@ class window.PositionDance
   constructor: (@options) ->
     if @options? then { @smoothingFactor, direction } = @options
     @smoothingFactor ?= 0.2
-    @direction = 
-      if direction? 
-        new THREE.Vector3(direction[0], direction[1], direction[2]) 
-      else 
-        new THREE.Vector3(0, 1, 0)
+    
+    direction ?= [0, 1, 0]
+    @direction = new THREE.Vector3(direction[0], direction[1], direction[2])
+
     @directionCopy = new THREE.Vector3();
     @positionChange = 0
 
