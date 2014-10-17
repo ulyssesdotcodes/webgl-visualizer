@@ -4,52 +4,31 @@ class window.Visualizer
 
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
-    @scene = scene
-    @dancers = new Array()
-    @shaderLoader = new ShaderLoader()
-
-    # Create the audio context
-    window.AudioContext = window.AudioContext || window.webkitAudioContext
-    @audioContext = new AudioContext()
-    @audioWindow = new AudioWindow(2048, 1);
-    @loadedAudio = new Array()
-    @analyser = @audioContext.createAnalyser()
-    @analyser.fftSize = 2048
-    @startOffset = 0
-
+    @viewer = new VisualizerViewer(scene, camera)
+    
+    @choreographyRoutine = new ChoreographyRoutine(@viewer)
 
     @setupGUI()
-
-    # Load the sample audio
-    # @play('audio/Go.mp3')
-    # @play('audio/Glasser.mp3')
-    # @play('audio/OnMyMind.mp3')
-
-    @createLiveInput()
 
     @choreographyRoutine.playNext()
 
   setupGUI: () ->
-    @choreographyRoutine = new ChoreographyRoutine()
-    @choreographyRoutine.visualizer = @
-
     gui = new dat.GUI()
 
-    gui.add(@audioWindow, 'responsiveness', 0.0, 5.0)
-
+    gui.add(@viewer.audioWindow, 'responsiveness', 0.0, 5.0)
     idController = gui.add(@choreographyRoutine, 'id')
 
-    dancerController  = gui.add(@choreographyRoutine, 'dancer', Object.keys(@dancerTypes))
+    dancerController  = gui.add(@choreographyRoutine, 'dancer', Object.keys(Visualizer.dancerTypes))
     dancerFolder = gui.addFolder('Dancer parameters')
     dancerFolder.open()
     updateDancerFolder = (value, obj) =>
-      if !@dancerTypes[value]?
+      if !Visualizer.dancerTypes[value]?
         return
 
       while dancerFolder.__controllers[0]?
         dancerFolder.remove(dancerFolder.__controllers[0])
 
-      for param in @dancerTypes[value].params
+      for param in Visualizer.dancerTypes[value].params
         @choreographyRoutine.dancerParams[param.name] = 
           if obj?.options?[param.name]
             obj.options[param.name]
@@ -60,17 +39,17 @@ class window.Visualizer
 
     dancerController.onFinishChange updateDancerFolder
 
-    danceController = gui.add(@choreographyRoutine, 'dance', Object.keys(@danceTypes))
+    danceController = gui.add(@choreographyRoutine, 'dance', Object.keys(Visualizer.danceTypes))
     danceFolder = gui.addFolder('Dance parameters')
     danceFolder.open()
     updateDanceFolder = (value, obj) =>
-      if !@danceTypes[value]?
+      if !Visualizer.danceTypes[value]?
         return
 
       while danceFolder.__controllers[0]?
         danceFolder.remove(danceFolder.__controllers[0])
 
-      for param in @danceTypes[value].params
+      for param in Visualizer.danceTypes[value].params
         @choreographyRoutine.danceParams[param.name] = 
           if obj?.options?[param.name]
             obj.options[param.name]
@@ -79,7 +58,7 @@ class window.Visualizer
         danceFolder.add(@choreographyRoutine.danceParams, param.name)
     danceController.onChange updateDanceFolder
     
-    danceMaterialController = gui.add(@choreographyRoutine, 'danceMaterial', Object.keys(@danceMaterialTypes))
+    danceMaterialController = gui.add(@choreographyRoutine, 'danceMaterial', Object.keys(Visualizer.danceMaterialTypes))
 
     danceMaterialFolder = gui.addFolder('Dance material parameters')
     danceMaterialFolder.open()
@@ -90,7 +69,7 @@ class window.Visualizer
       while danceMaterialFolder.__controllers[0]?
         danceMaterialFolder.remove(danceMaterialFolder.__controllers[0])
 
-      for param in @danceMaterialTypes[value].params
+      for param in Visualizer.danceMaterialTypes[value].params
         @choreographyRoutine.danceMaterialParams[param.name] = 
           if obj?.options?[param.name]
             obj.options[param.name]
@@ -100,14 +79,15 @@ class window.Visualizer
     danceMaterialController.onChange updateDanceMaterialFolder
 
     idController.onChange (value) =>
-      if @dancers[value]?
-        @choreographyRoutine.updateDancer @dancers[value]
+      idDancer = @viewer.getDancer(value)
+      if idDancer?
+        @choreographyRoutine.updateDancer idDancer
         for controller in gui.__controllers
           controller.updateDisplay()
         
-        updateDancerFolder(@choreographyRoutine.dancer, @dancers[value])
-        updateDanceMaterialFolder(@choreographyRoutine.danceMaterial, @dancers[value].danceMaterial)
-        updateDanceFolder(@choreographyRoutine.dance, @dancers[value].dance)
+        updateDancerFolder(@choreographyRoutine.dancer, idDancer)
+        updateDanceMaterialFolder(@choreographyRoutine.danceMaterial, idDancer.danceMaterial)
+        updateDanceFolder(@choreographyRoutine.dance, idDancer.dance)
 
     gui.add(@choreographyRoutine, 'preview')
     gui.add(@choreographyRoutine, 'add')
@@ -115,157 +95,25 @@ class window.Visualizer
     gui.add(@choreographyRoutine, 'playNext')
     gui.add(@choreographyRoutine, 'reset')
 
-  # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
-  render: () ->
-    if !@playing
-      return
-    
-    @audioWindow.update(@analyser, @audioContext.currentTime)
-    # Create event
-    for id in Object.keys(@dancers)
-      @dancers[id].update(@audioWindow)
-
-  pause: () ->
-    @source.stop()
-    @playing = false
-    @startOffset += @audioContext.currentTime - @startTime
-
   #Event methods
   onKeyDown: (event) ->
     switch event.keyCode
       when @keys.PAUSE
-        if @playing then @pause() else @play(@currentlyPlaying)
+        if @viewer.playing then @viewer.pause() else @viewer.play(@viewer.currentlyPlaying)
 
       when @keys.NEXT
         @choreographyRoutine.playNext()
 
-  receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
-    if id == -1
-      for dancer in @dancers
-        @scene.remove(dancer.body)
-      @dancers = []
-      return
-    if @dancers[id]?
-      # Test everything else
-      currentDancer = @dancers[id]
-
-      # If no parameters are set, but an id is, then remove the object
-      if !dancer? && !dance && !danceMaterial
-        @scene.remove(currentDancer.body)
-        @dancers.splice(@dancers.indexOf(id), 1)
-
-      if dance? 
-        if !dancer? && !danceMaterial?
-          currentDancer.reset()
-          currentDancer.dance = new @danceTypes[dance.type](dance.params)
-          return
-        else
-          newDance = new @danceTypes[dance.type](dance.params)
-      else
-        newDance = currentDancer.dance
-
-      addDancer = (newDance, newMaterial) =>
-        if dancer?
-          newDancer = new @dancerTypes[dancer.type](newDance, newMaterial, dancer.params)
-        else
-          newDancer = new currentDancer.constructor(newDance, newMaterial)
-
-        currentDancer.reset()
-        @scene.remove(currentDancer.body)
-        @dancers[id] = newDancer
-        @scene.add(newDancer.body)
-
-      if danceMaterial?
-        # Special case for shaders because it has to load the shader file
-        # This is a really hacky way of checking if it's a shader. Should change.
-        if danceMaterial.type.indexOf('Shader') > -1
-          newMaterial = new @danceMaterialTypes[danceMaterial.type](@shaderLoader)
-          newMaterial.loadShader @audioWindow, (shaderMaterial) =>
-            addDancer newDance, shaderMaterial
-          return
-
-        newMaterial = new @danceMaterialTypes[danceMaterial.type](danceMaterial.params)
-      else
-        newMaterial = currentDancer.danceMaterial
-
-      addDancer(newDance, newMaterial)
-
-      return
-    else if id?
-      @dancers[id] = new @dancerTypes[dancer.type](new @danceTypes[dance.type](dance.params), new @danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params)
-      @scene.add @dancers[id].body
-      return
-    else
-      return
-
-
-
-  # Utility methods
-
-  createLiveInput: () ->
-    gotStream = (stream) =>
-      @playing = true  
-      @source = @audioContext.createMediaStreamSource stream
-      @source.connect @analyser
-
-    @dbSampleBuf = new Uint8Array(2048)
-
-    if ( navigator.getUserMedia )
-        navigator.getUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
-    else if (navigator.webkitGetUserMedia )
-        navigator.webkitGetUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
-    else if (navigator.mozGetUserMedia )
-        navigator.mozGetUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
-    else
-        return(alert("Error: getUserMedia not supported!"));
-
-  play: (url) ->
-    @currentlyPlaying = url
-
-    if @loadedAudio[url]?
-      @loadFromBuffer(@loadedAudio[url])
-      return
-
-    request = new XMLHttpRequest()
-    request.open("GET", url, true)
-    request.responseType = 'arraybuffer'
-    request.onload = () => 
-      @audioContext.decodeAudioData request.response
-          , (buffer) =>
-            @loadedAudio[url] = buffer
-            @loadFromBuffer(buffer)
-          , (err) -> console.log(err)
-      return
-
-    request.send()
-    return
-
-  # Removes the last dancer, returns the dancer's dance
-  removeLastDancer: () ->
-    prevDancer = @dancers.pop()
-    @scene.remove(prevDancer.body) 
-    return prevDancer.dance
-
-  
-  loadFromBuffer: (buffer) ->
-    @startTime = @audioContext.currentTime
-    @source = @audioContext.createBufferSource()
-    @source.buffer = buffer
-    @source.connect(@analyser)
-    @source.connect(@audioContext.destination)
-    @playing = true
-    @source.start(0, @startOffset)
-
-  dancerTypes:
+  @dancerTypes:
     CubeDancer: CubeDancer
     SphereDancer: SphereDancer
     PointCloudDancer: PointCloudDancer
 
-  danceTypes:
+  @danceTypes:
     ScaleDance: ScaleDance
     PositionDance: PositionDance
     RotateDance: RotateDance
 
-  danceMaterialTypes:
+  @danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial
     SimpleFrequencyShader: SimpleFrequencyShader

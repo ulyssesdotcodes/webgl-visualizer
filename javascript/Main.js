@@ -37,7 +37,7 @@
     };
 
     Main.prototype.render = function() {
-      this.visualizer.render();
+      this.visualizer.viewer.render();
       this.scene.updateMatrixWorld();
       this.camera.updateProjectionMatrix();
       this.renderer.clear();

@@ -34,7 +34,7 @@ class window.Main
     @controls.update()
 
   render: () ->
-    @visualizer.render()  
+    @visualizer.viewer.render()  
 
     @scene.updateMatrixWorld()
     @camera.updateProjectionMatrix()
