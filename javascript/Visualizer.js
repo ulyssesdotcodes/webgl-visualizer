@@ -303,7 +303,8 @@
 
     Visualizer.prototype.danceTypes = {
       ScaleDance: ScaleDance,
-      PositionDance: PositionDance
+      PositionDance: PositionDance,
+      RotateDance: RotateDance
     };
 
     Visualizer.prototype.danceMaterialTypes = {

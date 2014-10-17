@@ -264,6 +264,7 @@ class window.Visualizer
   danceTypes:
     ScaleDance: ScaleDance
     PositionDance: PositionDance
+    RotateDance: RotateDance
 
   danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial

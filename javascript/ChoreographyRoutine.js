@@ -16,7 +16,7 @@
           {
             id: -1
           }, {
-            id: 1,
+            id: 2,
             dancer: {
               type: 'CubeDancer'
             },
@@ -39,11 +39,28 @@
               type: 'PointCloudDancer'
             },
             dance: {
-              type: 'ScaleDance',
+              type: 'RotateDance',
+              params: {
+                axis: [-1, -1, 0]
+              }
+            },
+            danceMaterial: {
+              type: 'ColorDanceMaterial',
               params: {
                 smoothingFactor: 0.5,
-                min: [1.0, 1.0, 1.0],
-                max: [1.2, 1.2, 1.2]
+                minL: 0.0
+              }
+            }
+          }, {
+            id: 1,
+            dancer: {
+              type: 'PointCloudDancer'
+            },
+            dance: {
+              type: 'RotateDance',
+              params: {
+                axis: [0, 1, 1],
+                speed: 0.5
               }
             },
             danceMaterial: {
@@ -56,7 +73,7 @@
           }
         ], [
           {
-            id: 1,
+            id: 2,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -64,7 +81,7 @@
               }
             }
           }, {
-            id: 2,
+            id: 3,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -80,11 +97,12 @@
             danceMaterial: {
               type: 'ColorDanceMaterial',
               params: {
-                smoothingFactor: 0.5
+                smoothingFactor: 0.5,
+                wireframe: true
               }
             }
           }, {
-            id: 3,
+            id: 4,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -100,11 +118,12 @@
             danceMaterial: {
               type: 'ColorDanceMaterial',
               params: {
-                smoothingFactor: 0.5
+                smoothingFactor: 0.5,
+                wireframe: true
               }
             }
           }, {
-            id: 4,
+            id: 5,
             dancer: {
               type: 'SphereDancer',
               params: {
@@ -120,7 +139,8 @@
             danceMaterial: {
               type: 'ColorDanceMaterial',
               params: {
-                smoothingFactor: 0.5
+                smoothingFactor: 0.5,
+                wireframe: true
               }
             }
           }
