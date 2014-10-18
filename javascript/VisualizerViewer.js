@@ -5,9 +5,14 @@
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
+      this.choreographyQueue = new Queue();
     }
 
-    VisualizerViewer.prototype.receiveChoreography = function(_arg) {
+    VisualizerViewer.prototype.receiveChoreography = function(move) {
+      return this.choreographyQueue.push(move);
+    };
+
+    VisualizerViewer.prototype.executeChoreography = function(_arg) {
       var addDancer, currentDancer, dance, danceMaterial, dancer, id, newDance, newMaterial, _i, _len, _ref;
       id = _arg.id, dancer = _arg.dancer, dance = _arg.dance, danceMaterial = _arg.danceMaterial;
       if (id === -1) {
@@ -79,6 +84,9 @@
 
     VisualizerViewer.prototype.render = function(audioWindow) {
       var id, _i, _len, _ref, _results;
+      while (this.choreographyQueue.length() > 0) {
+        this.executeChoreography(this.choreographyQueue.shift());
+      }
       _ref = Object.keys(this.dancers);
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
