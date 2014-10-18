@@ -8,7 +8,7 @@
 				overflow: hidden;
 			}
 
-			#routineContainer {
+			#routine {
 				width: 300px;
 				float: left;
 				position: absolute;
@@ -42,13 +42,9 @@
 		<script src="javascript/Main.js"></script>
 	</head>
 	<body>
-		<div id="routineContainer">
-			<a href="#" id="viewerButton"> Open Viewer </a>
-			<pre id="routine"></pre>
-		</div>
 		<div id="container"></div>
 		<script type="text/javascript">
-		  window.app = new Main(false)
+		  window.app = new Main(true)
 
 		  window.animate()
 		</script>

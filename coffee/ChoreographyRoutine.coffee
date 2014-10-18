@@ -1,5 +1,5 @@
 class window.ChoreographyRoutine
-  constructor: (@viewer) ->
+  constructor: (@visualizer) ->
     @id = 0
     @dancer = "CubeDancer"
     @dance = "ScaleDance"
@@ -120,7 +120,7 @@ class window.ChoreographyRoutine
     @updateText()
 
   preview: () ->
-    @viewer.receiveChoreography
+    @visualizer.receiveChoreography
       id: @id
       dancer:
         type: @dancer
@@ -158,7 +158,7 @@ class window.ChoreographyRoutine
 
     @routineMoment = @routine[++@routineBeat]
     for change in @routineMoment
-      @viewer.receiveChoreography change
+      @visualizer.receiveChoreography change
 
   reset: () ->
     @routine = []
