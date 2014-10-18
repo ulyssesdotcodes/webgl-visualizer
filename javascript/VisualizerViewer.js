@@ -5,14 +5,6 @@
       this.scene = scene;
       this.dancers = new Array();
       this.shaderLoader = new ShaderLoader();
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.audioContext = new AudioContext();
-      this.audioWindow = new AudioWindow(2048, 1);
-      this.loadedAudio = new Array();
-      this.analyser = this.audioContext.createAnalyser();
-      this.analyser.fftSize = 2048;
-      this.startOffset = 0;
-      this.createLiveInput();
     }
 
     VisualizerViewer.prototype.receiveChoreography = function(_arg) {
@@ -85,81 +77,15 @@
       return this.dancers[id];
     };
 
-    VisualizerViewer.prototype.render = function() {
+    VisualizerViewer.prototype.render = function(audioWindow) {
       var id, _i, _len, _ref, _results;
-      if (!this.playing) {
-        return;
-      }
-      this.audioWindow.update(this.analyser, this.audioContext.currentTime);
       _ref = Object.keys(this.dancers);
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         id = _ref[_i];
-        _results.push(this.dancers[id].update(this.audioWindow));
+        _results.push(this.dancers[id].update(audioWindow));
       }
       return _results;
-    };
-
-    VisualizerViewer.prototype.pause = function() {
-      this.source.stop();
-      this.playing = false;
-      return this.startOffset += this.audioContext.currentTime - this.startTime;
-    };
-
-    VisualizerViewer.prototype.createLiveInput = function() {
-      var gotStream;
-      gotStream = (function(_this) {
-        return function(stream) {
-          _this.playing = true;
-          _this.source = _this.audioContext.createMediaStreamSource(stream);
-          return _this.source.connect(_this.analyser);
-        };
-      })(this);
-      this.dbSampleBuf = new Uint8Array(2048);
-      if (navigator.getUserMedia) {
-        return navigator.getUserMedia({
-          audio: true
-        }, gotStream, function(err) {
-          return console.log(err);
-        });
-      } else if (navigator.webkitGetUserMedia) {
-        return navigator.webkitGetUserMedia({
-          audio: true
-        }, gotStream, function(err) {
-          return console.log(err);
-        });
-      } else if (navigator.mozGetUserMedia) {
-        return navigator.mozGetUserMedia({
-          audio: true
-        }, gotStream, function(err) {
-          return console.log(err);
-        });
-      } else {
-        return alert("Error: getUserMedia not supported!");
-      }
-    };
-
-    VisualizerViewer.prototype.play = function(url) {
-      var request;
-      this.currentlyPlaying = url;
-      if (this.loadedAudio[url] != null) {
-        this.loadFromBuffer(this.loadedAudio[url]);
-        return;
-      }
-      request = new XMLHttpRequest();
-      request.open("GET", url, true);
-      request.responseType = 'arraybuffer';
-      request.onload = (function(_this) {
-        return function() {
-          _this.audioContext.decodeAudioData(request.response, function(buffer) {
-            _this.loadedAudio[url] = buffer;
-            return _this.loadFromBuffer(buffer);
-          }, function(err) {
-            return console.log(err);
-          });
-        };
-      })(this);
-      request.send();
     };
 
     VisualizerViewer.prototype.removeLastDancer = function() {
@@ -167,16 +93,6 @@
       prevDancer = this.dancers.pop();
       this.scene.remove(prevDancer.body);
       return prevDancer.dance;
-    };
-
-    VisualizerViewer.prototype.loadFromBuffer = function(buffer) {
-      this.startTime = this.audioContext.currentTime;
-      this.source = this.audioContext.createBufferSource();
-      this.source.buffer = buffer;
-      this.source.connect(this.analyser);
-      this.source.connect(this.audioContext.destination);
-      this.playing = true;
-      return this.source.start(0, this.startOffset);
     };
 
     return VisualizerViewer;

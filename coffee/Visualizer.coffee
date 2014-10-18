@@ -5,17 +5,44 @@ class window.Visualizer
   # Set up the scene based on a Main object which contains the scene.
   constructor: (scene, camera) ->
     @viewer = new VisualizerViewer(scene, camera)
+
+    # Create the audio context
+    window.AudioContext = window.AudioContext || window.webkitAudioContext
+    @audioContext = new AudioContext()
+    @audioWindow = new AudioWindow(2048, 1);
+    @loadedAudio = new Array()
+    @analyser = @audioContext.createAnalyser()
+    @analyser.fftSize = 2048
+    @startOffset = 0
+
+
+    # Load the sample audio
+    # @play('audio/Go.mp3')
+    @play('audio/Glasser.mp3')
+    # @play('audio/OnMyMind.mp3')
+
+    # @createLiveInput()
     
-    @choreographyRoutine = new ChoreographyRoutine(@viewer)
+    @choreographyRoutine = new ChoreographyRoutine(@)
 
     @setupGUI()
 
     @choreographyRoutine.playNext()
 
+    $('#viewerButton').click (e) =>
+      e.preventDefault()
+      @domain = window.location.protocol + '//' + window.location.host
+      popupURL = @domain + '/viewer.html'
+      @popup = window.open(popupURL, 'myWindow')
+      routineBeat = @choreographyRoutine.routineBeat
+      @choreographyRoutine.routineBeat = -1
+      while @choreographyRoutine.routineBeat < routineBeat
+        @choreographyRoutine.playNext()
+
   setupGUI: () ->
     gui = new dat.GUI()
 
-    gui.add(@viewer.audioWindow, 'responsiveness', 0.0, 5.0)
+    gui.add(@audioWindow, 'responsiveness', 0.0, 5.0)
     idController = gui.add(@choreographyRoutine, 'id')
 
     dancerController  = gui.add(@choreographyRoutine, 'dancer', Object.keys(Visualizer.dancerTypes))
@@ -63,7 +90,7 @@ class window.Visualizer
     danceMaterialFolder = gui.addFolder('Dance material parameters')
     danceMaterialFolder.open()
     updateDanceMaterialFolder = (value, obj) =>
-      if !@danceMaterialTypes[value]?
+      if !Visualizer.danceMaterialTypes[value]?
         return
 
       while danceMaterialFolder.__controllers[0]?
@@ -95,11 +122,30 @@ class window.Visualizer
     gui.add(@choreographyRoutine, 'playNext')
     gui.add(@choreographyRoutine, 'reset')
 
+  receiveChoreography: (move) ->
+    @viewer.receiveChoreography move
+    if @popup? then @popup.postMessage(@wrapMessage('choreography', move), @domain)
+
+  render: () ->
+    if !@playing
+      return
+    
+    @audioWindow.update(@analyser, @audioContext.currentTime)
+
+    @viewer.render(@audioWindow)
+    if @popup? then @popup.postMessage(@wrapMessage('render', @audioWindow), @domain)
+
+  wrapMessage: (type, data) ->
+    {
+      type: type
+      data: data
+    }
+
   #Event methods
   onKeyDown: (event) ->
     switch event.keyCode
       when @keys.PAUSE
-        if @viewer.playing then @viewer.pause() else @viewer.play(@viewer.currentlyPlaying)
+        if @playing then @pause() else @play(@currentlyPlaying)
 
       when @keys.NEXT
         @choreographyRoutine.playNext()
@@ -117,3 +163,58 @@ class window.Visualizer
   @danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial
     SimpleFrequencyShader: SimpleFrequencyShader
+
+  pause: () ->
+    @source.stop()
+    @playing = false
+    @startOffset += @audioContext.currentTime - @startTime
+
+
+  # Utility methods
+
+  createLiveInput: () ->
+    gotStream = (stream) =>
+      @playing = true  
+      @source = @audioContext.createMediaStreamSource stream
+      @source.connect @analyser
+
+    @dbSampleBuf = new Uint8Array(2048)
+
+    if ( navigator.getUserMedia )
+        navigator.getUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
+    else if (navigator.webkitGetUserMedia )
+        navigator.webkitGetUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
+    else if (navigator.mozGetUserMedia )
+        navigator.mozGetUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
+    else
+        return(alert("Error: getUserMedia not supported!"));
+
+  play: (url) ->
+    @currentlyPlaying = url
+
+    if @loadedAudio[url]?
+      @loadFromBuffer(@loadedAudio[url])
+      return
+
+    request = new XMLHttpRequest()
+    request.open("GET", url, true)
+    request.responseType = 'arraybuffer'
+    request.onload = () => 
+      @audioContext.decodeAudioData request.response
+          , (buffer) =>
+            @loadedAudio[url] = buffer
+            @loadFromBuffer(buffer)
+          , (err) -> console.log(err)
+      return
+
+    request.send()
+    return
+
+  loadFromBuffer: (buffer) ->
+    @startTime = @audioContext.currentTime
+    @source = @audioContext.createBufferSource()
+    @source.buffer = buffer
+    @source.connect(@analyser)
+    @source.connect(@audioContext.destination)
+    @playing = true
+    @source.start(0, @startOffset)

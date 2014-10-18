@@ -2,7 +2,7 @@
 
 class window.Main
   # Construct the scene
-  constructor: () ->
+  constructor: (isViewer) ->
     @scene = new THREE.Scene()
     @renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } )
     @renderer.setSize( window.innerWidth, window.innerHeight )
@@ -25,16 +25,26 @@ class window.Main
 
     document.body.appendChild(@renderer.domElement)
 
-    @visualizer = new Visualizer(@scene, @camera)
-
-    window.addEventListener('keydown', @visualizer.onKeyDown.bind(@visualizer), false)
+    if isViewer
+      @viewer = new VisualizerViewer(@scene, @camera)
+      @domain = window.location.protocol + '//' + window.location.host
+      window.addEventListener 'message', (event) =>
+        if event.origin != @domain then return
+        sentObj = event.data
+        if sentObj.type == 'render'
+          @viewer.render sentObj.data
+        if sentObj.type == 'choreography'
+          @viewer.receiveChoreography sentObj.data
+    else
+      @visualizer = new Visualizer(@scene, @camera) 
+      window.addEventListener('keydown', @visualizer.onKeyDown.bind(@visualizer), false)
 
   animate: () ->
     @render()
     @controls.update()
 
   render: () ->
-    @visualizer.viewer.render()  
+    @visualizer?.render()  
 
     @scene.updateMatrixWorld()
     @camera.updateProjectionMatrix()
@@ -52,10 +62,6 @@ window.animate = () ->
   window.app.animate()
 
 $ ->
-  window.app = new Main()
-
-  window.animate()
-
   dat.GUI.prototype.removeFolder = (name) ->
     folder =  this.__folders[name]
     if !folder

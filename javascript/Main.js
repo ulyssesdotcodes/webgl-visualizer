@@ -3,7 +3,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.Main = (function() {
-    function Main() {
+    function Main(isViewer) {
       this.onWindowResize = __bind(this.onWindowResize, this);
       var controlChange;
       this.scene = new THREE.Scene();
@@ -27,8 +27,28 @@
       this.controls.target = new THREE.Vector3(0, 0, 0);
       window.addEventListener('resize', this.onWindowResize, false);
       document.body.appendChild(this.renderer.domElement);
-      this.visualizer = new Visualizer(this.scene, this.camera);
-      window.addEventListener('keydown', this.visualizer.onKeyDown.bind(this.visualizer), false);
+      if (isViewer) {
+        this.viewer = new VisualizerViewer(this.scene, this.camera);
+        this.domain = window.location.protocol + '//' + window.location.host;
+        window.addEventListener('message', (function(_this) {
+          return function(event) {
+            var sentObj;
+            if (event.origin !== _this.domain) {
+              return;
+            }
+            sentObj = event.data;
+            if (sentObj.type === 'render') {
+              _this.viewer.render(sentObj.data);
+            }
+            if (sentObj.type === 'choreography') {
+              return _this.viewer.receiveChoreography(sentObj.data);
+            }
+          };
+        })(this));
+      } else {
+        this.visualizer = new Visualizer(this.scene, this.camera);
+        window.addEventListener('keydown', this.visualizer.onKeyDown.bind(this.visualizer), false);
+      }
     }
 
     Main.prototype.animate = function() {
@@ -37,7 +57,10 @@
     };
 
     Main.prototype.render = function() {
-      this.visualizer.viewer.render();
+      var _ref;
+      if ((_ref = this.visualizer) != null) {
+        _ref.render();
+      }
       this.scene.updateMatrixWorld();
       this.camera.updateProjectionMatrix();
       this.renderer.clear();
@@ -60,8 +83,6 @@
   };
 
   $(function() {
-    window.app = new Main();
-    window.animate();
     return dat.GUI.prototype.removeFolder = function(name) {
       var folder;
       folder = this.__folders[name];
