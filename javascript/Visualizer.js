@@ -15,24 +15,28 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Glasser.mp3');
+      this.createLiveInput();
       this.choreographyRoutine = new ChoreographyRoutine(this);
       this.setupGUI();
       this.choreographyRoutine.playNext();
       $('#viewerButton').click((function(_this) {
         return function(e) {
-          var popupURL, routineBeat, _results;
+          var popupURL, sendBeats;
           e.preventDefault();
           _this.domain = window.location.protocol + '//' + window.location.host;
           popupURL = _this.domain + location.pathname + 'viewer.html';
           _this.popup = window.open(popupURL, 'myWindow');
-          routineBeat = _this.choreographyRoutine.routineBeat;
-          _this.choreographyRoutine.routineBeat = -1;
-          _results = [];
-          while (_this.choreographyRoutine.routineBeat < routineBeat) {
-            _results.push(_this.choreographyRoutine.playNext());
-          }
-          return _results;
+          sendBeats = function() {
+            var routineBeat, _results;
+            routineBeat = _this.choreographyRoutine.routineBeat;
+            _this.choreographyRoutine.routineBeat = -1;
+            _results = [];
+            while (_this.choreographyRoutine.routineBeat < routineBeat) {
+              _results.push(_this.choreographyRoutine.playNext());
+            }
+            return _results;
+          };
+          return setTimeout(sendBeats, 100);
         };
       })(this));
     }

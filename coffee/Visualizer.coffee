@@ -18,10 +18,10 @@ class window.Visualizer
 
     # Load the sample audio
     # @play('audio/Go.mp3')
-    @play('audio/Glasser.mp3')
+    # @play('audio/Glasser.mp3')
     # @play('audio/OnMyMind.mp3')
 
-    # @createLiveInput()
+    @createLiveInput()
     
     @choreographyRoutine = new ChoreographyRoutine(@)
 
@@ -34,10 +34,14 @@ class window.Visualizer
       @domain = window.location.protocol + '//' + window.location.host
       popupURL = @domain + location.pathname + 'viewer.html'
       @popup = window.open(popupURL, 'myWindow')
-      routineBeat = @choreographyRoutine.routineBeat
-      @choreographyRoutine.routineBeat = -1
-      while @choreographyRoutine.routineBeat < routineBeat
-        @choreographyRoutine.playNext()
+
+      # We have to delay catching the window up because it has to load first.
+      sendBeats = () =>
+        routineBeat = @choreographyRoutine.routineBeat
+        @choreographyRoutine.routineBeat = -1
+        while @choreographyRoutine.routineBeat < routineBeat
+          @choreographyRoutine.playNext()
+      setTimeout sendBeats, 100
 
   setupGUI: () ->
     gui = new dat.GUI()

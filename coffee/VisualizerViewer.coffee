@@ -4,7 +4,12 @@ class window.VisualizerViewer
     @dancers = new Array()
     @shaderLoader = new ShaderLoader()
 
-  receiveChoreography: ({id, dancer, dance, danceMaterial }) ->
+    @choreographyQueue = new Queue()
+
+  receiveChoreography: (move) ->
+    @choreographyQueue.push(move)
+
+  executeChoreography: ({id, dancer, dance, danceMaterial }) ->
     if id == -1
       for dancer in @dancers
         @scene.remove(dancer.body)
@@ -69,6 +74,8 @@ class window.VisualizerViewer
 
   # Render the scene by going through the AudioObject array and calling update(audioEvent) on each one
   render: (audioWindow) ->
+    while @choreographyQueue.length() > 0
+      @executeChoreography @choreographyQueue.shift()
     # Create event
     for id in Object.keys(@dancers)
       @dancers[id].update(audioWindow)
