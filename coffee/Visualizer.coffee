@@ -17,8 +17,8 @@ class window.Visualizer
 
 
     # Load the sample audio
-    # @play('audio/Go.mp3')
-    @play('audio/Glasser.mp3')
+    @play('audio/Go.mp3')
+    # @play('audio/Glasser.mp3')
     # @play('audio/OnMyMind.mp3')
 
     # @createLiveInput()
@@ -128,6 +128,8 @@ class window.Visualizer
 
   receiveChoreography: (move) ->
     @viewer.receiveChoreography move
+
+  sendChoreography: (move) ->
     if @popup? then @popup.postMessage(@wrapMessage('choreography', move), @domain)
 
   render: () ->

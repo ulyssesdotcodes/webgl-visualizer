@@ -153,6 +153,9 @@ class window.ChoreographyRoutine
     @updateText()
 
   playNext: () ->
+    for change in @routineMoment
+      @visualizer.sendChoreography change
+
     if @routineBeat == @routine.length - 1
       @routineBeat = -1
 

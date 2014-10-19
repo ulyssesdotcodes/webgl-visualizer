@@ -194,15 +194,20 @@
     };
 
     ChoreographyRoutine.prototype.playNext = function() {
-      var change, _i, _len, _ref, _results;
+      var change, _i, _j, _len, _len1, _ref, _ref1, _results;
+      _ref = this.routineMoment;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        change = _ref[_i];
+        this.visualizer.sendChoreography(change);
+      }
       if (this.routineBeat === this.routine.length - 1) {
         this.routineBeat = -1;
       }
       this.routineMoment = this.routine[++this.routineBeat];
-      _ref = this.routineMoment;
+      _ref1 = this.routineMoment;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        change = _ref[_i];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        change = _ref1[_j];
         _results.push(this.visualizer.receiveChoreography(change));
       }
       return _results;

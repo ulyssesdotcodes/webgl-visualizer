@@ -15,7 +15,7 @@
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 2048;
       this.startOffset = 0;
-      this.play('audio/Glasser.mp3');
+      this.play('audio/Go.mp3');
       this.choreographyRoutine = new ChoreographyRoutine(this);
       this.setupGUI();
       this.choreographyRoutine.playNext();
@@ -140,7 +140,10 @@
     };
 
     Visualizer.prototype.receiveChoreography = function(move) {
-      this.viewer.receiveChoreography(move);
+      return this.viewer.receiveChoreography(move);
+    };
+
+    Visualizer.prototype.sendChoreography = function(move) {
       if (this.popup != null) {
         return this.popup.postMessage(this.wrapMessage('choreography', move), this.domain);
       }
