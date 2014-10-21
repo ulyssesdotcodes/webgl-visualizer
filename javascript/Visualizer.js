@@ -6,20 +6,27 @@
       NEXT: 78
     };
 
-    function Visualizer(scene, camera) {
-      this.viewer = new VisualizerViewer(scene, camera);
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.audioContext = new AudioContext();
+    function Visualizer(viewer) {
+      this.viewer = viewer;
       this.audioWindow = new AudioWindow(2048, 1);
       this.loadedAudio = new Array();
-      this.analyser = this.audioContext.createAnalyser();
-      this.analyser.fftSize = 2048;
       this.startOffset = 0;
+      this.setupAnalyser();
       this.createLiveInput();
       this.choreographyRoutine = new ChoreographyRoutine(this);
       this.setupGUI();
       this.choreographyRoutine.playNext();
-      $('#viewerButton').click((function(_this) {
+    }
+
+    Visualizer.prototype.setupAnalyser = function() {
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.audioContext = new AudioContext();
+      this.analyser = this.audioContext.createAnalyser();
+      return this.analyser.fftSize = 2048;
+    };
+
+    Visualizer.prototype.setupPopup = function() {
+      return $('#viewerButton').click((function(_this) {
         return function(e) {
           var popupURL, sendBeats;
           e.preventDefault();
@@ -39,91 +46,66 @@
           return setTimeout(sendBeats, 100);
         };
       })(this));
-    }
+    };
 
     Visualizer.prototype.setupGUI = function() {
-      var danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui, idController, updateDanceFolder, updateDanceMaterialFolder, updateDancerFolder;
+      var danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui, idController, setupFolder, updateFolder, _ref, _ref1, _ref2;
       gui = new dat.GUI();
       gui.add(this.audioWindow, 'responsiveness', 0.0, 5.0);
       idController = gui.add(this.choreographyRoutine, 'id');
-      dancerController = gui.add(this.choreographyRoutine, 'dancer', Object.keys(Visualizer.dancerTypes));
-      dancerFolder = gui.addFolder('Dancer parameters');
-      dancerFolder.open();
-      updateDancerFolder = (function(_this) {
-        return function(value, obj) {
-          var param, _i, _len, _ref, _ref1, _results;
-          if (Visualizer.dancerTypes[value] == null) {
-            return;
-          }
-          while (dancerFolder.__controllers[0] != null) {
-            dancerFolder.remove(dancerFolder.__controllers[0]);
-          }
-          _ref = Visualizer.dancerTypes[value].params;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            param = _ref[_i];
-            _this.choreographyRoutine.dancerParams[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
-            _results.push(dancerFolder.add(_this.choreographyRoutine.dancerParams, param.name));
-          }
-          return _results;
+      setupFolder = (function(_this) {
+        return function(name, varName, keys) {
+          var controller, folder;
+          controller = gui.add(_this.choreographyRoutine, varName, keys);
+          folder = gui.addFolder(name);
+          folder.open();
+          return [controller, folder];
         };
       })(this);
-      dancerController.onFinishChange(updateDancerFolder);
-      danceController = gui.add(this.choreographyRoutine, 'dance', Object.keys(Visualizer.danceTypes));
-      danceFolder = gui.addFolder('Dance parameters');
-      danceFolder.open();
-      updateDanceFolder = (function(_this) {
+      updateFolder = function(types, folder, params, value, obj) {
+        var param, _i, _len, _ref, _ref1, _results;
+        if (types[value] == null) {
+          return;
+        }
+        while (folder.__controllers[0] != null) {
+          folder.remove(folder.__controllers[0]);
+        }
+        _ref = types[value].params;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          param = _ref[_i];
+          params[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
+          _results.push(folder.add(params, param.name));
+        }
+        return _results;
+      };
+      _ref = setupFolder('Dancer parameters', 'dancer', Object.keys(Visualizer.dancerTypes)), dancerController = _ref[0], dancerFolder = _ref[1];
+      dancerController.onChange((function(_this) {
         return function(value, obj) {
-          var param, _i, _len, _ref, _ref1, _results;
-          if (Visualizer.danceTypes[value] == null) {
-            return;
-          }
-          while (danceFolder.__controllers[0] != null) {
-            danceFolder.remove(danceFolder.__controllers[0]);
-          }
-          _ref = Visualizer.danceTypes[value].params;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            param = _ref[_i];
-            _this.choreographyRoutine.danceParams[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
-            _results.push(danceFolder.add(_this.choreographyRoutine.danceParams, param.name));
-          }
-          return _results;
+          return updateFolder(Visualizer.dancerTypes, dancerFolder, _this.choreographyRoutine.dancerParams, value, obj);
         };
-      })(this);
-      danceController.onChange(updateDanceFolder);
-      danceMaterialController = gui.add(this.choreographyRoutine, 'danceMaterial', Object.keys(Visualizer.danceMaterialTypes));
-      danceMaterialFolder = gui.addFolder('Dance material parameters');
-      danceMaterialFolder.open();
-      updateDanceMaterialFolder = (function(_this) {
+      })(this));
+      _ref1 = setupFolder('Dance parameters', 'dance', Object.keys(Visualizer.danceTypes)), danceController = _ref1[0], danceFolder = _ref1[1];
+      danceController.onChange((function(_this) {
         return function(value, obj) {
-          var param, _i, _len, _ref, _ref1, _results;
-          if (Visualizer.danceMaterialTypes[value] == null) {
-            return;
-          }
-          while (danceMaterialFolder.__controllers[0] != null) {
-            danceMaterialFolder.remove(danceMaterialFolder.__controllers[0]);
-          }
-          _ref = Visualizer.danceMaterialTypes[value].params;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            param = _ref[_i];
-            _this.choreographyRoutine.danceMaterialParams[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
-            _results.push(danceMaterialFolder.add(_this.choreographyRoutine.danceMaterialParams, param.name));
-          }
-          return _results;
+          return updateFolder(Visualizer.danceTypes, danceFolder, _this.choreographyRoutine.danceParams, value, obj);
         };
-      })(this);
-      danceMaterialController.onChange(updateDanceMaterialFolder);
+      })(this));
+      _ref2 = setupFolder('Dance material paramaters', 'danceMaterial', Object.keys(Visualizer.danceMaterialTypes)), danceMaterialController = _ref2[0], danceMaterialFolder = _ref2[1];
+      danceMaterialController.onChange((function(_this) {
+        return function(value, obj) {
+          return updateFolder(Visualizer.danceMaterialTypes, danceMaterialFolder, _this.choreographyRoutine.danceMaterialParams, value, obj);
+        };
+      })(this));
       idController.onChange((function(_this) {
         return function(value) {
-          var controller, idDancer, _i, _len, _ref;
+          var controller, idDancer, _i, _len, _ref3;
           idDancer = _this.viewer.getDancer(value);
           if (idDancer != null) {
             _this.choreographyRoutine.updateDancer(idDancer);
-            _ref = gui.__controllers;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              controller = _ref[_i];
+            _ref3 = gui.__controllers;
+            for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+              controller = _ref3[_i];
               controller.updateDisplay();
             }
             updateDancerFolder(_this.choreographyRoutine.dancer, idDancer);
@@ -272,3 +254,5 @@
   })();
 
 }).call(this);
+
+//# sourceMappingURL=Visualizer.js.map

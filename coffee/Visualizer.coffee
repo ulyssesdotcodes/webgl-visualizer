@@ -3,18 +3,12 @@ class window.Visualizer
   keys: { PAUSE: 32, NEXT: 78 }
 
   # Set up the scene based on a Main object which contains the scene.
-  constructor: (scene, camera) ->
-    @viewer = new VisualizerViewer(scene, camera)
-
-    # Create the audio context
-    window.AudioContext = window.AudioContext || window.webkitAudioContext
-    @audioContext = new AudioContext()
+  constructor: (@viewer) ->
     @audioWindow = new AudioWindow(2048, 1);
     @loadedAudio = new Array()
-    @analyser = @audioContext.createAnalyser()
-    @analyser.fftSize = 2048
     @startOffset = 0
 
+    @setupAnalyser()
 
     # Load the sample audio
     # @play('audio/Go.mp3')
@@ -22,13 +16,20 @@ class window.Visualizer
     # @play('audio/OnMyMind.mp3')
 
     @createLiveInput()
-    
+
     @choreographyRoutine = new ChoreographyRoutine(@)
 
     @setupGUI()
 
     @choreographyRoutine.playNext()
 
+  setupAnalyser: () ->
+    window.AudioContext = window.AudioContext || window.webkitAudioContext
+    @audioContext = new AudioContext()
+    @analyser = @audioContext.createAnalyser()
+    @analyser.fftSize = 2048
+
+  setupPopup: () ->
     $('#viewerButton').click (e) =>
       e.preventDefault()
       @domain = window.location.protocol + '//' + window.location.host
@@ -49,65 +50,45 @@ class window.Visualizer
     gui.add(@audioWindow, 'responsiveness', 0.0, 5.0)
     idController = gui.add(@choreographyRoutine, 'id')
 
-    dancerController  = gui.add(@choreographyRoutine, 'dancer', Object.keys(Visualizer.dancerTypes))
-    dancerFolder = gui.addFolder('Dancer parameters')
-    dancerFolder.open()
-    updateDancerFolder = (value, obj) =>
-      if !Visualizer.dancerTypes[value]?
+    setupFolder = (name, varName, keys) =>
+      controller = gui.add(@choreographyRoutine, varName, keys)
+      folder = gui.addFolder(name)
+      folder.open()
+      return [ controller, folder ]
+
+    updateFolder = (types, folder, params, value, obj) ->
+      if !types[value]?
         return
 
-      while dancerFolder.__controllers[0]?
-        dancerFolder.remove(dancerFolder.__controllers[0])
+      while folder.__controllers[0]?
+        folder.remove(folder.__controllers[0])
 
-      for param in Visualizer.dancerTypes[value].params
-        @choreographyRoutine.dancerParams[param.name] = 
+      for param in types[value].params
+        params[param.name] =
           if obj?.options?[param.name]
             obj.options[param.name]
           else
             param.default
 
-        dancerFolder.add(@choreographyRoutine.dancerParams, param.name) 
+        folder.add(params, param.name)
 
-    dancerController.onFinishChange updateDancerFolder
+    [dancerController, dancerFolder] = setupFolder('Dancer parameters', 'dancer', Object.keys(Visualizer.dancerTypes))
 
-    danceController = gui.add(@choreographyRoutine, 'dance', Object.keys(Visualizer.danceTypes))
-    danceFolder = gui.addFolder('Dance parameters')
-    danceFolder.open()
-    updateDanceFolder = (value, obj) =>
-      if !Visualizer.danceTypes[value]?
-        return
+    dancerController.onChange (value, obj) =>
+      updateFolder(Visualizer.dancerTypes, dancerFolder, @choreographyRoutine.dancerParams, value, obj)
 
-      while danceFolder.__controllers[0]?
-        danceFolder.remove(danceFolder.__controllers[0])
+    [danceController, danceFolder] = setupFolder('Dance parameters', 'dance', Object.keys(Visualizer.danceTypes))
 
-      for param in Visualizer.danceTypes[value].params
-        @choreographyRoutine.danceParams[param.name] = 
-          if obj?.options?[param.name]
-            obj.options[param.name]
-          else
-            param.default
-        danceFolder.add(@choreographyRoutine.danceParams, param.name)
-    danceController.onChange updateDanceFolder
-    
-    danceMaterialController = gui.add(@choreographyRoutine, 'danceMaterial', Object.keys(Visualizer.danceMaterialTypes))
+    danceController.onChange (value, obj) =>
+      updateFolder(Visualizer.danceTypes, danceFolder, @choreographyRoutine.danceParams, value, obj)
 
-    danceMaterialFolder = gui.addFolder('Dance material parameters')
-    danceMaterialFolder.open()
-    updateDanceMaterialFolder = (value, obj) =>
-      if !Visualizer.danceMaterialTypes[value]?
-        return
+    [danceMaterialController, danceMaterialFolder] = setupFolder('Dance material paramaters', 'danceMaterial',
+      Object.keys(Visualizer.danceMaterialTypes))
 
-      while danceMaterialFolder.__controllers[0]?
-        danceMaterialFolder.remove(danceMaterialFolder.__controllers[0])
+    danceMaterialController.onChange (value, obj) =>
+      updateFolder(Visualizer.danceMaterialTypes, danceMaterialFolder, @choreographyRoutine.danceMaterialParams, value,
+        obj)
 
-      for param in Visualizer.danceMaterialTypes[value].params
-        @choreographyRoutine.danceMaterialParams[param.name] = 
-          if obj?.options?[param.name]
-            obj.options[param.name]
-          else
-            param.default
-        danceMaterialFolder.add(@choreographyRoutine.danceMaterialParams, param.name)
-    danceMaterialController.onChange updateDanceMaterialFolder
 
     idController.onChange (value) =>
       idDancer = @viewer.getDancer(value)
@@ -115,7 +96,7 @@ class window.Visualizer
         @choreographyRoutine.updateDancer idDancer
         for controller in gui.__controllers
           controller.updateDisplay()
-        
+
         updateDancerFolder(@choreographyRoutine.dancer, idDancer)
         updateDanceMaterialFolder(@choreographyRoutine.danceMaterial, idDancer.danceMaterial)
         updateDanceFolder(@choreographyRoutine.dance, idDancer.dance)
@@ -133,7 +114,7 @@ class window.Visualizer
   render: () ->
     if !@playing
       return
-    
+
     @audioWindow.update(@analyser, @audioContext.currentTime)
 
     @viewer.render(@audioWindow)
@@ -141,8 +122,8 @@ class window.Visualizer
 
   wrapMessage: (type, data) ->
     {
-      type: type
-      data: data
+    type: type
+    data: data
     }
 
   #Event methods
@@ -150,7 +131,6 @@ class window.Visualizer
     switch event.keyCode
       when @keys.PAUSE
         if @playing then @pause() else @play(@currentlyPlaying)
-
       when @keys.NEXT
         @choreographyRoutine.playNext()
 
@@ -178,20 +158,23 @@ class window.Visualizer
 
   createLiveInput: () ->
     gotStream = (stream) =>
-      @playing = true  
+      @playing = true
       @source = @audioContext.createMediaStreamSource stream
       @source.connect @analyser
 
     @dbSampleBuf = new Uint8Array(2048)
 
     if ( navigator.getUserMedia )
-        navigator.getUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
+      navigator.getUserMedia({ audio: true }, gotStream, (err) ->
+        console.log(err))
     else if (navigator.webkitGetUserMedia )
-        navigator.webkitGetUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
+      navigator.webkitGetUserMedia({ audio: true }, gotStream, (err) ->
+        console.log(err))
     else if (navigator.mozGetUserMedia )
-        navigator.mozGetUserMedia({audio:true}, gotStream, (err) -> console.log(err) )
+      navigator.mozGetUserMedia({ audio: true }, gotStream, (err) ->
+        console.log(err))
     else
-        return(alert("Error: getUserMedia not supported!"));
+      return(alert("Error: getUserMedia not supported!"));
 
   play: (url) ->
     @currentlyPlaying = url
@@ -203,12 +186,13 @@ class window.Visualizer
     request = new XMLHttpRequest()
     request.open("GET", url, true)
     request.responseType = 'arraybuffer'
-    request.onload = () => 
+    request.onload = () =>
       @audioContext.decodeAudioData request.response
-          , (buffer) =>
-            @loadedAudio[url] = buffer
-            @loadFromBuffer(buffer)
-          , (err) -> console.log(err)
+      , (buffer) =>
+        @loadedAudio[url] = buffer
+        @loadFromBuffer(buffer)
+      , (err) ->
+        console.log(err)
       return
 
     request.send()

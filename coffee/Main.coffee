@@ -2,7 +2,7 @@
 
 class window.Main
   # Construct the scene
-  constructor: (isViewer) ->
+  constructor: (isVisualizer) ->
     @scene = new THREE.Scene()
     @renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } )
     @renderer.setSize( window.innerWidth, window.innerHeight )
@@ -25,8 +25,11 @@ class window.Main
 
     document.body.appendChild(@renderer.domElement)
 
-    if isViewer
-      @viewer = new VisualizerViewer(@scene, @camera)
+    @viewer = new VisualizerViewer(@scene, @camera)
+    if isVisualizer
+      @visualizer = new Visualizer(@viewer) 
+      window.addEventListener('keydown', @visualizer.onKeyDown.bind(@visualizer), false)
+    else
       @domain = window.location.protocol + '//' + window.location.host
       window.addEventListener 'message', (event) =>
         if event.origin != @domain then return
@@ -35,9 +38,6 @@ class window.Main
           @viewer.render sentObj.data
         if sentObj.type == 'choreography'
           @viewer.receiveChoreography sentObj.data
-    else
-      @visualizer = new Visualizer(@scene, @camera) 
-      window.addEventListener('keydown', @visualizer.onKeyDown.bind(@visualizer), false)
 
   animate: () ->
     @render()

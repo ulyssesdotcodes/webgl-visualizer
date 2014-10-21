@@ -3,7 +3,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.Main = (function() {
-    function Main(isViewer) {
+    function Main(isVisualizer) {
       this.onWindowResize = __bind(this.onWindowResize, this);
       var controlChange;
       this.scene = new THREE.Scene();
@@ -27,8 +27,11 @@
       this.controls.target = new THREE.Vector3(0, 0, 0);
       window.addEventListener('resize', this.onWindowResize, false);
       document.body.appendChild(this.renderer.domElement);
-      if (isViewer) {
-        this.viewer = new VisualizerViewer(this.scene, this.camera);
+      this.viewer = new VisualizerViewer(this.scene, this.camera);
+      if (isVisualizer) {
+        this.visualizer = new Visualizer(this.viewer);
+        window.addEventListener('keydown', this.visualizer.onKeyDown.bind(this.visualizer), false);
+      } else {
         this.domain = window.location.protocol + '//' + window.location.host;
         window.addEventListener('message', (function(_this) {
           return function(event) {
@@ -45,9 +48,6 @@
             }
           };
         })(this));
-      } else {
-        this.visualizer = new Visualizer(this.scene, this.camera);
-        window.addEventListener('keydown', this.visualizer.onKeyDown.bind(this.visualizer), false);
       }
     }
 
@@ -97,3 +97,5 @@
   });
 
 }).call(this);
+
+//# sourceMappingURL=Main.js.map
