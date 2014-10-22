@@ -16,7 +16,7 @@ class window.ChoreographyRoutine
         { id: -1 },
         {
           id: 2
-          dancer: 
+          dancer:
             type: 'CubeDancer'
           dance:
             type: 'PositionDance'
@@ -30,7 +30,7 @@ class window.ChoreographyRoutine
         },
         {
           id: 0
-          dancer: 
+          dancer:
             type: 'PointCloudDancer'
           dance:
             type: 'RotateDance'
@@ -44,7 +44,7 @@ class window.ChoreographyRoutine
         },
         {
           id: 1
-          dancer: 
+          dancer:
             type: 'PointCloudDancer'
           dance:
             type: 'RotateDance'
@@ -59,14 +59,14 @@ class window.ChoreographyRoutine
         }
       ],
       [
-        { 
+        {
           id: 2
           dancer:
             type: 'SphereDancer'
             params:
               position: [0.5, 0, 0.5]
         },
-        { 
+        {
           id: 3
           dancer:
             type: 'SphereDancer'
@@ -82,7 +82,7 @@ class window.ChoreographyRoutine
               smoothingFactor: 0.5
               wireframe: true
         },
-        { 
+        {
           id: 4
           dancer:
             type: 'SphereDancer'
@@ -98,7 +98,7 @@ class window.ChoreographyRoutine
               smoothingFactor: 0.5
               wireframe: true
         },
-        { 
+        {
           id: 5
           dancer:
             type: 'SphereDancer'

@@ -8,22 +8,13 @@
 
     function Visualizer(viewer) {
       this.viewer = viewer;
-      this.audioWindow = new AudioWindow(2048, 1);
-      this.loadedAudio = new Array();
-      this.startOffset = 0;
-      this.setupAnalyser();
-      this.createLiveInput();
+      this.player = new Player();
+      this.player.createLiveInput();
       this.choreographyRoutine = new ChoreographyRoutine(this);
+      this.setupPopup();
       this.setupGUI();
       this.choreographyRoutine.playNext();
     }
-
-    Visualizer.prototype.setupAnalyser = function() {
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.audioContext = new AudioContext();
-      this.analyser = this.audioContext.createAnalyser();
-      return this.analyser.fftSize = 2048;
-    };
 
     Visualizer.prototype.setupPopup = function() {
       return $('#viewerButton').click((function(_this) {
@@ -51,7 +42,7 @@
     Visualizer.prototype.setupGUI = function() {
       var danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui, idController, setupFolder, updateFolder, _ref, _ref1, _ref2;
       gui = new dat.GUI();
-      gui.add(this.audioWindow, 'responsiveness', 0.0, 5.0);
+      gui.add(this.player.audioWindow, 'responsiveness', 0.0, 5.0);
       idController = gui.add(this.choreographyRoutine, 'id');
       setupFolder = (function(_this) {
         return function(name, varName, keys) {
@@ -129,13 +120,13 @@
     };
 
     Visualizer.prototype.render = function() {
-      if (!this.playing) {
+      if (!this.player.playing) {
         return;
       }
-      this.audioWindow.update(this.analyser, this.audioContext.currentTime);
-      this.viewer.render(this.audioWindow);
+      this.player.update();
+      this.viewer.render(this.player.audioWindow);
       if (this.popup != null) {
-        return this.popup.postMessage(this.wrapMessage('render', this.audioWindow), this.domain);
+        return this.popup.postMessage(this.wrapMessage('render', this.player.audioWindow), this.domain);
       }
     };
 
@@ -149,12 +140,7 @@
     Visualizer.prototype.onKeyDown = function(event) {
       switch (event.keyCode) {
         case this.keys.PAUSE:
-          if (this.playing) {
-            return this.pause();
-          } else {
-            return this.play(this.currentlyPlaying);
-          }
-          break;
+          return this.player.pause();
         case this.keys.NEXT:
           return this.choreographyRoutine.playNext();
       }
@@ -175,78 +161,6 @@
     Visualizer.danceMaterialTypes = {
       ColorDanceMaterial: ColorDanceMaterial,
       SimpleFrequencyShader: SimpleFrequencyShader
-    };
-
-    Visualizer.prototype.pause = function() {
-      this.source.stop();
-      this.playing = false;
-      return this.startOffset += this.audioContext.currentTime - this.startTime;
-    };
-
-    Visualizer.prototype.createLiveInput = function() {
-      var gotStream;
-      gotStream = (function(_this) {
-        return function(stream) {
-          _this.playing = true;
-          _this.source = _this.audioContext.createMediaStreamSource(stream);
-          return _this.source.connect(_this.analyser);
-        };
-      })(this);
-      this.dbSampleBuf = new Uint8Array(2048);
-      if (navigator.getUserMedia) {
-        return navigator.getUserMedia({
-          audio: true
-        }, gotStream, function(err) {
-          return console.log(err);
-        });
-      } else if (navigator.webkitGetUserMedia) {
-        return navigator.webkitGetUserMedia({
-          audio: true
-        }, gotStream, function(err) {
-          return console.log(err);
-        });
-      } else if (navigator.mozGetUserMedia) {
-        return navigator.mozGetUserMedia({
-          audio: true
-        }, gotStream, function(err) {
-          return console.log(err);
-        });
-      } else {
-        return alert("Error: getUserMedia not supported!");
-      }
-    };
-
-    Visualizer.prototype.play = function(url) {
-      var request;
-      this.currentlyPlaying = url;
-      if (this.loadedAudio[url] != null) {
-        this.loadFromBuffer(this.loadedAudio[url]);
-        return;
-      }
-      request = new XMLHttpRequest();
-      request.open("GET", url, true);
-      request.responseType = 'arraybuffer';
-      request.onload = (function(_this) {
-        return function() {
-          _this.audioContext.decodeAudioData(request.response, function(buffer) {
-            _this.loadedAudio[url] = buffer;
-            return _this.loadFromBuffer(buffer);
-          }, function(err) {
-            return console.log(err);
-          });
-        };
-      })(this);
-      request.send();
-    };
-
-    Visualizer.prototype.loadFromBuffer = function(buffer) {
-      this.startTime = this.audioContext.currentTime;
-      this.source = this.audioContext.createBufferSource();
-      this.source.buffer = buffer;
-      this.source.connect(this.analyser);
-      this.source.connect(this.audioContext.destination);
-      this.playing = true;
-      return this.source.start(0, this.startOffset);
     };
 
     return Visualizer;
