@@ -2,6 +2,14 @@
 (function() {
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
+  require('./Visualizer.coffee');
+
+  require('../javascript/OrbitControls');
+
+  require('./VisualizerViewer.coffee');
+
+  require('./DatGUIInterface.coffee');
+
   window.Main = (function() {
     function Main(isVisualizer) {
       this.onWindowResize = __bind(this.onWindowResize, this);

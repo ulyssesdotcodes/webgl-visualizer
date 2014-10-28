@@ -1,3 +1,5 @@
+require './AudioWindow.coffee'
+
 # Plays the audio and creates an analyser
 class window.Player
   constructor: () ->

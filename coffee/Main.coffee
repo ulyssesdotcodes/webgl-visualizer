@@ -1,4 +1,8 @@
-# Constructor to set up the business side of stuff. It shouldn't contain any of the visualization code.
+# Require all the shit
+require './Visualizer.coffee'
+require '../javascript/OrbitControls'
+require './VisualizerViewer.coffee'
+require './DatGUIInterface.coffee'
 
 class window.Main
   # Construct the scene

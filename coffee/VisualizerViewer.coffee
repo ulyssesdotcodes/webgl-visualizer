@@ -1,3 +1,6 @@
+require './ShaderLoader.coffee'
+require '../javascript/Queue.js'
+
 class window.VisualizerViewer
   constructor: (scene, camera) ->
     @scene = scene

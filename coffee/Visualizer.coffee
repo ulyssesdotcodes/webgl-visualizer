@@ -1,3 +1,14 @@
+require './Player.coffee'
+require './ChoreographyRoutine.coffee'
+require './dancers/CubeDancer.coffee'
+require './dancers/SphereDancer.coffee'
+require './dancers/PointCloudDancer.coffee'
+require './dances/ScaleDance.coffee'
+require './dances/PositionDance.coffee'
+require './dances/RotateDance.coffee'
+require './danceMaterials/ColorDanceMaterial.coffee'
+require './danceMaterials/SimpleFrequencyShader.coffee'
+
 class window.Visualizer
   # Get those keys set up
   keys: { PAUSE: 32, NEXT: 78 }

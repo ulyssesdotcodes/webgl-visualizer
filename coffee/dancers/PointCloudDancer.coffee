@@ -1,3 +1,5 @@
+require './Dancer.coffee'
+
 class window.PointCloudDancer extends Dancer
   @params: 
     [
