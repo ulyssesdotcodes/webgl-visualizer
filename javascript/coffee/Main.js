@@ -21,7 +21,6 @@
           return _this.render();
         };
       })(this);
-      this.controls.addEventListener('change', controlChange);
       this.camera.position.z = -4;
       this.camera.position.y = 3;
       this.controls.target = new THREE.Vector3(0, 0, 0);
@@ -29,7 +28,7 @@
       document.body.appendChild(this.renderer.domElement);
       this.viewer = new VisualizerViewer(this.scene, this.camera);
       if (isVisualizer) {
-        this.visualizer = new Visualizer(this.viewer, new DatGUIInterface());
+        this.visualizer = new Visualizer(this.viewer);
         window.addEventListener('keydown', this.visualizer.onKeyDown.bind(this.visualizer), false);
       } else {
         this.domain = window.location.protocol + '//' + window.location.host;
@@ -61,7 +60,6 @@
       if ((_ref = this.visualizer) != null) {
         _ref.render();
       }
-      this.scene.updateMatrixWorld();
       this.camera.updateProjectionMatrix();
       this.renderer.clear();
       this.renderer.render(this.scene, this.camera);

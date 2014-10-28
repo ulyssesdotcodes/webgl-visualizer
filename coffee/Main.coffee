@@ -27,7 +27,7 @@ class window.Main
 
     @viewer = new VisualizerViewer(@scene, @camera)
     if isVisualizer
-      @visualizer = new Visualizer(@viewer) 
+      @visualizer = new Visualizer(@viewer, new DatGUIInterface())
       window.addEventListener('keydown', @visualizer.onKeyDown.bind(@visualizer), false)
     else
       @domain = window.location.protocol + '//' + window.location.host

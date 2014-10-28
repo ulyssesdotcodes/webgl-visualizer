@@ -10,7 +10,6 @@
       this.dancerParams = {};
       this.danceParams = {};
       this.danceMaterialParams = {};
-      this.elem = $('#routine');
       this.reset();
       this.routine = [
         [
@@ -215,7 +214,7 @@
     };
 
     ChoreographyRoutine.prototype.updateText = function() {
-      return this.elem.html(JSON.stringify(this.routine, void 0, 2));
+      return this.visualizer["interface"].updateText(this.routine);
     };
 
     ChoreographyRoutine.prototype.updateDancer = function(dancer) {

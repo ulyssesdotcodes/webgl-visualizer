@@ -27,4 +27,3 @@ class window.AudioWindow
         rms += val*val
 
     @averageDb = Math.sqrt(rms / @bufferSize) * @responsiveness
-    # TODO: smooth

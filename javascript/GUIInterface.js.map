@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "GUIInterface.js",
+  "sourceRoot": "..\\coffee",
+  "sources": [
+    "GUIInterface.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;AAAA,EAAM,MAAM,CAAC;iCAAb;;2BAAA;;MAAA,CAAA;AAAA"
+}

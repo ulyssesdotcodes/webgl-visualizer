@@ -8,8 +8,6 @@ class window.ChoreographyRoutine
     @danceParams = {}
     @danceMaterialParams = {}
 
-    @elem = $('#routine')
-
     @reset()
     @routine = [
       [
@@ -166,7 +164,7 @@ class window.ChoreographyRoutine
     @routineBeat = -1
 
   updateText: () ->
-    @elem.html(JSON.stringify(@routine, undefined, 2))
+    @visualizer.interface.updateText(@routine)
 
   updateDancer: (dancer) ->
     @dancer = dancer.constructor.name
