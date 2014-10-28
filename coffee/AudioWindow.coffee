@@ -1,10 +1,11 @@
 # Contains the frequencySamples and dbSamples for audio
 class window.AudioWindow
-  constructor: (bufferSize, responsiveness) ->
+  @bufferSize: 2048
+
+  constructor: (responsiveness) ->
     @responsiveness = responsiveness
-    @bufferSize = bufferSize
-    @frequencyBuffer = new Uint8Array(bufferSize)
-    @dbBuffer = new Uint8Array(bufferSize)
+    @frequencyBuffer = new Uint8Array(@constructor.bufferSize)
+    @dbBuffer = new Uint8Array(@constructor.bufferSize)
     @time = 0
     @deltaTime = 0
 
@@ -26,4 +27,4 @@ class window.AudioWindow
         val = (buf - 128) / 128
         rms += val*val
 
-    @averageDb = Math.sqrt(rms / @bufferSize) * @responsiveness
+    @averageDb = Math.sqrt(rms / @constructor.bufferSize) * @responsiveness

@@ -3,7 +3,7 @@ require './AudioWindow.coffee'
 # Plays the audio and creates an analyser
 class window.Player
   constructor: () ->
-    @audioWindow = new AudioWindow(2048, 1);
+    @audioWindow = new AudioWindow(1);
     @loadedAudio = new Array()
     @startOffset = 0
     @setupAnalyser()
@@ -12,7 +12,7 @@ class window.Player
     window.AudioContext = window.AudioContext || window.webkitAudioContext
     @audioContext = new AudioContext()
     @analyser = @audioContext.createAnalyser()
-    @analyser.fftSize = 2048
+    @analyser.fftSize = AudioWindow.bufferSize
 
   update: () ->
     @audioWindow.update(@analyser, @audioContext.currentTime)

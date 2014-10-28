@@ -32,21 +32,23 @@ class window.DatGUIInterface
 
     [dancerController, dancerFolder] = setupFolder('Dancer parameters', 'dancer', Object.keys(Visualizer.dancerTypes))
 
-    dancerController.onChange (value, obj) =>
+    updateDancerFolder = (value, obj) =>
       updateFolder(Visualizer.dancerTypes, dancerFolder, @choreographyRoutine.dancerParams, value, obj)
+    dancerController.onChange updateDancerFolder
 
     [danceController, danceFolder] = setupFolder('Dance parameters', 'dance', Object.keys(Visualizer.danceTypes))
 
-    danceController.onChange (value, obj) =>
+    updateDanceFolder = (value, obj) =>
       updateFolder(Visualizer.danceTypes, danceFolder, @choreographyRoutine.danceParams, value, obj)
+    danceController.onChange updateDanceFolder
 
     [danceMaterialController, danceMaterialFolder] = setupFolder('Dance material paramaters', 'danceMaterial',
       Object.keys(Visualizer.danceMaterialTypes))
 
-    danceMaterialController.onChange (value, obj) =>
+    updateDanceMaterialFolder = (value, obj) =>
       updateFolder(Visualizer.danceMaterialTypes, danceMaterialFolder, @choreographyRoutine.danceMaterialParams, value,
         obj)
-
+    danceMaterialController.onChange updateDanceMaterialFolder
 
     idController.onChange (value) =>
       idDancer = @viewer.getDancer(value)

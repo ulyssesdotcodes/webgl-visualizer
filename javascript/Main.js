@@ -6,7 +6,7 @@
 
   require('../javascript/OrbitControls');
 
-  require('./VisualizerViewer.coffee');
+  require('./Viewer.coffee');
 
   require('./DatGUIInterface.coffee');
 

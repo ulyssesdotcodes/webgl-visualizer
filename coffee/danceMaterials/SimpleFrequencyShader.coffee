@@ -9,10 +9,10 @@ class window.SimpleFrequencyShader
     @shaderLoader = shaderLoader
     @newTexArray = new Uint8Array(@target * @target * 4)
 
-  loadShader: (audioWindow, next) ->    
+  loadShader: (next) ->
     @shaderLoader.load 'simple_frequency', (shader) =>
       shader.uniforms = {
-        freqTexture: {type: "t", value: @reduceArray(audioWindow.frequencyBuffer)}
+        freqTexture: {type: "t", value: AudioWindow.bufferSize}
         resolution: { type: "v2", value: new THREE.Vector2(128, 128)}
       }
 

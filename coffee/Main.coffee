@@ -1,7 +1,7 @@
 # Require all the shit
 require './Visualizer.coffee'
 require '../javascript/OrbitControls'
-require './VisualizerViewer.coffee'
+require './Viewer.coffee'
 require './DatGUIInterface.coffee'
 
 class window.Main
@@ -29,7 +29,7 @@ class window.Main
 
     document.body.appendChild(@renderer.domElement)
 
-    @viewer = new VisualizerViewer(@scene, @camera)
+    @viewer = new Viewer(@scene, @camera)
     if isVisualizer
       @visualizer = new Visualizer(@viewer, new DatGUIInterface())
       window.addEventListener('keydown', @visualizer.onKeyDown.bind(@visualizer), false)

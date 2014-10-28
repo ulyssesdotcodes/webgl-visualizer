@@ -1,7 +1,7 @@
 require './ShaderLoader.coffee'
 require '../javascript/Queue.js'
 
-class window.VisualizerViewer
+class window.Viewer
   constructor: (scene, camera) ->
     @scene = scene
     @dancers = new Array()
@@ -53,7 +53,7 @@ class window.VisualizerViewer
         # This is a really hacky way of checking if it's a shader. Should change.
         if danceMaterial.type.indexOf('Shader') > -1
           newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](@shaderLoader)
-          newMaterial.loadShader @audioWindow, (shaderMaterial) =>
+          newMaterial.loadShader (shaderMaterial) =>
             addDancer newDance, shaderMaterial
           return
 

@@ -36,7 +36,7 @@ class window.ColorDanceMaterial
     maxValue = 0
     maxIndex = -1
     maxImportantIndex = 1
-    for i in [1..audioWindow.bufferSize]
+    for i in [1..AudioWindow.bufferSize]
       freq = audioWindow.frequencyBuffer[i]
       value = freq * i
       if (value > maxValue)
@@ -45,7 +45,7 @@ class window.ColorDanceMaterial
 
     oldColorHSL = @appliedColor.getHSL()
 
-    newColorS = maxIndex / audioWindow.bufferSize;
+    newColorS = maxIndex / AudioWindow.bufferSize;
     newColorS = @smoothingFactor * newColorS + (1 - @smoothingFactor) * oldColorHSL.s
 
     newColorL = audioWindow.averageDb
