@@ -1,3 +1,5 @@
+require('./Config.coffee')
+
 class window.ChoreographyRoutine
   constructor: (@visualizer) ->
     @id = 0
@@ -7,6 +9,8 @@ class window.ChoreographyRoutine
     @dancerParams = {}
     @danceParams = {}
     @danceMaterialParams = {}
+
+    @refreshRoutines()
 
     @reset()
     @routine = [
@@ -165,6 +169,16 @@ class window.ChoreographyRoutine
 
   updateText: () ->
     @visualizer.interface.updateText(@routine)
+
+  refreshRoutines: () ->
+    $.ajax
+      url: Config.server + '/routines'
+      jsonp: 'callback'
+      dataType: 'jsonp'
+      type: 'GET'
+      success: (data) =>
+        @routines = JSON.parse(data)
+
 
   updateDancer: (dancer) ->
     @dancer = dancer.constructor.name
