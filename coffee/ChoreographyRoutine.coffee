@@ -10,116 +10,127 @@ class window.ChoreographyRoutine
     @danceParams = {}
     @danceMaterialParams = {}
 
+    $.ajax
+      url: Config.server + '/routines/1'
+      type: "GET"
+      success: (data) =>
+        _this.loadFirstRoutine(data)
+
     @refreshRoutines()
 
+  loadFirstRoutine: (firstRoutine) ->
     @reset()
-    @routine = [
-      [
-        { id: -1 },
-        {
-          id: 2
-          dancer:
-            type: 'CubeDancer'
-          dance:
-            type: 'PositionDance'
-            params:
-              smoothingFactor: 0.5
-              direction: [0, 4.0, 0]
-          danceMaterial:
-            type: 'ColorDanceMaterial'
-            params:
-              smoothingFactor: 0.5
-        },
-        {
-          id: 0
-          dancer:
-            type: 'PointCloudDancer'
-          dance:
-            type: 'RotateDance'
-            params:
-              axis: [-1, -1, 0]
-          danceMaterial:
-            type: 'ColorDanceMaterial'
-            params:
-              smoothingFactor: 0.5
-              minL: 0.0
-        },
-        {
-          id: 1
-          dancer:
-            type: 'PointCloudDancer'
-          dance:
-            type: 'RotateDance'
-            params:
-              axis: [0, 1, 1]
-              speed: 0.5
-          danceMaterial:
-            type: 'ColorDanceMaterial'
-            params:
-              smoothingFactor: 0.5
-              minL: 0.0
-        }
-      ],
-      [
-        {
-          id: 2
-          dancer:
-            type: 'SphereDancer'
-            params:
-              position: [0.5, 0, 0.5]
-        },
-        {
-          id: 3
-          dancer:
-            type: 'SphereDancer'
-            params:
-              position: [0.5, 0, -0.5]
-          dance:
-            type: 'ScaleDance'
-            params:
-              smoothingFactor: 0.5
-          danceMaterial:
-            type: 'ColorDanceMaterial'
-            params:
-              smoothingFactor: 0.5
-              wireframe: true
-        },
-        {
-          id: 4
-          dancer:
-            type: 'SphereDancer'
-            params:
-              position: [-0.5, 0, 0.5]
-          dance:
-            type: 'ScaleDance'
-            params:
-              smoothingFactor: 0.5
-          danceMaterial:
-            type: 'ColorDanceMaterial'
-            params:
-              smoothingFactor: 0.5
-              wireframe: true
-        },
-        {
-          id: 5
-          dancer:
-            type: 'SphereDancer'
-            params:
-              position: [-0.5, 0, -0.5]
-          dance:
-            type: 'PositionDance'
-            params:
-              smoothingFactor: 0.5
-          danceMaterial:
-            type: 'ColorDanceMaterial'
-            params:
-              smoothingFactor: 0.5
-              wireframe: true
-        },
-      ]
-    ]
-
+    @routine = JSON.parse(firstRoutine.data)
     @updateText()
+    @playNext()
+
+#    The first routine. This should be added to the server before running it.
+#
+#    @routine = [
+#      [
+#        { id: -1 },
+#        {
+#          id: 2
+#          dancer:
+#            type: 'CubeDancer'
+#          dance:
+#            type: 'PositionDance'
+#            params:
+#              smoothingFactor: 0.5
+#              direction: [0, 4.0, 0]
+#          danceMaterial:
+#            type: 'ColorDanceMaterial'
+#            params:
+#              smoothingFactor: 0.5
+#        },
+#        {
+#          id: 0
+#          dancer:
+#            type: 'PointCloudDancer'
+#          dance:
+#            type: 'RotateDance'
+#            params:
+#              axis: [-1, -1, 0]
+#          danceMaterial:
+#            type: 'ColorDanceMaterial'
+#            params:
+#              smoothingFactor: 0.5
+#              minL: 0.0
+#        },
+#        {
+#          id: 1
+#          dancer:
+#            type: 'PointCloudDancer'
+#          dance:
+#            type: 'RotateDance'
+#            params:
+#              axis: [0, 1, 1]
+#              speed: 0.5
+#          danceMaterial:
+#            type: 'ColorDanceMaterial'
+#            params:
+#              smoothingFactor: 0.5
+#              minL: 0.0
+#        }
+#      ],
+#      [
+#        {
+#          id: 2
+#          dancer:
+#            type: 'SphereDancer'
+#            params:
+#              position: [0.5, 0, 0.5]
+#        },
+#        {
+#          id: 3
+#          dancer:
+#            type: 'SphereDancer'
+#            params:
+#              position: [0.5, 0, -0.5]
+#          dance:
+#            type: 'ScaleDance'
+#            params:
+#              smoothingFactor: 0.5
+#          danceMaterial:
+#            type: 'ColorDanceMaterial'
+#            params:
+#              smoothingFactor: 0.5
+#              wireframe: true
+#        },
+#        {
+#          id: 4
+#          dancer:
+#            type: 'SphereDancer'
+#            params:
+#              position: [-0.5, 0, 0.5]
+#          dance:
+#            type: 'ScaleDance'
+#            params:
+#              smoothingFactor: 0.5
+#          danceMaterial:
+#            type: 'ColorDanceMaterial'
+#            params:
+#              smoothingFactor: 0.5
+#              wireframe: true
+#        },
+#        {
+#          id: 5
+#          dancer:
+#            type: 'SphereDancer'
+#            params:
+#              position: [-0.5, 0, -0.5]
+#          dance:
+#            type: 'PositionDance'
+#            params:
+#              smoothingFactor: 0.5
+#          danceMaterial:
+#            type: 'ColorDanceMaterial'
+#            params:
+#              smoothingFactor: 0.5
+#              wireframe: true
+#        },
+#      ]
+#    ]
 
   preview: () ->
     @visualizer.receiveChoreography
@@ -173,11 +184,9 @@ class window.ChoreographyRoutine
   refreshRoutines: () ->
     $.ajax
       url: Config.server + '/routines'
-      jsonp: 'callback'
-      dataType: 'jsonp'
       type: 'GET'
       success: (data) =>
-        @routines = JSON.parse(data)
+        @routines = data
 
 
   updateDancer: (dancer) ->

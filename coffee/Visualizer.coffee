@@ -29,8 +29,6 @@ class window.Visualizer
     @interface.setupPopup()
     @interface.setup(@player, @choreographyRoutine, @viewer)
 
-    @choreographyRoutine.playNext()
-
   receiveChoreography: (move) ->
     @viewer.receiveChoreography move
     if @popup? then @popup.postMessage(@wrapMessage('choreography', move), @domain)
