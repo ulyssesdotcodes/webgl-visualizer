@@ -1,6 +1,9 @@
 # Ignore audio files and compiled javascript
 audio/*
 
+# npm
+node_modules/
+
 #############
 ## WebStorm
 #############
