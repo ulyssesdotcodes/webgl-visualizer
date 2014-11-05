@@ -9,20 +9,21 @@ class window.ChoreographyRoutine
     @dancerParams = {}
     @danceParams = {}
     @danceMaterialParams = {}
+    @routines = []
 
-    $.ajax
-      url: Config.server + '/routines/1'
-      type: "GET"
-      success: (data) =>
-        _this.loadFirstRoutine(data)
-
-    @refreshRoutines()
-
-  loadFirstRoutine: (firstRoutine) ->
     @reset()
-    @routine = JSON.parse(firstRoutine.data)
+
+  loadRoutineById: (id, next) ->
+    $.ajax
+      url: Config.server + '/routines/' + id
+      type: "GET"
+      success: (routine) =>
+        _this.routines[id].data = routine.data
+        next(_this.routines[routine.id])
+
+  queueRoutine: (id) ->
+    Array::push.apply @routine, JSON.parse(@routines[id].data)
     @updateText()
-    @playNext()
 
 #    The first routine. This should be added to the server before running it.
 #
@@ -181,13 +182,23 @@ class window.ChoreographyRoutine
   updateText: () ->
     @visualizer.interface.updateText(@routine)
 
-  refreshRoutines: () ->
+  refreshRoutines: (next) ->
     $.ajax
       url: Config.server + '/routines'
       type: 'GET'
       success: (data) =>
-        @routines = data
+        for routine in data
+          @routines[routine.id] = routine
+        next()
 
+  pushCurrentRoutine: (name, next) ->
+    $.ajax
+      url: Config.server + '/routines'
+      type: 'POST'
+      data: JSON.stringify
+        name: name
+        data: JSON.stringify(@routine)
+      success: next
 
   updateDancer: (dancer) ->
     @dancer = dancer.constructor.name

@@ -1,6 +1,7 @@
 class window.DatGUIInterface
   constructor: () ->
     @routineWindow = $('#routine')
+    @routineStage = $('#routineStage')
 
   setup: (@player, @choreographyRoutine, @viewer) ->
     gui = new dat.GUI()
@@ -84,6 +85,29 @@ class window.DatGUIInterface
         while @choreographyRoutine.routineBeat < routineBeat
           @choreographyRoutine.playNext()
       setTimeout sendBeats, 100
+
+  setupRoutineStage: () ->
+    @refreshRoutines()
+    $('#routinePush').click (e) =>
+      e.preventDefault()
+      @choreographyRoutine.pushCurrentRoutine $('#pushName').val(), () =>
+        @refreshRoutines()
+
+    $('#routineSelect').change (e) =>
+      @currentRoutineId = $('#routineSelect option:selected').val()
+      @choreographyRoutine.loadRoutineById @currentRoutineId, (routine) =>
+        @routineStage.html(@choreographyRoutine.routines[@currentRoutineId].data)
+
+
+    $('#routineQueue').click (e) =>
+      e.preventDefault()
+      @choreographyRoutine.queueRoutine(@currentRoutineId)
+
+  refreshRoutines: () ->
+    $('#routineSelect').empty()
+    for key in Object.keys(@choreographyRoutine.routines)
+      value = @choreographyRoutine.routines[key]
+      $('#routineSelect').append($("<option></option>").attr("value", key).text(value.name));
 
   updateText: (json) ->
     @routineWindow.html(JSON.stringify(json, undefined, 2))
