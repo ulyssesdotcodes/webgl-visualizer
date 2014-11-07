@@ -1,6 +1,8 @@
+require './QueueView.coffee'
+
 class window.DatGUIInterface
   constructor: () ->
-    @routineWindow = $('#routine')
+    @container = $('#interface')
 
   setup: (@player, @choreographyRoutine, @viewer) ->
     gui = new dat.GUI()
@@ -68,6 +70,8 @@ class window.DatGUIInterface
     gui.add(@choreographyRoutine, 'reset')
 
     @setupPopup()
+    @setupQueueView()
+    @setupRoutinesView()
 
 
   setupPopup: () ->
@@ -85,5 +89,12 @@ class window.DatGUIInterface
           @choreographyRoutine.playNext()
       setTimeout sendBeats, 100
 
-  updateText: (json) ->
-    @routineWindow.html(JSON.stringify(json, undefined, 2))
+  setupQueueView: () ->
+    @queueView = new QueueView()
+    @queueView.createView(@container)
+
+  setupRoutinesView: () ->
+    # set up routines view
+
+  updateText: () ->
+    @queueView.updateText(@choreographyRoutine.routineBeat, @choreographyRoutine.routine)

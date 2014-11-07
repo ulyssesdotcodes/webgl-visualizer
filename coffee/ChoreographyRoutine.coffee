@@ -115,7 +115,7 @@ class window.ChoreographyRoutine
       ]
     ]
 
-    @updateText()
+#    @updateText()
 
   # Individual moment methods
 
@@ -160,6 +160,8 @@ class window.ChoreographyRoutine
     for change in @routineMoment
       @visualizer.receiveChoreography change
 
+    @updateText()
+
   updateDancer: (dancer) ->
     @dancer = dancer.constructor.name
     @danceMaterial = dancer.danceMaterial.constructor.name
@@ -180,7 +182,7 @@ class window.ChoreographyRoutine
     @routineBeat = -1
 
   updateText: () ->
-    @visualizer.interface.updateText(@routine)
+    @visualizer.interface.updateText()
 
 
 

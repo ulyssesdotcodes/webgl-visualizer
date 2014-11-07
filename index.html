@@ -8,7 +8,7 @@
 				overflow: hidden;
 			}
 
-			#routineContainer {
+			#interface {
 				width: 300px;
 				float: left;
 				position: absolute;
@@ -17,6 +17,10 @@
 				overflow-x: scroll;
 				height: 100%;
 			}
+
+			.bold {
+				font-weight: bold;
+			}
 		</style>
 		<script src="lib/jquery.min.js"></script>
 		<script src="lib/three.min.js"></script>
@@ -24,10 +28,7 @@
         <script type="text/javascript" src="bundle.js" charset="utf-8"></script>
 	</head>
 	<body>
-		<div id="routineContainer">
-			<a href="#" id="viewerButton"> Open Viewer </a>
-			<pre id="routine"></pre>
-		</div>
+		<div id="interface"></div>
 		<div id="container"></div>
 		<script type="text/javascript">
 		  window.app = new Main(true)
