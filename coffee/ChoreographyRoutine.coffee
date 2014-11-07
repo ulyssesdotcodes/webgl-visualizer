@@ -117,6 +117,8 @@ class window.ChoreographyRoutine
 
     @updateText()
 
+  # Individual moment methods
+
   preview: () ->
     @visualizer.receiveChoreography
       id: @id
@@ -158,6 +160,20 @@ class window.ChoreographyRoutine
     for change in @routineMoment
       @visualizer.receiveChoreography change
 
+  updateDancer: (dancer) ->
+    @dancer = dancer.constructor.name
+    @danceMaterial = dancer.danceMaterial.constructor.name
+    @dance = dancer.dance.constructor.name
+
+
+  # Entire routine methods
+
+  queueRoutine: (routineData) ->
+    Array::push.apply @routine, routineData
+
+  createRoutine: (name, next) ->
+    # Use the routine service to create a routine
+
   reset: () ->
     @routine = []
     @routineMoment = []
@@ -166,8 +182,8 @@ class window.ChoreographyRoutine
   updateText: () ->
     @visualizer.interface.updateText(@routine)
 
-  updateDancer: (dancer) ->
-    @dancer = dancer.constructor.name
-    @danceMaterial = dancer.danceMaterial.constructor.name
-    @dance = dancer.dance.constructor.name
+
+
+
+
 

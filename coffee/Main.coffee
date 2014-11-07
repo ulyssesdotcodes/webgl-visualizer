@@ -2,7 +2,7 @@
 require './Visualizer.coffee'
 require '../javascript/OrbitControls'
 require './Viewer.coffee'
-require './DatGUIInterface.coffee'
+require './interface/DatGUIInterface.coffee'
 
 class window.Main
   # Construct the scene
