@@ -26,7 +26,6 @@ class window.Visualizer
 
     @choreographyRoutine = new ChoreographyRoutine(@)
 
-    @interface.setupPopup()
     @interface.setup(@player, @choreographyRoutine, @viewer)
 
     @choreographyRoutine.playNext()

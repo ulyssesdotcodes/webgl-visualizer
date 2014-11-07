@@ -688,7 +688,6 @@ window.Visualizer = (function() {
     this.player = new Player();
     this.player.createLiveInput();
     this.choreographyRoutine = new ChoreographyRoutine(this);
-    this["interface"].setupPopup();
     this["interface"].setup(this.player, this.choreographyRoutine, this.viewer);
     this.choreographyRoutine.playNext();
   }
@@ -1342,7 +1341,8 @@ window.DatGUIInterface = (function() {
   };
 
   DatGUIInterface.prototype.setupPopup = function() {
-    return $('#viewerButton').click((function(_this) {
+    this.viewerButton = $("<a href='#'>Open Viewer</a>");
+    this.viewerButton.click((function(_this) {
       return function(e) {
         var popupURL, sendBeats;
         e.preventDefault();
@@ -1362,6 +1362,7 @@ window.DatGUIInterface = (function() {
         return setTimeout(sendBeats, 100);
       };
     })(this));
+    return this.container.append(this.viewerButton);
   };
 
   DatGUIInterface.prototype.setupQueueView = function() {

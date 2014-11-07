@@ -75,7 +75,8 @@ class window.DatGUIInterface
 
 
   setupPopup: () ->
-    $('#viewerButton').click (e) =>
+    @viewerButton = $ "<a href='#'>Open Viewer</a>"
+    @viewerButton.click (e) =>
       e.preventDefault()
       @domain = window.location.protocol + '//' + window.location.host
       popupURL = @domain + location.pathname + 'viewer.html'
@@ -88,6 +89,8 @@ class window.DatGUIInterface
         while @choreographyRoutine.routineBeat < routineBeat
           @choreographyRoutine.playNext()
       setTimeout sendBeats, 100
+
+    @container.append(@viewerButton)
 
   setupQueueView: () ->
     @queueView = new QueueView()
