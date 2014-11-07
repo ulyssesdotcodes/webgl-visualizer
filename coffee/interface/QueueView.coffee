@@ -9,11 +9,17 @@ class window.QueueView
     # Display routineQueue with current index highlighted
     html = []
 
-    html.push(@stringify(routineQueue.slice(0, currentIndex)))
-    html.push("<span class='bold'>")
-    html.push(@stringify(routineQueue.slice(currentIndex, currentIndex + 1)))
-    html.push("</span>")
-    html.push(@stringify(routineQueue.slice(currentIndex + 1)))
+    for routine, i in routineQueue
+      if i == currentIndex
+        html.push("<span class='bold'>")
+
+      console.log "i: " + i + ", ci: " + currentIndex
+      html.push(@stringify(routine))
+
+      if i == currentIndex
+        html.push("</span>")
+
+      html.push(',\n')
 
     @routineView.html(html.join(""))
 
