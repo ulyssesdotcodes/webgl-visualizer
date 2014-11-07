@@ -1,8 +1,11 @@
 require './QueueView.coffee'
+require './RoutinesView.coffee'
+require '../RoutinesController.coffee'
 
 class window.DatGUIInterface
   constructor: () ->
     @container = $('#interface')
+    @routinesController = new RoutinesController()
 
   setup: (@player, @choreographyRoutine, @viewer) ->
     gui = new dat.GUI()
@@ -97,7 +100,11 @@ class window.DatGUIInterface
     @queueView.createView(@container)
 
   setupRoutinesView: () ->
-    # set up routines view
+    @routinesView = new RoutinesView(@choreographyRoutine, @routinesController)
+    @routinesView.createView(@container)
+
+    @routinesView.updateRoutines () =>
+      @routinesView.onSelect(1)
 
   updateText: () ->
     @queueView.updateText(@choreographyRoutine.routineBeat, @choreographyRoutine.routine)

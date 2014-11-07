@@ -1,8 +1,9 @@
 class window.QueueView
   createView: (target) ->
     # Add queue view to target
-    @routineView = $ "<pre>"
-    @routineView.addClass "routinesView"
+    @routineView = $ "<pre>",
+      id: 'queue'
+
     target.append @routineView
 
   updateText: (currentIndex, routineQueue) ->
@@ -13,7 +14,6 @@ class window.QueueView
       if i == currentIndex
         html.push("<span class='bold'>")
 
-      console.log "i: " + i + ", ci: " + currentIndex
       html.push(@stringify(routine))
 
       if i == currentIndex
