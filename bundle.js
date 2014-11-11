@@ -1480,7 +1480,7 @@ window.DatGUIInterface = (function() {
   };
 
   DatGUIInterface.prototype.setupQueueView = function() {
-    this.queueView = new QueueView(this.routinesController);
+    this.queueView = new QueueView(this.choreographyRoutine, this.routinesController);
     return this.queueView.createView(this.container);
   };
 
@@ -1506,7 +1506,8 @@ window.DatGUIInterface = (function() {
 
 },{"../RoutinesController.coffee":5,"./QueueView.coffee":20,"./RoutinesView.coffee":21}],20:[function(require,module,exports){
 window.QueueView = (function() {
-  function QueueView(routinesController) {
+  function QueueView(choreographyRoutine, routinesController) {
+    this.choreographyRoutine = choreographyRoutine;
     this.routinesController = routinesController;
     return;
   }
@@ -1562,7 +1563,8 @@ window.QueueView = (function() {
         } else {
           _this.jsonInvalid = false;
           _this.invalidJSON.addClass("hide");
-          return _this.queue = newJSON;
+          _this.queue = newJSON;
+          return _this.choreographyRoutine.routine = _this.queue;
         }
       };
     })(this));

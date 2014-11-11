@@ -1,5 +1,5 @@
 class window.QueueView
-  constructor: (@routinesController) ->
+  constructor: (@choreographyRoutine, @routinesController) ->
     return
 
   createView: (target) ->
@@ -57,6 +57,7 @@ class window.QueueView
         @jsonInvalid = false
         @invalidJSON.addClass "hide"
         @queue = newJSON
+        @choreographyRoutine.routine = @queue
 
 
     target.append @routineView

@@ -96,7 +96,7 @@ class window.DatGUIInterface
     @container.append(@viewerButton)
 
   setupQueueView: () ->
-    @queueView = new QueueView(@routinesController)
+    @queueView = new QueueView(@choreographyRoutine, @routinesController)
     @queueView.createView(@container)
 
   setupRoutinesView: () ->
