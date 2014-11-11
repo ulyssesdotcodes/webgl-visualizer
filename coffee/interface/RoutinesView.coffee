@@ -6,6 +6,7 @@ class window.RoutinesView
     # Add routines view to target
     @routinesContainer = $ "<div>",
       id: 'routinesContainer'
+      class: 'half-height scrollable'
     target.append @routinesContainer
 
     @selector = $ "<select>",

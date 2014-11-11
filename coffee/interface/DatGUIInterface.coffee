@@ -72,6 +72,11 @@ class window.DatGUIInterface
     gui.add(@choreographyRoutine, 'playNext')
     gui.add(@choreographyRoutine, 'reset')
 
+    @containerTop = $ "<div>",
+      class: "half-height"
+
+    @container.append @containerTop
+
     @setupPopup()
     @setupQueueView()
     @setupRoutinesView()
@@ -93,11 +98,11 @@ class window.DatGUIInterface
           @choreographyRoutine.playNext()
       setTimeout sendBeats, 100
 
-    @container.append(@viewerButton)
+    @containerTop.append(@viewerButton)
 
   setupQueueView: () ->
     @queueView = new QueueView(@choreographyRoutine, @routinesController)
-    @queueView.createView(@container)
+    @queueView.createView(@containerTop)
 
   setupRoutinesView: () ->
     @routinesView = new RoutinesView(@choreographyRoutine, @routinesController)

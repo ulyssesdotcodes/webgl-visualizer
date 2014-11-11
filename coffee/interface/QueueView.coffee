@@ -7,24 +7,26 @@ class window.QueueView
 
     target.append @queueContainer
 
-    target = @queueContainer
+    @controls = $ "<div>"
+
+    @queueContainer.append @controls
 
     @pushSuccessful = $ "<div>",
       text: "Push successful"
       class: "hide"
 
-    target.append @pushSuccessful
+    @controls.append @pushSuccessful
 
     @invalidJSON = $ "<div>",
       text: "Invalid json"
       class: "hide"
 
-    target.append @invalidJSON
+    @controls.append @invalidJSON
 
     @queueName = $ "<input>",
       type: "text"
 
-    target.append @queueName
+    @controls.append @queueName
 
     @pushButton = $ "<a>",
       href: "#"
@@ -34,10 +36,11 @@ class window.QueueView
       e.preventDefault()
       @onPush()
 
-    target.append @pushButton
+    @controls.append @pushButton
 
     @routineView = $ "<pre>",
       id: 'queue'
+      class: 'scrollable no-margin'
       contenteditable: true
 
     @routineView.keydown (e) ->
@@ -59,8 +62,10 @@ class window.QueueView
         @queue = newJSON
         @choreographyRoutine.routine = @queue
 
+    @queueContainer.height(target.height() - target.find('a').height())
+    @routineView.height(@queueContainer.height() - @controls.height())
 
-    target.append @routineView
+    @queueContainer.append @routineView
 
   onPush: () ->
     if @jsonInvalid

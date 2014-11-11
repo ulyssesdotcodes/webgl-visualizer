@@ -1449,6 +1449,10 @@ window.DatGUIInterface = (function() {
     gui.add(this.choreographyRoutine, 'insertBeat');
     gui.add(this.choreographyRoutine, 'playNext');
     gui.add(this.choreographyRoutine, 'reset');
+    this.containerTop = $("<div>", {
+      "class": "half-height"
+    });
+    this.container.append(this.containerTop);
     this.setupPopup();
     this.setupQueueView();
     return this.setupRoutinesView();
@@ -1476,12 +1480,12 @@ window.DatGUIInterface = (function() {
         return setTimeout(sendBeats, 100);
       };
     })(this));
-    return this.container.append(this.viewerButton);
+    return this.containerTop.append(this.viewerButton);
   };
 
   DatGUIInterface.prototype.setupQueueView = function() {
     this.queueView = new QueueView(this.choreographyRoutine, this.routinesController);
-    return this.queueView.createView(this.container);
+    return this.queueView.createView(this.containerTop);
   };
 
   DatGUIInterface.prototype.setupRoutinesView = function() {
@@ -1515,21 +1519,22 @@ window.QueueView = (function() {
   QueueView.prototype.createView = function(target) {
     this.queueContainer = $("<div>");
     target.append(this.queueContainer);
-    target = this.queueContainer;
+    this.controls = $("<div>");
+    this.queueContainer.append(this.controls);
     this.pushSuccessful = $("<div>", {
       text: "Push successful",
       "class": "hide"
     });
-    target.append(this.pushSuccessful);
+    this.controls.append(this.pushSuccessful);
     this.invalidJSON = $("<div>", {
       text: "Invalid json",
       "class": "hide"
     });
-    target.append(this.invalidJSON);
+    this.controls.append(this.invalidJSON);
     this.queueName = $("<input>", {
       type: "text"
     });
-    target.append(this.queueName);
+    this.controls.append(this.queueName);
     this.pushButton = $("<a>", {
       href: "#",
       text: "Push"
@@ -1540,9 +1545,10 @@ window.QueueView = (function() {
         return _this.onPush();
       };
     })(this));
-    target.append(this.pushButton);
+    this.controls.append(this.pushButton);
     this.routineView = $("<pre>", {
       id: 'queue',
+      "class": 'scrollable no-margin',
       contenteditable: true
     });
     this.routineView.keydown(function(e) {
@@ -1568,7 +1574,9 @@ window.QueueView = (function() {
         }
       };
     })(this));
-    return target.append(this.routineView);
+    this.queueContainer.height(target.height() - target.find('a').height());
+    this.routineView.height(this.queueContainer.height() - this.controls.height());
+    return this.queueContainer.append(this.routineView);
   };
 
   QueueView.prototype.onPush = function() {
@@ -1621,7 +1629,8 @@ window.RoutinesView = (function() {
 
   RoutinesView.prototype.createView = function(target) {
     this.routinesContainer = $("<div>", {
-      id: 'routinesContainer'
+      id: 'routinesContainer',
+      "class": 'half-height scrollable'
     });
     target.append(this.routinesContainer);
     this.selector = $("<select>", {
