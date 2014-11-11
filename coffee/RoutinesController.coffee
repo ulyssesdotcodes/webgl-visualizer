@@ -7,13 +7,16 @@ class window.RoutinesController
 
   getRoutine: (id, next) ->
     # load from service or from @routines
-    if @routines[id].data != ""
+    if @routines[id]?.data != ""
       next @routines.data
       return
 
     @routinesService.getRoutine id, (routine) =>
-      @routines[id].data = JSON.parse(routine.data)
-      console.log @routines[id]
+      if !@routines[id]?
+        @routines[id] = routine
+      else
+        @routines[id].data = JSON.parse(routine.data)
+
       next(@routines[id])
 
   refreshRoutines: (next) ->
@@ -25,4 +28,12 @@ class window.RoutinesController
         else
           @routines[routine.id] = routine
 
-      next(@routines)
+      if next? then next(@routines)
+
+  pushRoutine: (name, data, next) ->
+    routine =
+      name: name
+      data: JSON.stringify data
+    @routinesService.createRoutine routine, () =>
+      @refreshRoutines()
+      next()

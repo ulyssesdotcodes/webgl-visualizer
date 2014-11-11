@@ -1,5 +1,5 @@
 class window.RoutinesService
-  @server = "http://localhost:3000/"
+  @server = "http://visualizer.upopple.com/"
 
   getRoutines: (next) ->
     # get routines
@@ -19,6 +19,10 @@ class window.RoutinesService
 
 
   createRoutine: (data, next) ->
-     # post data to server
-
-     next(id)
+    # post data to server
+    $.ajax
+      url: @constructor.server + 'routines'
+      type: 'POST'
+      data: JSON.stringify data
+      success: (data) ->
+        next()

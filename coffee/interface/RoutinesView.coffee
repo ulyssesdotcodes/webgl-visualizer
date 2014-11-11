@@ -57,4 +57,5 @@ class window.RoutinesView
   onSelect: (id) ->
     # updateText with routine
     @routinesController.getRoutine id, (routine) =>
-      @updateText(routine.data)
+      if routine?.data?
+        @updateText(routine.data)
