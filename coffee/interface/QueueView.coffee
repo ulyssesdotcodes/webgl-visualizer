@@ -15,6 +15,12 @@ class window.QueueView
 
     target.append @pushSuccessful
 
+    @invalidJSON = $ "<div>",
+      text: "Invalid json"
+      class: "hide"
+
+    target.append @invalidJSON
+
     @queueName = $ "<input>",
       type: "text"
 
@@ -26,15 +32,40 @@ class window.QueueView
 
     @pushButton.click (e) =>
       e.preventDefault()
-      @routinesController.pushRoutine @queueName.val(), @queue, () =>
-        @pushSuccessful.removeClass "hide"
+      @onPush()
 
     target.append @pushButton
 
     @routineView = $ "<pre>",
       id: 'queue'
+      contenteditable: true
+
+    @routineView.keydown (e) ->
+      e.stopPropagation()
+
+    @routineView.on 'input', () =>
+      try
+        newJSON = JSON.parse("[" + @routineView.text() + "]")
+      catch
+        @jsonInvalid = true
+        @invalidJSON.removeClass "hide"
+
+      if !newJSON? || newJSON.length == 0
+        @jsonInvalid = true
+        @invalidJSON.removeClass "hide"
+      else
+        @jsonInvalid = false
+        @invalidJSON.addClass "hide"
+        @queue = newJSON
+
 
     target.append @routineView
+
+  onPush: () ->
+    if @jsonInvalid
+      return
+    @routinesController.pushRoutine @queueName.val(), @queue, () =>
+      @pushSuccessful.removeClass "hide"
 
   updateText: (currentIndex, routineQueue) ->
     @pushSuccessful.addClass "hide"
@@ -54,7 +85,7 @@ class window.QueueView
 
       html.push(',\n')
 
-    @routineView.html(html.join(""))
+    @routineView.html(html.slice(0, html.length-1).join(""))
 
   stringify: (json) ->
     JSON.stringify(json, undefined, 2)
