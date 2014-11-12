@@ -172,14 +172,18 @@ class window.ChoreographyRoutine
 
   queueRoutine: (routineData) ->
     Array::push.apply @routine, routineData
+    @updateText()
 
   createRoutine: (name, next) ->
-    # Use the routine service to create a routine
+    @routinesController.pushRoutine name, @routine, () =>
+      next()
 
   reset: () ->
     @routine = []
     @routineMoment = []
     @routineBeat = -1
+    @visualizer.receiveChoreography([ { id: -1 } ])
+    @updateText()
 
   updateText: () ->
     @visualizer.interface.updateText()

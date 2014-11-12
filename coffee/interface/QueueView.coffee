@@ -1,5 +1,5 @@
 class window.QueueView
-  constructor: (@choreographyRoutine, @routinesController) ->
+  constructor: (@choreographyRoutine) ->
     return
 
   createView: (target) ->
@@ -70,7 +70,7 @@ class window.QueueView
   onPush: () ->
     if @jsonInvalid
       return
-    @routinesController.pushRoutine @queueName.val(), @queue, () =>
+    @choreographyRoutine.createRoutine @queueName.val(), =>
       @pushSuccessful.removeClass "hide"
 
   updateText: (currentIndex, routineQueue) ->

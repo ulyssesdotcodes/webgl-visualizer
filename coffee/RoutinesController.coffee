@@ -8,7 +8,7 @@ class window.RoutinesController
   getRoutine: (id, next) ->
     # load from service or from @routines
     if @routines[id]?.data != ""
-      next @routines.data
+      next @routines[id]
       return
 
     @routinesService.getRoutine id, (routine) =>

@@ -101,7 +101,7 @@ class window.DatGUIInterface
     @containerTop.append(@viewerButton)
 
   setupQueueView: () ->
-    @queueView = new QueueView(@choreographyRoutine, @routinesController)
+    @queueView = new QueueView(@choreographyRoutine)
     @queueView.createView(@containerTop)
 
   setupRoutinesView: () ->
@@ -112,4 +112,5 @@ class window.DatGUIInterface
       @routinesView.onSelect(1)
 
   updateText: () ->
-    @queueView.updateText(@choreographyRoutine.routineBeat, @choreographyRoutine.routine)
+    if @queueView?
+      @queueView.updateText(@choreographyRoutine.routineBeat, @choreographyRoutine.routine)

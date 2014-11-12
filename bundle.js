@@ -249,15 +249,28 @@ window.ChoreographyRoutine = (function() {
   };
 
   ChoreographyRoutine.prototype.queueRoutine = function(routineData) {
-    return Array.prototype.push.apply(this.routine, routineData);
+    Array.prototype.push.apply(this.routine, routineData);
+    return this.updateText();
   };
 
-  ChoreographyRoutine.prototype.createRoutine = function(name, next) {};
+  ChoreographyRoutine.prototype.createRoutine = function(name, next) {
+    return this.routinesController.pushRoutine(name, this.routine, (function(_this) {
+      return function() {
+        return next();
+      };
+    })(this));
+  };
 
   ChoreographyRoutine.prototype.reset = function() {
     this.routine = [];
     this.routineMoment = [];
-    return this.routineBeat = -1;
+    this.routineBeat = -1;
+    this.visualizer.receiveChoreography([
+      {
+        id: -1
+      }
+    ]);
+    return this.updateText();
   };
 
   ChoreographyRoutine.prototype.updateText = function() {
@@ -497,7 +510,7 @@ window.RoutinesController = (function() {
   RoutinesController.prototype.getRoutine = function(id, next) {
     var _ref;
     if (((_ref = this.routines[id]) != null ? _ref.data : void 0) !== "") {
-      next(this.routines.data);
+      next(this.routines[id]);
       return;
     }
     return this.routinesService.getRoutine(id, (function(_this) {
@@ -1484,7 +1497,7 @@ window.DatGUIInterface = (function() {
   };
 
   DatGUIInterface.prototype.setupQueueView = function() {
-    this.queueView = new QueueView(this.choreographyRoutine, this.routinesController);
+    this.queueView = new QueueView(this.choreographyRoutine);
     return this.queueView.createView(this.containerTop);
   };
 
@@ -1499,7 +1512,9 @@ window.DatGUIInterface = (function() {
   };
 
   DatGUIInterface.prototype.updateText = function() {
-    return this.queueView.updateText(this.choreographyRoutine.routineBeat, this.choreographyRoutine.routine);
+    if (this.queueView != null) {
+      return this.queueView.updateText(this.choreographyRoutine.routineBeat, this.choreographyRoutine.routine);
+    }
   };
 
   return DatGUIInterface;
@@ -1510,9 +1525,8 @@ window.DatGUIInterface = (function() {
 
 },{"../RoutinesController.coffee":5,"./QueueView.coffee":20,"./RoutinesView.coffee":21}],20:[function(require,module,exports){
 window.QueueView = (function() {
-  function QueueView(choreographyRoutine, routinesController) {
+  function QueueView(choreographyRoutine) {
     this.choreographyRoutine = choreographyRoutine;
-    this.routinesController = routinesController;
     return;
   }
 
@@ -1583,7 +1597,7 @@ window.QueueView = (function() {
     if (this.jsonInvalid) {
       return;
     }
-    return this.routinesController.pushRoutine(this.queueName.val(), this.queue, (function(_this) {
+    return this.choreographyRoutine.createRoutine(this.queueName.val(), (function(_this) {
       return function() {
         return _this.pushSuccessful.removeClass("hide");
       };
