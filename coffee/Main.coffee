@@ -22,7 +22,6 @@ class window.Main
     @controls.addEventListener( 'change', controlChange )
 
     @camera.position.z = -4
-    @camera.position.y = 3
     @controls.target = new THREE.Vector3( 0, 0, 0 )
 
     window.addEventListener( 'resize', @onWindowResize, false )

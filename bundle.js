@@ -315,7 +315,6 @@ window.Main = (function() {
     })(this);
     this.controls.addEventListener('change', controlChange);
     this.camera.position.z = -4;
-    this.camera.position.y = 3;
     this.controls.target = new THREE.Vector3(0, 0, 0);
     window.addEventListener('resize', this.onWindowResize, false);
     document.body.appendChild(this.renderer.domElement);
