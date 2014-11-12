@@ -14,7 +14,7 @@ class window.Visualizer
   keys: { PAUSE: 32, NEXT: 78 }
 
   # Set up the scene based on a Main object which contains the scene.
-  constructor: (@viewer, @interface) ->
+  constructor: (@viewer, @interface, @routinesController) ->
     @player = new Player()
 
     # Load the sample audio

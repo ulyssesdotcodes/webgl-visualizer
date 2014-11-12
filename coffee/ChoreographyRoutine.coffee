@@ -1,5 +1,5 @@
 class window.ChoreographyRoutine
-  constructor: (@visualizer) ->
+  constructor: (@visualizer, @routinesController) ->
     @id = 0
     @dancer = "CubeDancer"
     @dance = "ScaleDance"
@@ -153,7 +153,7 @@ class window.ChoreographyRoutine
     @updateText()
 
   playNext: () ->
-    if @routineBeat == @routine.length - 1
+    if @routineBeat >= @routine.length - 1
       @routineBeat = -1
 
     @routineMoment = @routine[++@routineBeat]
@@ -175,14 +175,14 @@ class window.ChoreographyRoutine
     @updateText()
 
   createRoutine: (name, next) ->
-    @routinesController.pushRoutine name, @routine, () =>
+    @visualizer.routinesController.pushRoutine name, @routine, () =>
       next()
 
   reset: () ->
     @routine = []
     @routineMoment = []
     @routineBeat = -1
-    @visualizer.receiveChoreography([ { id: -1 } ])
+    @visualizer.receiveChoreography({ id: -1 })
     @updateText()
 
   updateText: () ->

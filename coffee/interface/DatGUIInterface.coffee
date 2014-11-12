@@ -3,9 +3,8 @@ require './RoutinesView.coffee'
 require '../RoutinesController.coffee'
 
 class window.DatGUIInterface
-  constructor: () ->
+  constructor: (@routinesController) ->
     @container = $('#interface')
-    @routinesController = new RoutinesController()
 
   setup: (@player, @choreographyRoutine, @viewer) ->
     gui = new dat.GUI()

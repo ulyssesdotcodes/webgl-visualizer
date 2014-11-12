@@ -38,8 +38,9 @@ window.AudioWindow = (function() {
 
 },{}],2:[function(require,module,exports){
 window.ChoreographyRoutine = (function() {
-  function ChoreographyRoutine(visualizer) {
+  function ChoreographyRoutine(visualizer, routinesController) {
     this.visualizer = visualizer;
+    this.routinesController = routinesController;
     this.id = 0;
     this.dancer = "CubeDancer";
     this.dance = "ScaleDance";
@@ -230,7 +231,7 @@ window.ChoreographyRoutine = (function() {
 
   ChoreographyRoutine.prototype.playNext = function() {
     var change, _i, _len, _ref;
-    if (this.routineBeat === this.routine.length - 1) {
+    if (this.routineBeat >= this.routine.length - 1) {
       this.routineBeat = -1;
     }
     this.routineMoment = this.routine[++this.routineBeat];
@@ -254,7 +255,7 @@ window.ChoreographyRoutine = (function() {
   };
 
   ChoreographyRoutine.prototype.createRoutine = function(name, next) {
-    return this.routinesController.pushRoutine(name, this.routine, (function(_this) {
+    return this.visualizer.routinesController.pushRoutine(name, this.routine, (function(_this) {
       return function() {
         return next();
       };
@@ -265,11 +266,9 @@ window.ChoreographyRoutine = (function() {
     this.routine = [];
     this.routineMoment = [];
     this.routineBeat = -1;
-    this.visualizer.receiveChoreography([
-      {
-        id: -1
-      }
-    ]);
+    this.visualizer.receiveChoreography({
+      id: -1
+    });
     return this.updateText();
   };
 
@@ -297,7 +296,7 @@ require('./interface/DatGUIInterface.coffee');
 window.Main = (function() {
   function Main(isVisualizer) {
     this.onWindowResize = __bind(this.onWindowResize, this);
-    var controlChange;
+    var controlChange, routinesController;
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -320,7 +319,8 @@ window.Main = (function() {
     document.body.appendChild(this.renderer.domElement);
     this.viewer = new Viewer(this.scene, this.camera);
     if (isVisualizer) {
-      this.visualizer = new Visualizer(this.viewer, new DatGUIInterface());
+      routinesController = new RoutinesController();
+      this.visualizer = new Visualizer(this.viewer, new DatGUIInterface(routinesController), routinesController);
       window.addEventListener('keydown', this.visualizer.onKeyDown.bind(this.visualizer), false);
     } else {
       this.domain = window.location.protocol + '//' + window.location.host;
@@ -803,9 +803,10 @@ window.Visualizer = (function() {
     NEXT: 78
   };
 
-  function Visualizer(viewer, _interface) {
+  function Visualizer(viewer, _interface, routinesController) {
     this.viewer = viewer;
     this["interface"] = _interface;
+    this.routinesController = routinesController;
     this.player = new Player();
     this.player.createLiveInput();
     this.choreographyRoutine = new ChoreographyRoutine(this);
@@ -1379,9 +1380,9 @@ require('./RoutinesView.coffee');
 require('../RoutinesController.coffee');
 
 window.DatGUIInterface = (function() {
-  function DatGUIInterface() {
+  function DatGUIInterface(routinesController) {
+    this.routinesController = routinesController;
     this.container = $('#interface');
-    this.routinesController = new RoutinesController();
   }
 
   DatGUIInterface.prototype.setup = function(player, choreographyRoutine, viewer) {
