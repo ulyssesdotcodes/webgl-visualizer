@@ -32,7 +32,7 @@ class window.Visualizer
 
   receiveChoreography: (move) ->
     @viewer.receiveChoreography move
-    if @popup? then @popup.postMessage(@wrapMessage('choreography', move), @domain)
+    if @interface.popup? then @interface.popup.postMessage(@wrapMessage('choreography', move), @interface.domain)
 
   render: () ->
     if !@player.playing
@@ -41,7 +41,7 @@ class window.Visualizer
     @player.update()
 
     @viewer.render(@player.audioWindow)
-    if @popup? then @popup.postMessage(@wrapMessage('render', @player.audioWindow), @domain)
+    if @interface.popup? then @interface.popup.postMessage(@wrapMessage('render', @player.audioWindow), @interface.domain)
 
   wrapMessage: (type, data) ->
     type: type
