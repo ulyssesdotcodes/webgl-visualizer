@@ -1,4 +1,5 @@
 require './Player.coffee'
+require './SoundCloudLoader.coffee'
 require './ChoreographyRoutine.coffee'
 require './dancers/CubeDancer.coffee'
 require './dancers/SphereDancer.coffee'
@@ -22,11 +23,17 @@ class window.Visualizer
     # @play('audio/Glasser.mp3')
     # @play('audio/OnMyMind.mp3')
 
-    @player.createLiveInput()
+    # @player.createLiveInput()
 
     @choreographyRoutine = new ChoreographyRoutine(@)
 
     @interface.setup(@player, @choreographyRoutine, @viewer)
+    
+    @soundCloudLoader = new SoundCloudLoader(@interface.audioView)
+
+    @soundCloudLoader.loadStream "https://soundcloud.com/redviolin/swing-tape-3", () =>
+      @interface.audioView.playStream @soundCloudLoader.streamUrl(), () =>
+        @soundCloudLoader.directStream("coasting")
 
     @choreographyRoutine.playNext()
 

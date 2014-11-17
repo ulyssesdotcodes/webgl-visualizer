@@ -1,28 +1,36 @@
 class window.SoundCloudLoader
   @client_id = "384835fc6e109a2533f83591ae3713e9"
 
-  @constructor: (@player) ->
+  constructor: (@audioWindow) ->
+    @player = @audioWindow.player
     return
 
-  @loadStream: (url, successCallback, errorCallback) ->
+  loadStream: (url, successCallback, errorCallback) ->
     SC.initialize
       client_id: @constructor.client_id
     
-    SC.get '/resolve', { url: url }, (sound) ->
+    SC.get '/resolve', { url: url }, (sound) =>
       if sound.errors
+        console.log "error: ", sound.errors
         errorCallback()
       else
+        console.log sound
         if sound.kind == 'playlist'
           @sound = sound
           @streamPlaylistIndex = 0
           @streamUrl = () => 
-            sound.tracks[@streamPlaylistIndex].stream_url + '?client_id=' + @constructor.client_id
           successCallback()
         else
           @sound = sound
-          @streamUrl = () =>
-            return sound.stream_url + '?client_id=' + @constructor.client_id
-  @directStream = (direction) =>
+          successCallback()
+
+  streamUrl: () ->
+    if @sound.kind == 'playlist'
+      @sound.tracks[@streamPlaylistIndex].stream_url + '?client_id=' + @constructor.client_id
+    else
+      @sound.stream_url + '?client_id=' + @constructor.client_id
+
+  directStream = (direction) =>
     if direction == 'toggle'
       if @player.paused
         @player.play()

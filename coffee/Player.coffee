@@ -73,5 +73,11 @@ class window.Player
     @playing = true
     @source.start(0, @startOffset)
 
+  setPlayer: (player) ->
+    @source = @audioContext.createMediaElementSource(player)
+    @source.connect(@analyser)
+    @analyser.connect(@audioContext.destination)
+    @playing = true
+
   pause: () ->
     if @player.playing then @pause() else @play(@currentlyPlaying)

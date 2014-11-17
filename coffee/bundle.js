@@ -1,0 +1,1 @@
+console.error("Error: Cannot find module 'C:\\Users\\Ulysses\\Development\\webgl-visualizer\\coffee\\coffee\\Main.coffee' from 'C:\\Users\\Ulysses\\Development\\webgl-visualizer\\coffee'")

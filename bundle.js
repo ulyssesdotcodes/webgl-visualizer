@@ -389,7 +389,7 @@ $(function() {
 
 
 
-},{"../javascript/OrbitControls":22,"./Viewer.coffee":8,"./Visualizer.coffee":9,"./interface/DatGUIInterface.coffee":19}],4:[function(require,module,exports){
+},{"../javascript/OrbitControls":24,"./Viewer.coffee":9,"./Visualizer.coffee":10,"./interface/DatGUIInterface.coffee":21}],4:[function(require,module,exports){
 require('./AudioWindow.coffee');
 
 window.Player = (function() {
@@ -481,6 +481,13 @@ window.Player = (function() {
     this.source.connect(this.audioContext.destination);
     this.playing = true;
     return this.source.start(0, this.startOffset);
+  };
+
+  Player.prototype.setPlayer = function(player) {
+    this.source = this.audioContext.createMediaElementSource(player);
+    this.source.connect(this.analyser);
+    this.analyser.connect(this.audioContext.destination);
+    return this.playing = true;
   };
 
   Player.prototype.pause = function() {
@@ -663,6 +670,89 @@ window.ShaderLoader = (function() {
 
 
 },{}],8:[function(require,module,exports){
+window.SoundCloudLoader = (function() {
+  var directStream;
+
+  SoundCloudLoader.client_id = "384835fc6e109a2533f83591ae3713e9";
+
+  function SoundCloudLoader(audioWindow) {
+    this.audioWindow = audioWindow;
+    this.player = this.audioWindow.player;
+    return;
+  }
+
+  SoundCloudLoader.prototype.loadStream = function(url, successCallback, errorCallback) {
+    SC.initialize({
+      client_id: this.constructor.client_id
+    });
+    return SC.get('/resolve', {
+      url: url
+    }, (function(_this) {
+      return function(sound) {
+        if (sound.errors) {
+          console.log("error: ", sound.errors);
+          return errorCallback();
+        } else {
+          console.log(sound);
+          if (sound.kind === 'playlist') {
+            _this.sound = sound;
+            _this.streamPlaylistIndex = 0;
+            _this.streamUrl = function() {};
+            return successCallback();
+          } else {
+            _this.sound = sound;
+            return successCallback();
+          }
+        }
+      };
+    })(this));
+  };
+
+  SoundCloudLoader.prototype.streamUrl = function() {
+    if (this.sound.kind === 'playlist') {
+      return this.sound.tracks[this.streamPlaylistIndex].stream_url + '?client_id=' + this.constructor.client_id;
+    } else {
+      return this.sound.stream_url + '?client_id=' + this.constructor.client_id;
+    }
+  };
+
+  directStream = function(direction) {
+    if (direction === 'toggle') {
+      if (SoundCloudLoader.player.paused) {
+        return SoundCloudLoader.player.play();
+      } else {
+        return SoundCloudLoader.player.pause();
+      }
+    } else if (SoundCloudLoader.sound.kind === 'playlist') {
+      if (direction === 'coasting') {
+        SoundCloudLoader.streamPlaylistIndex++;
+      } else if (direction = 'forward') {
+        if (SoundCloudLoader.streamPlaylistIndex >= SoundCloudLoader.sound.track_count - 1) {
+          SoundCloudLoader.streamPlaylistIndex++;
+        } else {
+          SoundCloudLoader.streamPlaylistIndex--;
+        }
+      } else {
+        if (SoundCloudLoader.streamPlaylistIndex <= 0) {
+          SoundCloudLoader.streamPlaylistIndex = SoundCloudLoader.sound.track_count - 1;
+        } else {
+          SoundCloudLoader.streamPlaylistIndex--;
+        }
+      }
+      if (SoundCloudLoader.streamPlaylistIndex >= 0 && SoundCloudLoader.streamPlaylistIndex <= SoundCloudLoader.sound.track_count - 1) {
+        SoundCloudLoader.player.setAttribute(SoundCloudLoader.streamUrl());
+        return SoundCloudLoader.player.play();
+      }
+    }
+  };
+
+  return SoundCloudLoader;
+
+})();
+
+
+
+},{}],9:[function(require,module,exports){
 require('./ShaderLoader.coffee');
 
 require('../javascript/Queue.js');
@@ -776,8 +866,10 @@ window.Viewer = (function() {
 
 
 
-},{"../javascript/Queue.js":23,"./ShaderLoader.coffee":7}],9:[function(require,module,exports){
+},{"../javascript/Queue.js":25,"./ShaderLoader.coffee":7}],10:[function(require,module,exports){
 require('./Player.coffee');
+
+require('./SoundCloudLoader.coffee');
 
 require('./ChoreographyRoutine.coffee');
 
@@ -808,9 +900,16 @@ window.Visualizer = (function() {
     this["interface"] = _interface;
     this.routinesController = routinesController;
     this.player = new Player();
-    this.player.createLiveInput();
     this.choreographyRoutine = new ChoreographyRoutine(this);
     this["interface"].setup(this.player, this.choreographyRoutine, this.viewer);
+    this.soundCloudLoader = new SoundCloudLoader(this["interface"].audioView);
+    this.soundCloudLoader.loadStream("https://soundcloud.com/redviolin/swing-tape-3", (function(_this) {
+      return function() {
+        return _this["interface"].audioView.playStream(_this.soundCloudLoader.streamUrl(), function() {
+          return _this.soundCloudLoader.directStream("coasting");
+        });
+      };
+    })(this));
     this.choreographyRoutine.playNext();
   }
 
@@ -871,7 +970,7 @@ window.Visualizer = (function() {
 
 
 
-},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./danceMaterials/ColorDanceMaterial.coffee":10,"./danceMaterials/SimpleFrequencyShader.coffee":11,"./dancers/CubeDancer.coffee":12,"./dancers/PointCloudDancer.coffee":14,"./dancers/SphereDancer.coffee":15,"./dances/PositionDance.coffee":16,"./dances/RotateDance.coffee":17,"./dances/ScaleDance.coffee":18}],10:[function(require,module,exports){
+},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./SoundCloudLoader.coffee":8,"./danceMaterials/ColorDanceMaterial.coffee":11,"./danceMaterials/SimpleFrequencyShader.coffee":12,"./dancers/CubeDancer.coffee":13,"./dancers/PointCloudDancer.coffee":15,"./dancers/SphereDancer.coffee":16,"./dances/PositionDance.coffee":17,"./dances/RotateDance.coffee":18,"./dances/ScaleDance.coffee":19}],11:[function(require,module,exports){
 window.ColorDanceMaterial = (function() {
   ColorDanceMaterial.params = [
     {
@@ -954,7 +1053,7 @@ window.ColorDanceMaterial = (function() {
 
 
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 window.SimpleFrequencyShader = (function() {
   SimpleFrequencyShader.params = [];
 
@@ -1039,7 +1138,7 @@ window.SimpleFrequencyShader = (function() {
 
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1065,7 +1164,7 @@ window.CubeDancer = (function(_super) {
 
 
 
-},{"./Dancer.coffee":13}],13:[function(require,module,exports){
+},{"./Dancer.coffee":14}],14:[function(require,module,exports){
 window.Dancer = (function() {
   Dancer.type = Dancer;
 
@@ -1112,7 +1211,7 @@ window.Dancer = (function() {
 
 
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1180,7 +1279,7 @@ window.PointCloudDancer = (function(_super) {
 
 
 
-},{"./Dancer.coffee":13}],15:[function(require,module,exports){
+},{"./Dancer.coffee":14}],16:[function(require,module,exports){
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1206,7 +1305,7 @@ window.SphereDancer = (function(_super) {
 
 
 
-},{"./Dancer.coffee":13}],16:[function(require,module,exports){
+},{"./Dancer.coffee":14}],17:[function(require,module,exports){
 window.PositionDance = (function() {
   PositionDance.params = [
     {
@@ -1264,7 +1363,7 @@ window.PositionDance = (function() {
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 window.RotateDance = (function() {
   RotateDance.name = "RotateDance";
 
@@ -1317,7 +1416,7 @@ window.RotateDance = (function() {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 window.ScaleDance = (function() {
   ScaleDance.params = [
     {
@@ -1372,10 +1471,35 @@ window.ScaleDance = (function() {
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
+window.AudioView = (function() {
+  function AudioView() {}
+
+  AudioView.prototype.createView = function(target) {
+    this.audioPlayer = $("<audio />", {
+      controls: true
+    });
+    return target.append(this.audioPlayer);
+  };
+
+  AudioView.prototype.playStream = function(url, onEnd) {
+    this.audioPlayer.bind('ended', onEnd);
+    this.audioPlayer.attr('src', url);
+    return this.audioPlayer.trigger('play');
+  };
+
+  return AudioView;
+
+})();
+
+
+
+},{}],21:[function(require,module,exports){
 require('./QueueView.coffee');
 
 require('./RoutinesView.coffee');
+
+require('./AudioView.coffee');
 
 require('../RoutinesController.coffee');
 
@@ -1468,7 +1592,8 @@ window.DatGUIInterface = (function() {
     this.container.append(this.containerTop);
     this.setupPopup();
     this.setupQueueView();
-    return this.setupRoutinesView();
+    this.setupRoutinesView();
+    return this.setupAudioPlayer();
   };
 
   DatGUIInterface.prototype.setupPopup = function() {
@@ -1511,6 +1636,17 @@ window.DatGUIInterface = (function() {
     })(this));
   };
 
+  DatGUIInterface.prototype.setupAudioPlayer = function() {
+    var bottomBar;
+    bottomBar = $("<div>", {
+      "class": "bottom-bar"
+    });
+    this.audioView = new AudioView();
+    this.audioView.createView(bottomBar);
+    $('body').append(bottomBar);
+    return this.player.setPlayer(this.audioView.audioPlayer[0]);
+  };
+
   DatGUIInterface.prototype.updateText = function() {
     if (this.queueView != null) {
       return this.queueView.updateText(this.choreographyRoutine.routineBeat, this.choreographyRoutine.routine);
@@ -1523,7 +1659,7 @@ window.DatGUIInterface = (function() {
 
 
 
-},{"../RoutinesController.coffee":5,"./QueueView.coffee":20,"./RoutinesView.coffee":21}],20:[function(require,module,exports){
+},{"../RoutinesController.coffee":5,"./AudioView.coffee":20,"./QueueView.coffee":22,"./RoutinesView.coffee":23}],22:[function(require,module,exports){
 window.QueueView = (function() {
   function QueueView(choreographyRoutine) {
     this.choreographyRoutine = choreographyRoutine;
@@ -1633,7 +1769,7 @@ window.QueueView = (function() {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 window.RoutinesView = (function() {
   function RoutinesView(choreographyRoutine, routinesController) {
     this.choreographyRoutine = choreographyRoutine;
@@ -1721,7 +1857,7 @@ window.RoutinesView = (function() {
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /**
  * @author qiao / https://github.com/qiao
  * @author mrdoob / http://mrdoob.com
@@ -2383,7 +2519,7 @@ THREE.OrbitControls = function (object, domElement) {
 };
 
 THREE.OrbitControls.prototype = Object.create(THREE.EventDispatcher.prototype);
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 (function () {
     window.Queue = (function () {
         function Queue() {

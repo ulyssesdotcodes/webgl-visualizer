@@ -1,5 +1,6 @@
 require './QueueView.coffee'
 require './RoutinesView.coffee'
+require './AudioView.coffee'
 require '../RoutinesController.coffee'
 
 class window.DatGUIInterface
@@ -79,6 +80,7 @@ class window.DatGUIInterface
     @setupPopup()
     @setupQueueView()
     @setupRoutinesView()
+    @setupAudioPlayer()
 
 
   setupPopup: () ->
@@ -109,6 +111,17 @@ class window.DatGUIInterface
 
     @routinesView.updateRoutines () =>
       @routinesView.onSelect(1)
+  
+  setupAudioPlayer: () ->
+    bottomBar = $ "<div>",
+      class: "bottom-bar"
+
+    @audioView = new AudioView()
+    @audioView.createView(bottomBar)
+    
+    # TODO: Technically, container should contain this.
+    $('body').append bottomBar
+    @player.setPlayer @audioView.audioPlayer[0]   
 
   updateText: () ->
     if @queueView?
