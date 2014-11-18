@@ -18,15 +18,29 @@ class window.Player
     @audioWindow.update(@analyser, @audioContext.currentTime)
 
   pause: () ->
-    @source.stop()
-    @playing = false
-    @startOffset += @audioContext.currentTime - @startTime
+    if @player? && @playing
+      @source.disconnect()
+      @player[0].pause()
+      @player.bind "play", () =>
+        @pause()
+      @playing = false
+      @startOffset += @audioContext.currentTime - @startTime
+    else if @player?
+      @source.connect @analyser
+      @player[0].play()
+      @playing = true
+
+      if @miked
+        @pauseMic()
 
   createLiveInput: () ->
+    if @playing
+      @pause()
+
     gotStream = (stream) =>
-      @playing = true
-      @source = @audioContext.createMediaStreamSource stream
-      @source.connect @analyser
+      @miked = true
+      @micSource = @audioContext.createMediaStreamSource stream
+      @micSource.connect @analyser
 
     @dbSampleBuf = new Uint8Array(2048)
 
@@ -41,6 +55,11 @@ class window.Player
         console.log(err))
     else
       return(alert("Error: getUserMedia not supported!"));
+
+  pauseMic: () ->
+    if @miked
+      @micSource.disconnect()
+      @miked = false
 
   play: (url) ->
     @currentlyPlaying = url
@@ -73,11 +92,10 @@ class window.Player
     @playing = true
     @source.start(0, @startOffset)
 
-  setPlayer: (player) ->
-    @source = @audioContext.createMediaElementSource(player)
+  setPlayer: (@player) ->
+    @source = @audioContext.createMediaElementSource(@player[0])
     @source.connect(@analyser)
     @analyser.connect(@audioContext.destination)
     @playing = true
+    @pauseMic()
 
-  pause: () ->
-    if @player.playing then @pause() else @play(@currentlyPlaying)

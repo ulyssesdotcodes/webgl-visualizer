@@ -7,7 +7,7 @@ class window.DatGUIInterface
   constructor: (@routinesController) ->
     @container = $('#interface')
 
-  setup: (@player, @choreographyRoutine, @viewer) ->
+  setup: (@player, @choreographyRoutine, @viewer, @onUrl) ->
     gui = new dat.GUI()
 
     gui.add(@player.audioWindow, 'responsiveness', 0.0, 5.0)
@@ -117,11 +117,15 @@ class window.DatGUIInterface
       class: "bottom-bar"
 
     @audioView = new AudioView()
-    @audioView.createView(bottomBar)
+
+    onMic = () =>
+      @player.createLiveInput()
+
+    @audioView.createView bottomBar, onMic, @onUrl 
     
     # TODO: Technically, container should contain this.
     $('body').append bottomBar
-    @player.setPlayer @audioView.audioPlayer[0]   
+    @player.setPlayer @audioView.audioPlayer
 
   updateText: () ->
     if @queueView?

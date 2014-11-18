@@ -27,13 +27,14 @@ class window.Visualizer
 
     @choreographyRoutine = new ChoreographyRoutine(@)
 
-    @interface.setup(@player, @choreographyRoutine, @viewer)
+    @interface.setup @player, @choreographyRoutine, @viewer, (url) =>
+      @soundCloudLoader.loadStream url, () ->
+        console.log "playing " + url
     
     @soundCloudLoader = new SoundCloudLoader(@interface.audioView)
 
     @soundCloudLoader.loadStream "https://soundcloud.com/redviolin/swing-tape-3", () =>
-      @interface.audioView.playStream @soundCloudLoader.streamUrl(), () =>
-        @soundCloudLoader.directStream("coasting")
+      console.log "Playing some music"
 
     @choreographyRoutine.playNext()
 
@@ -75,3 +76,6 @@ class window.Visualizer
   @danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial
     SimpleFrequencyShader: SimpleFrequencyShader
+
+  pause: () ->
+    if @player.playing then @pause() else @play(@currentlyPlaying)

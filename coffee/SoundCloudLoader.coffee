@@ -1,8 +1,8 @@
 class window.SoundCloudLoader
   @client_id = "384835fc6e109a2533f83591ae3713e9"
 
-  constructor: (@audioWindow) ->
-    @player = @audioWindow.player
+  constructor: (@audioView) ->
+    @player = @audioView.player
     return
 
   loadStream: (url, successCallback, errorCallback) ->
@@ -20,9 +20,15 @@ class window.SoundCloudLoader
           @streamPlaylistIndex = 0
           @streamUrl = () => 
           successCallback()
+          @playStream()
         else
           @sound = sound
           successCallback()
+          @playStream()
+
+  playStream: () ->
+    @audioView.playStream @streamUrl(), () =>
+      @directStream('coasting')
 
   streamUrl: () ->
     if @sound.kind == 'playlist'

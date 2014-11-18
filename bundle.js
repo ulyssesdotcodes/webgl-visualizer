@@ -412,18 +412,36 @@ window.Player = (function() {
   };
 
   Player.prototype.pause = function() {
-    this.source.stop();
-    this.playing = false;
-    return this.startOffset += this.audioContext.currentTime - this.startTime;
+    if ((this.player != null) && this.playing) {
+      this.source.disconnect();
+      this.player[0].pause();
+      this.player.bind("play", (function(_this) {
+        return function() {
+          return _this.pause();
+        };
+      })(this));
+      this.playing = false;
+      return this.startOffset += this.audioContext.currentTime - this.startTime;
+    } else if (this.player != null) {
+      this.source.connect(this.analyser);
+      this.player[0].play();
+      this.playing = true;
+      if (this.miked) {
+        return this.pauseMic();
+      }
+    }
   };
 
   Player.prototype.createLiveInput = function() {
     var gotStream;
+    if (this.playing) {
+      this.pause();
+    }
     gotStream = (function(_this) {
       return function(stream) {
-        _this.playing = true;
-        _this.source = _this.audioContext.createMediaStreamSource(stream);
-        return _this.source.connect(_this.analyser);
+        _this.miked = true;
+        _this.micSource = _this.audioContext.createMediaStreamSource(stream);
+        return _this.micSource.connect(_this.analyser);
       };
     })(this);
     this.dbSampleBuf = new Uint8Array(2048);
@@ -447,6 +465,13 @@ window.Player = (function() {
       });
     } else {
       return alert("Error: getUserMedia not supported!");
+    }
+  };
+
+  Player.prototype.pauseMic = function() {
+    if (this.miked) {
+      this.micSource.disconnect();
+      return this.miked = false;
     }
   };
 
@@ -484,18 +509,12 @@ window.Player = (function() {
   };
 
   Player.prototype.setPlayer = function(player) {
-    this.source = this.audioContext.createMediaElementSource(player);
+    this.player = player;
+    this.source = this.audioContext.createMediaElementSource(this.player[0]);
     this.source.connect(this.analyser);
     this.analyser.connect(this.audioContext.destination);
-    return this.playing = true;
-  };
-
-  Player.prototype.pause = function() {
-    if (this.player.playing) {
-      return this.pause();
-    } else {
-      return this.play(this.currentlyPlaying);
-    }
+    this.playing = true;
+    return this.pauseMic();
   };
 
   return Player;
@@ -675,9 +694,9 @@ window.SoundCloudLoader = (function() {
 
   SoundCloudLoader.client_id = "384835fc6e109a2533f83591ae3713e9";
 
-  function SoundCloudLoader(audioWindow) {
-    this.audioWindow = audioWindow;
-    this.player = this.audioWindow.player;
+  function SoundCloudLoader(audioView) {
+    this.audioView = audioView;
+    this.player = this.audioView.player;
     return;
   }
 
@@ -698,12 +717,22 @@ window.SoundCloudLoader = (function() {
             _this.sound = sound;
             _this.streamPlaylistIndex = 0;
             _this.streamUrl = function() {};
-            return successCallback();
+            successCallback();
+            return _this.playStream();
           } else {
             _this.sound = sound;
-            return successCallback();
+            successCallback();
+            return _this.playStream();
           }
         }
+      };
+    })(this));
+  };
+
+  SoundCloudLoader.prototype.playStream = function() {
+    return this.audioView.playStream(this.streamUrl(), (function(_this) {
+      return function() {
+        return _this.directStream('coasting');
       };
     })(this));
   };
@@ -901,13 +930,17 @@ window.Visualizer = (function() {
     this.routinesController = routinesController;
     this.player = new Player();
     this.choreographyRoutine = new ChoreographyRoutine(this);
-    this["interface"].setup(this.player, this.choreographyRoutine, this.viewer);
+    this["interface"].setup(this.player, this.choreographyRoutine, this.viewer, (function(_this) {
+      return function(url) {
+        return _this.soundCloudLoader.loadStream(url, function() {
+          return console.log("playing " + url);
+        });
+      };
+    })(this));
     this.soundCloudLoader = new SoundCloudLoader(this["interface"].audioView);
     this.soundCloudLoader.loadStream("https://soundcloud.com/redviolin/swing-tape-3", (function(_this) {
       return function() {
-        return _this["interface"].audioView.playStream(_this.soundCloudLoader.streamUrl(), function() {
-          return _this.soundCloudLoader.directStream("coasting");
-        });
+        return console.log("Playing some music");
       };
     })(this));
     this.choreographyRoutine.playNext();
@@ -962,6 +995,14 @@ window.Visualizer = (function() {
   Visualizer.danceMaterialTypes = {
     ColorDanceMaterial: ColorDanceMaterial,
     SimpleFrequencyShader: SimpleFrequencyShader
+  };
+
+  Visualizer.prototype.pause = function() {
+    if (this.player.playing) {
+      return this.pause();
+    } else {
+      return this.play(this.currentlyPlaying);
+    }
   };
 
   return Visualizer;
@@ -1475,10 +1516,37 @@ window.ScaleDance = (function() {
 window.AudioView = (function() {
   function AudioView() {}
 
-  AudioView.prototype.createView = function(target) {
+  AudioView.prototype.createView = function(target, onMic, onUrl) {
+    var micIcon;
     this.audioPlayer = $("<audio />", {
       controls: true
     });
+    this.controls = $("<div>");
+    this.mic = $("<a>", {
+      href: '#'
+    });
+    micIcon = $("<img/>", {
+      "class": "icon",
+      src: "./resources/ic_mic_none_white_48dp.png"
+    });
+    this.mic.append(micIcon);
+    this.controls.append(this.mic);
+    this.mic.click((function(_this) {
+      return function(e) {
+        e.preventDefault();
+        return onMic();
+      };
+    })(this));
+    this.input = $("<input>", {
+      type: "text"
+    });
+    this.controls.append(this.input);
+    this.input.change((function(_this) {
+      return function(e) {
+        return onUrl(_this.input.val());
+      };
+    })(this));
+    target.append(this.controls);
     return target.append(this.audioPlayer);
   };
 
@@ -1509,11 +1577,12 @@ window.DatGUIInterface = (function() {
     this.container = $('#interface');
   }
 
-  DatGUIInterface.prototype.setup = function(player, choreographyRoutine, viewer) {
+  DatGUIInterface.prototype.setup = function(player, choreographyRoutine, viewer, onUrl) {
     var danceController, danceFolder, danceMaterialController, danceMaterialFolder, dancerController, dancerFolder, gui, idController, setupFolder, updateDanceFolder, updateDanceMaterialFolder, updateDancerFolder, updateFolder, _ref, _ref1, _ref2;
     this.player = player;
     this.choreographyRoutine = choreographyRoutine;
     this.viewer = viewer;
+    this.onUrl = onUrl;
     gui = new dat.GUI();
     gui.add(this.player.audioWindow, 'responsiveness', 0.0, 5.0);
     idController = gui.add(this.choreographyRoutine, 'id');
@@ -1637,14 +1706,19 @@ window.DatGUIInterface = (function() {
   };
 
   DatGUIInterface.prototype.setupAudioPlayer = function() {
-    var bottomBar;
+    var bottomBar, onMic;
     bottomBar = $("<div>", {
       "class": "bottom-bar"
     });
     this.audioView = new AudioView();
-    this.audioView.createView(bottomBar);
+    onMic = (function(_this) {
+      return function() {
+        return _this.player.createLiveInput();
+      };
+    })(this);
+    this.audioView.createView(bottomBar, onMic, this.onUrl);
     $('body').append(bottomBar);
-    return this.player.setPlayer(this.audioView.audioPlayer[0]);
+    return this.player.setPlayer(this.audioView.audioPlayer);
   };
 
   DatGUIInterface.prototype.updateText = function() {
