@@ -43,7 +43,7 @@ class window.Visualizer
     if @interface.popup? then @interface.popup.postMessage(@wrapMessage('choreography', move), @interface.domain)
 
   render: () ->
-    if !@player.playing
+    if !@player.playing && !@player.miked
       return
 
     @player.update()

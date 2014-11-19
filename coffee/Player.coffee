@@ -21,10 +21,14 @@ class window.Player
     if @player? && @playing
       @source.disconnect()
       @player[0].pause()
-      @player.bind "play", () =>
-        @pause()
       @playing = false
       @startOffset += @audioContext.currentTime - @startTime
+      @player.bind "play", () =>
+        @source.connect @analyser
+        @playing = true
+        if @miked
+          @pauseMic()
+
     else if @player?
       @source.connect @analyser
       @player[0].play()
@@ -36,6 +40,11 @@ class window.Player
   createLiveInput: () ->
     if @playing
       @pause()
+
+    if @micSource?
+      @micSource.connect @analyser
+      @miked = true
+      return
 
     gotStream = (stream) =>
       @miked = true

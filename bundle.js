@@ -415,13 +415,17 @@ window.Player = (function() {
     if ((this.player != null) && this.playing) {
       this.source.disconnect();
       this.player[0].pause();
-      this.player.bind("play", (function(_this) {
+      this.playing = false;
+      this.startOffset += this.audioContext.currentTime - this.startTime;
+      return this.player.bind("play", (function(_this) {
         return function() {
-          return _this.pause();
+          _this.source.connect(_this.analyser);
+          _this.playing = true;
+          if (_this.miked) {
+            return _this.pauseMic();
+          }
         };
       })(this));
-      this.playing = false;
-      return this.startOffset += this.audioContext.currentTime - this.startTime;
     } else if (this.player != null) {
       this.source.connect(this.analyser);
       this.player[0].play();
@@ -436,6 +440,11 @@ window.Player = (function() {
     var gotStream;
     if (this.playing) {
       this.pause();
+    }
+    if (this.micSource != null) {
+      this.micSource.connect(this.analyser);
+      this.miked = true;
+      return;
     }
     gotStream = (function(_this) {
       return function(stream) {
@@ -954,7 +963,7 @@ window.Visualizer = (function() {
   };
 
   Visualizer.prototype.render = function() {
-    if (!this.player.playing) {
+    if (!this.player.playing && !this.player.miked) {
       return;
     }
     this.player.update();
