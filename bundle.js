@@ -934,6 +934,7 @@ window.Visualizer = (function() {
   };
 
   function Visualizer(viewer, _interface, routinesController) {
+    var url;
     this.viewer = viewer;
     this["interface"] = _interface;
     this.routinesController = routinesController;
@@ -947,7 +948,8 @@ window.Visualizer = (function() {
       };
     })(this));
     this.soundCloudLoader = new SoundCloudLoader(this["interface"].audioView);
-    this.soundCloudLoader.loadStream("https://soundcloud.com/redviolin/swing-tape-3", (function(_this) {
+    url = window.location.hash != null ? "https://soundcloud.com/" + window.location.hash.substring(1) : "https://soundcloud.com/redviolin/swing-tape-3";
+    this.soundCloudLoader.loadStream(url, (function(_this) {
       return function() {
         return console.log("Playing some music");
       };

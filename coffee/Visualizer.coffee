@@ -30,10 +30,15 @@ class window.Visualizer
     @interface.setup @player, @choreographyRoutine, @viewer, (url) =>
       @soundCloudLoader.loadStream url, () ->
         console.log "playing " + url
-    
+   
     @soundCloudLoader = new SoundCloudLoader(@interface.audioView)
 
-    @soundCloudLoader.loadStream "https://soundcloud.com/redviolin/swing-tape-3", () =>
+    url = 
+      if window.location.hash?
+        "https://soundcloud.com/" + window.location.hash.substring(1)
+      else
+        "https://soundcloud.com/redviolin/swing-tape-3"
+    @soundCloudLoader.loadStream url, () =>
       console.log "Playing some music"
 
     @choreographyRoutine.playNext()
