@@ -1,4 +1,7 @@
 uniform sampler2D freqTexture;
+uniform float time;
+uniform vec2 audioResolution;
+
 varying vec2 vUv;
 
 void main() {

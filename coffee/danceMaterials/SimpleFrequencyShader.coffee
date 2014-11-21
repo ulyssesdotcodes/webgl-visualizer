@@ -4,16 +4,17 @@ class window.SimpleFrequencyShader
   @name: "SimpleFrequencyShader"
   
   constructor: (shaderLoader) ->
-    @target = 128
+    @target = 256
     @size = 1024
     @shaderLoader = shaderLoader
-    @newTexArray = new Uint8Array(@target * @target * 4)
+    @newTexArray = new Uint8Array(@target * 8)
 
   loadShader: (next) ->
     @shaderLoader.load 'simple_frequency', (shader) =>
       shader.uniforms = {
-        freqTexture: {type: "t", value: AudioWindow.bufferSize}
-        resolution: { type: "v2", value: new THREE.Vector2(128, 128)}
+        time: { type: "1f", value: 0 }
+        audioResolution: { type: "v2", value: [@target, 2] }
+        freqTexture: { type: "t", value: AudioWindow.bufferSize}
       }
 
       @material = new THREE.ShaderMaterial(shader)
@@ -24,6 +25,7 @@ class window.SimpleFrequencyShader
 
   update: (audioWindow, dancer) ->
     dancer.body.material.uniforms.freqTexture.value = @reduceArray(audioWindow.frequencyBuffer)
+    dancer.body.material.uniforms.time.value = audioWindow.time
 
   reduceArray: (freqBuf) ->
 
@@ -39,29 +41,13 @@ class window.SimpleFrequencyShader
         movingSum = 0
 
 
-    for i in [0...@target]
-      for j in [0...@target]
-        baseIndex = i * @target * 4 + j * 4;
-        if newBuf[j] > i * 2
-          @newTexArray[baseIndex] = 255
-          @newTexArray[baseIndex + 1] = 255
-          @newTexArray[baseIndex + 2] = 255
-          @newTexArray[baseIndex + 3] = 255
-        else 
-          @newTexArray[baseIndex] = 0
-          @newTexArray[baseIndex + 1] = 0
-          @newTexArray[baseIndex + 2] = 0
-          @newTexArray[baseIndex + 3] = 0
+    for i in [0...@target * 8]
+      @newTexArray[i] = newBuf[i % @target]
 
-    texture = new THREE.DataTexture(@newTexArray, @target, @target, THREE.RGBAFormat, THREE.UnsignedByte)
+    texture = new THREE.DataTexture(@newTexArray, @target, 2, THREE.LuminanceFormat, THREE.UnsignedByte)
     texture.needsUpdate = true
-    texture.flipY = false
-    texture.generateMipmaps = false
     texture.magFilter = THREE.LinearFilter
     texture.minFilter = THREE.LinearFilter
     texture.unpackAlignment = 1
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.RepeatWrapping
-    texture.anisotropy = 4
 
     return texture
