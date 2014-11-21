@@ -34,7 +34,7 @@ class window.Visualizer
     @soundCloudLoader = new SoundCloudLoader(@interface.audioView)
 
     url = 
-      if window.location.hash?
+      if window.location.hash == ""?
         "https://soundcloud.com/" + window.location.hash.substring(1)
       else
         "https://soundcloud.com/redviolin/swing-tape-3"

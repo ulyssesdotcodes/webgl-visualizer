@@ -32,4 +32,3 @@ class window.AudioView
   playStream: (url, onEnd) ->
     @audioPlayer.bind 'ended', onEnd
     @audioPlayer.attr 'src', url
-    @audioPlayer.trigger 'play'
