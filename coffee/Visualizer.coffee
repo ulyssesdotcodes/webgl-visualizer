@@ -8,7 +8,7 @@ require './dances/ScaleDance.coffee'
 require './dances/PositionDance.coffee'
 require './dances/RotateDance.coffee'
 require './danceMaterials/ColorDanceMaterial.coffee'
-require './danceMaterials/SimpleFrequencyShader.coffee'
+require './danceMaterials/ShaderMaterial.coffee'
 
 class window.Visualizer
   # Get those keys set up
@@ -80,7 +80,7 @@ class window.Visualizer
 
   @danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial
-    SimpleFrequencyShader: SimpleFrequencyShader
+    ShaderMaterial: ShaderMaterial
 
   pause: () ->
     if @player.playing then @pause() else @play(@currentlyPlaying)

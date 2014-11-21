@@ -851,9 +851,8 @@ window.Viewer = (function() {
         };
       })(this);
       if (danceMaterial != null) {
-        if (danceMaterial.type.indexOf('Shader') > -1) {
-          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader);
-          newMaterial.loadShader((function(_this) {
+        if (danceMaterial.type === "ShaderMaterial") {
+          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader, danceMaterial.params, (function(_this) {
             return function(shaderMaterial) {
               return addDancer(newDance, shaderMaterial);
             };
@@ -925,7 +924,7 @@ require('./dances/RotateDance.coffee');
 
 require('./danceMaterials/ColorDanceMaterial.coffee');
 
-require('./danceMaterials/SimpleFrequencyShader.coffee');
+require('./danceMaterials/ShaderMaterial.coffee');
 
 window.Visualizer = (function() {
   Visualizer.prototype.keys = {
@@ -1005,7 +1004,7 @@ window.Visualizer = (function() {
 
   Visualizer.danceMaterialTypes = {
     ColorDanceMaterial: ColorDanceMaterial,
-    SimpleFrequencyShader: SimpleFrequencyShader
+    ShaderMaterial: ShaderMaterial
   };
 
   Visualizer.prototype.pause = function() {
@@ -1022,7 +1021,7 @@ window.Visualizer = (function() {
 
 
 
-},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./SoundCloudLoader.coffee":8,"./danceMaterials/ColorDanceMaterial.coffee":11,"./danceMaterials/SimpleFrequencyShader.coffee":12,"./dancers/CubeDancer.coffee":13,"./dancers/PointCloudDancer.coffee":15,"./dancers/SphereDancer.coffee":16,"./dances/PositionDance.coffee":17,"./dances/RotateDance.coffee":18,"./dances/ScaleDance.coffee":19}],11:[function(require,module,exports){
+},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./SoundCloudLoader.coffee":8,"./danceMaterials/ColorDanceMaterial.coffee":11,"./danceMaterials/ShaderMaterial.coffee":12,"./dancers/CubeDancer.coffee":13,"./dancers/PointCloudDancer.coffee":15,"./dancers/SphereDancer.coffee":16,"./dances/PositionDance.coffee":17,"./dances/RotateDance.coffee":18,"./dances/ScaleDance.coffee":19}],11:[function(require,module,exports){
 window.ColorDanceMaterial = (function() {
   ColorDanceMaterial.params = [
     {
@@ -1106,20 +1105,32 @@ window.ColorDanceMaterial = (function() {
 
 
 },{}],12:[function(require,module,exports){
-window.SimpleFrequencyShader = (function() {
-  SimpleFrequencyShader.params = [];
+window.ShaderMaterial = (function() {
+  ShaderMaterial.params = [
+    {
+      name: "shaderName",
+      "default": "simple_frequency"
+    }
+  ];
 
-  SimpleFrequencyShader.name = "SimpleFrequencyShader";
+  ShaderMaterial.name = "ShaderMaterial";
 
-  function SimpleFrequencyShader(shaderLoader) {
-    this.target = 256;
-    this.size = 1024;
+  function ShaderMaterial(shaderLoader, options, shaderCallback) {
     this.shaderLoader = shaderLoader;
+    this.options = options;
+    this.shaderCallback = shaderCallback;
+    if (this.options != null) {
+      this.shaderName = this.options.shaderName;
+    }
+    this.target = 256;
+    this.size = AudioWindow.bufferSize;
     this.newTexArray = new Uint8Array(this.target * 8);
+    this.loadShader(this.shaderCallback);
+    this.buffer = new Uint8Array(this.target);
   }
 
-  SimpleFrequencyShader.prototype.loadShader = function(next) {
-    return this.shaderLoader.load('simple_frequency', (function(_this) {
+  ShaderMaterial.prototype.loadShader = function(next) {
+    return this.shaderLoader.load(this.shaderName, (function(_this) {
       return function(shader) {
         shader.uniforms = {
           time: {
@@ -1143,35 +1154,47 @@ window.SimpleFrequencyShader = (function() {
     })(this));
   };
 
-  SimpleFrequencyShader.prototype.update = function(audioWindow, dancer) {
-    dancer.body.material.uniforms.freqTexture.value = this.reduceArray(audioWindow.frequencyBuffer);
-    return dancer.body.material.uniforms.time.value = audioWindow.time;
-  };
-
-  SimpleFrequencyShader.prototype.reduceArray = function(freqBuf) {
-    var flooredRatio, i, movingSum, newBuf, texture, _i, _j, _ref, _ref1;
-    newBuf = new Array(this.target);
-    movingSum = 0;
-    flooredRatio = Math.floor(this.size / this.target);
-    for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-      movingSum += freqBuf[i];
-      if (((i + 1) % flooredRatio) === 0) {
-        newBuf[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
-        movingSum = 0;
-      }
+  ShaderMaterial.prototype.update = function(audioWindow, dancer) {
+    var i, texture, _i, _j, _ref, _ref1, _ref2;
+    if (dancer.body.material == null) {
+      return;
     }
-    for (i = _j = 0, _ref1 = this.target * 8; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-      this.newTexArray[i] = newBuf[i % this.target];
+    this.reduceArrayToBuffer(audioWindow.frequencyBuffer);
+    for (i = _i = 0, _ref = this.target * 4; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      this.newTexArray[i] = this.buffer[i % this.target];
+    }
+    this.reduceArrayToBuffer(audioWindow.dbBuffer);
+    for (i = _j = _ref1 = this.target * 4, _ref2 = this.target * 8; _ref1 <= _ref2 ? _j < _ref2 : _j > _ref2; i = _ref1 <= _ref2 ? ++_j : --_j) {
+      this.newTexArray[i] = this.buffer[i % this.target];
     }
     texture = new THREE.DataTexture(this.newTexArray, this.target, 2, THREE.LuminanceFormat, THREE.UnsignedByte);
+    texture.flipY = true;
     texture.needsUpdate = true;
     texture.magFilter = THREE.LinearFilter;
     texture.minFilter = THREE.LinearFilter;
     texture.unpackAlignment = 1;
-    return texture;
+    dancer.body.material.uniforms.freqTexture.value = texture;
+    return dancer.body.material.uniforms.time.value = audioWindow.time;
   };
 
-  return SimpleFrequencyShader;
+  ShaderMaterial.prototype.reduceArrayToBuffer = function(freqBuf) {
+    var flooredRatio, i, movingSum, _i, _ref, _results;
+    movingSum = 0;
+    flooredRatio = Math.floor(this.size / this.target);
+    _results = [];
+    for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
+      movingSum += freqBuf[i];
+      if (((i + 1) % flooredRatio) === 0) {
+        this.buffer[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
+        _results.push(movingSum = 0);
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  return ShaderMaterial;
 
 })();
 

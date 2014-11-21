@@ -44,5 +44,5 @@ When you're satisfied with how the scene looks, you can either click `playNext` 
 
 `ColorDanceMaterial` - a material that changes lightness based on volume, saturation based on frequency, and rotates through colors starting at the specified color
 
-`SimpleFrequencyShader` - a shader that displays frequencies. Not useable on a `PointCloudDancer`.
+`ShaderMaterial` - a shader that displays frequencies. Not useable on a `PointCloudDancer`.
 

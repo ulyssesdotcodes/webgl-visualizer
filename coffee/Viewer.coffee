@@ -51,9 +51,8 @@ class window.Viewer
       if danceMaterial?
         # Special case for shaders because it has to load the shader file
         # This is a really hacky way of checking if it's a shader. Should change.
-        if danceMaterial.type.indexOf('Shader') > -1
-          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](@shaderLoader)
-          newMaterial.loadShader (shaderMaterial) =>
+        if danceMaterial.type == "ShaderMaterial"
+          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type] @shaderLoader, danceMaterial.params, (shaderMaterial) =>
             addDancer newDance, shaderMaterial
           return
 
