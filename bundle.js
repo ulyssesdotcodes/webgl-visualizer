@@ -717,14 +717,14 @@ window.Viewer = (function() {
         };
       })(this);
       if (danceMaterial != null) {
-        if (danceMaterial.type.indexOf('Shader') > -1) {
-          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader);
-          newMaterial.loadShader((function(_this) {
+        if (danceMaterial.type === "ShaderMaterial") {
+          danceMaterial.params.shaderLoader = this.shaderLoader;
+          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader, danceMaterial.params);
+          newMaterial.loadTexture((function(_this) {
             return function(shaderMaterial) {
               return addDancer(newDance, shaderMaterial);
             };
           })(this));
-          return;
         }
         newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params);
       } else {
@@ -732,8 +732,18 @@ window.Viewer = (function() {
       }
       addDancer(newDance, newMaterial);
     } else if (id != null) {
-      this.dancers[id] = new Visualizer.dancerTypes[dancer.type](new Visualizer.danceTypes[dance.type](dance.params), new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params);
-      this.scene.add(this.dancers[id].body);
+      addDancer = (function(_this) {
+        return function(newMaterial) {
+          _this.dancers[id] = new Visualizer.dancerTypes[dancer.type](new Visualizer.danceTypes[dance.type](dance.params), newMaterial, dancer.params);
+          return _this.scene.add(_this.dancers[id].body);
+        };
+      })(this);
+      if (danceMaterial.type === "ShaderMaterial") {
+        newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader, danceMaterial.params);
+        newMaterial.loadTexture(addDancer);
+      } else {
+        addDancer(new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params));
+      }
     } else {
 
     }
@@ -791,7 +801,7 @@ require('./dances/RotateDance.coffee');
 
 require('./danceMaterials/ColorDanceMaterial.coffee');
 
-require('./danceMaterials/SimpleFrequencyShader.coffee');
+require('./danceMaterials/ShaderMaterial.coffee');
 
 window.Visualizer = (function() {
   Visualizer.prototype.keys = {
@@ -871,7 +881,7 @@ window.Visualizer = (function() {
 
   Visualizer.danceMaterialTypes = {
     ColorDanceMaterial: ColorDanceMaterial,
-    SimpleFrequencyShader: SimpleFrequencyShader
+    ShaderMaterial: ShaderMaterial
   };
 
   Visualizer.prototype.pause = function() {
@@ -888,7 +898,7 @@ window.Visualizer = (function() {
 
 
 
-},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./SoundCloudLoader.coffee":8,"./danceMaterials/ColorDanceMaterial.coffee":11,"./danceMaterials/SimpleFrequencyShader.coffee":12,"./dancers/CubeDancer.coffee":13,"./dancers/PointCloudDancer.coffee":15,"./dancers/SphereDancer.coffee":16,"./dances/PositionDance.coffee":17,"./dances/RotateDance.coffee":18,"./dances/ScaleDance.coffee":19}],11:[function(require,module,exports){
+},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./SoundCloudLoader.coffee":8,"./danceMaterials/ColorDanceMaterial.coffee":11,"./danceMaterials/ShaderMaterial.coffee":12,"./dancers/CubeDancer.coffee":13,"./dancers/PointCloudDancer.coffee":15,"./dancers/SphereDancer.coffee":16,"./dances/PositionDance.coffee":17,"./dances/RotateDance.coffee":18,"./dances/ScaleDance.coffee":19}],11:[function(require,module,exports){
 window.ColorDanceMaterial = (function() {
   ColorDanceMaterial.params = [
     {
@@ -972,85 +982,98 @@ window.ColorDanceMaterial = (function() {
 
 
 },{}],12:[function(require,module,exports){
-window.SimpleFrequencyShader = (function() {
-  SimpleFrequencyShader.params = [];
+window.ShaderMaterial = (function() {
+  ShaderMaterial.params = [
+    {
+      name: "shaderName",
+      "default": "simple_frequency"
+    }
+  ];
 
-  SimpleFrequencyShader.name = "SimpleFrequencyShader";
+  ShaderMaterial.name = "ShaderMaterial";
 
-  function SimpleFrequencyShader(shaderLoader) {
-    this.target = 128;
-    this.size = 1024;
+  function ShaderMaterial(shaderLoader, options) {
     this.shaderLoader = shaderLoader;
-    this.newTexArray = new Uint8Array(this.target * this.target * 4);
+    if (options != null) {
+      this.shaderName = options.shaderName;
+    }
+    this.target = 256;
+    this.size = AudioWindow.bufferSize;
+    this.newTexArray = new Uint8Array(this.target * 2);
+    this.buffer = new Uint8Array(this.target);
   }
 
-  SimpleFrequencyShader.prototype.loadShader = function(next) {
-    return this.shaderLoader.load('simple_frequency', (function(_this) {
+  ShaderMaterial.prototype.loadTexture = function(next) {
+    return this.shaderLoader.load(this.shaderName, (function(_this) {
       return function(shader) {
         shader.uniforms = {
+          audioResolution: {
+            type: "1i",
+            value: _this.target
+          },
           freqTexture: {
             type: "t",
             value: AudioWindow.bufferSize
           },
-          resolution: {
-            type: "v2",
-            value: new THREE.Vector2(128, 128)
+          time: {
+            type: "1f",
+            value: 0.0
           }
         };
         _this.material = new THREE.ShaderMaterial(shader);
-        _this.material.side = THREE.DoubleSide;
         _this.material.transparent = true;
         return next(_this);
       };
     })(this));
   };
 
-  SimpleFrequencyShader.prototype.update = function(audioWindow, dancer) {
-    return dancer.body.material.uniforms.freqTexture.value = this.reduceArray(audioWindow.frequencyBuffer);
-  };
-
-  SimpleFrequencyShader.prototype.reduceArray = function(freqBuf) {
-    var baseIndex, flooredRatio, i, j, movingSum, newBuf, texture, _i, _j, _k, _ref, _ref1, _ref2;
-    newBuf = new Array(this.target);
-    movingSum = 0;
-    flooredRatio = Math.floor(this.size / this.target);
-    for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-      movingSum += freqBuf[i];
-      if (((i + 1) % flooredRatio) === 0) {
-        newBuf[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
-        movingSum = 0;
-      }
+  ShaderMaterial.prototype.update = function(audioWindow, dancer) {
+    var texture;
+    if (dancer.body.material == null) {
+      return;
     }
-    for (i = _j = 0, _ref1 = this.target; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-      for (j = _k = 0, _ref2 = this.target; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; j = 0 <= _ref2 ? ++_k : --_k) {
-        baseIndex = i * this.target * 4 + j * 4;
-        if (newBuf[j] > i * 2) {
-          this.newTexArray[baseIndex] = 255;
-          this.newTexArray[baseIndex + 1] = 255;
-          this.newTexArray[baseIndex + 2] = 255;
-          this.newTexArray[baseIndex + 3] = 255;
-        } else {
-          this.newTexArray[baseIndex] = 0;
-          this.newTexArray[baseIndex + 1] = 0;
-          this.newTexArray[baseIndex + 2] = 0;
-          this.newTexArray[baseIndex + 3] = 0;
-        }
-      }
-    }
-    texture = new THREE.DataTexture(this.newTexArray, this.target, this.target, THREE.RGBAFormat, THREE.UnsignedByte);
+    this.reduceArrayToBuffer(audioWindow.frequencyBuffer);
+    this.mapWithOffset(this.buffer, this.newTexArray, 0);
+    this.reduceArrayToBuffer(audioWindow.dbBuffer);
+    this.mapWithOffset(this.buffer, this.newTexArray, this.target);
+    texture = new THREE.DataTexture(this.newTexArray, this.target, 2, THREE.LuminanceFormat, THREE.UnsignedByteType);
     texture.needsUpdate = true;
     texture.flipY = false;
     texture.generateMipmaps = false;
     texture.magFilter = THREE.LinearFilter;
     texture.minFilter = THREE.LinearFilter;
     texture.unpackAlignment = 1;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.anisotropy = 4;
-    return texture;
+    dancer.body.material.uniforms.freqTexture.value = texture;
+    return dancer.body.material.uniforms.time.value = audioWindow.time;
   };
 
-  return SimpleFrequencyShader;
+  ShaderMaterial.prototype.reduceArrayToBuffer = function(freqBuf) {
+    var flooredRatio, i, movingSum, _i, _ref, _results;
+    movingSum = 0;
+    flooredRatio = Math.floor(this.size / this.target);
+    _results = [];
+    for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
+      movingSum += freqBuf[i];
+      if (((i + 1) % flooredRatio) === 0) {
+        this.buffer[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
+        _results.push(movingSum = 0);
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  ShaderMaterial.prototype.mapWithOffset = function(buffer, out, offset) {
+    var i, _i, _ref, _results;
+    _results = [];
+    for (i = _i = 1, _ref = buffer.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+      _results.push(out[i + offset] = buffer[i]);
+    }
+    return _results;
+  };
+
+  return ShaderMaterial;
 
 })();
 
