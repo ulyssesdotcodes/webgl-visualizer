@@ -718,12 +718,13 @@ window.Viewer = (function() {
       })(this);
       if (danceMaterial != null) {
         if (danceMaterial.type === "ShaderMaterial") {
-          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader, danceMaterial.params, (function(_this) {
+          danceMaterial.params.shaderLoader = this.shaderLoader;
+          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader, danceMaterial.params);
+          newMaterial.loadTexture((function(_this) {
             return function(shaderMaterial) {
               return addDancer(newDance, shaderMaterial);
             };
           })(this));
-          return;
         }
         newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params);
       } else {
@@ -731,8 +732,18 @@ window.Viewer = (function() {
       }
       addDancer(newDance, newMaterial);
     } else if (id != null) {
-      this.dancers[id] = new Visualizer.dancerTypes[dancer.type](new Visualizer.danceTypes[dance.type](dance.params), new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params);
-      this.scene.add(this.dancers[id].body);
+      addDancer = (function(_this) {
+        return function(newMaterial) {
+          _this.dancers[id] = new Visualizer.dancerTypes[dancer.type](new Visualizer.danceTypes[dance.type](dance.params), newMaterial, dancer.params);
+          return _this.scene.add(_this.dancers[id].body);
+        };
+      })(this);
+      if (danceMaterial.type === "ShaderMaterial") {
+        newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](this.shaderLoader, danceMaterial.params);
+        newMaterial.loadTexture(addDancer);
+      } else {
+        addDancer(new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params));
+      }
     } else {
 
     }
@@ -981,35 +992,32 @@ window.ShaderMaterial = (function() {
 
   ShaderMaterial.name = "ShaderMaterial";
 
-  function ShaderMaterial(shaderLoader, options, shaderCallback) {
+  function ShaderMaterial(shaderLoader, options) {
     this.shaderLoader = shaderLoader;
-    this.options = options;
-    this.shaderCallback = shaderCallback;
-    if (this.options != null) {
-      this.shaderName = this.options.shaderName;
+    if (options != null) {
+      this.shaderName = options.shaderName;
     }
     this.target = 256;
     this.size = AudioWindow.bufferSize;
-    this.newTexArray = new Uint8Array(this.target * 8);
-    this.loadShader(this.shaderCallback);
+    this.newTexArray = new Uint8Array(this.target * 2);
     this.buffer = new Uint8Array(this.target);
   }
 
-  ShaderMaterial.prototype.loadShader = function(next) {
+  ShaderMaterial.prototype.loadTexture = function(next) {
     return this.shaderLoader.load(this.shaderName, (function(_this) {
       return function(shader) {
         shader.uniforms = {
-          time: {
-            type: "1f",
-            value: 0
-          },
           audioResolution: {
-            type: "v2",
-            value: [_this.target, 2]
+            type: "1i",
+            value: _this.target
           },
           freqTexture: {
             type: "t",
             value: AudioWindow.bufferSize
+          },
+          time: {
+            type: "1f",
+            value: 0.0
           }
         };
         _this.material = new THREE.ShaderMaterial(shader);
@@ -1021,30 +1029,29 @@ window.ShaderMaterial = (function() {
   };
 
   ShaderMaterial.prototype.update = function(audioWindow, dancer) {
-    var i, texture, _i, _j, _ref, _ref1, _ref2;
+    var i, texture, _i, _ref;
     if (dancer.body.material == null) {
       return;
     }
     this.reduceArrayToBuffer(audioWindow.frequencyBuffer);
-    for (i = _i = 0, _ref = this.target * 4; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      this.newTexArray[i] = this.buffer[i % this.target];
-    }
-    this.reduceArrayToBuffer(audioWindow.dbBuffer);
-    for (i = _j = _ref1 = this.target * 4, _ref2 = this.target * 8; _ref1 <= _ref2 ? _j < _ref2 : _j > _ref2; i = _ref1 <= _ref2 ? ++_j : --_j) {
+    for (i = _i = 0, _ref = this.target * 2; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
       this.newTexArray[i] = this.buffer[i % this.target];
     }
     texture = new THREE.DataTexture(this.newTexArray, this.target, 2, THREE.LuminanceFormat, THREE.UnsignedByte);
-    texture.flipY = true;
     texture.needsUpdate = true;
+    texture.flipY = false;
+    texture.generateMipmaps = false;
     texture.magFilter = THREE.LinearFilter;
     texture.minFilter = THREE.LinearFilter;
     texture.unpackAlignment = 1;
+    texture.anisotropy = 4;
     dancer.body.material.uniforms.freqTexture.value = texture;
-    return dancer.body.material.uniforms.time.value = audioWindow.time;
+    return dancer.body.material.uniforms.time.value = audioWindow.bufferSize;
   };
 
   ShaderMaterial.prototype.reduceArrayToBuffer = function(freqBuf) {
     var flooredRatio, i, movingSum, _i, _ref, _results;
+    this.buffer = new Array(this.target);
     movingSum = 0;
     flooredRatio = Math.floor(this.size / this.target);
     _results = [];

@@ -52,9 +52,11 @@ class window.Viewer
         # Special case for shaders because it has to load the shader file
         # This is a really hacky way of checking if it's a shader. Should change.
         if danceMaterial.type == "ShaderMaterial"
-          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type] @shaderLoader, danceMaterial.params, (shaderMaterial) =>
+          danceMaterial.params.shaderLoader = @shaderLoader
+
+          newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type] @shaderLoader, danceMaterial.params
+          newMaterial.loadTexture (shaderMaterial) =>
             addDancer newDance, shaderMaterial
-          return
 
         newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params)
       else
@@ -64,8 +66,15 @@ class window.Viewer
 
       return
     else if id?
-      @dancers[id] = new Visualizer.dancerTypes[dancer.type](new Visualizer.danceTypes[dance.type](dance.params), new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params), dancer.params)
-      @scene.add @dancers[id].body
+      addDancer = (newMaterial) =>
+        @dancers[id] = new Visualizer.dancerTypes[dancer.type](new Visualizer.danceTypes[dance.type](dance.params), newMaterial, dancer.params)
+        @scene.add @dancers[id].body
+
+      if danceMaterial.type == "ShaderMaterial"
+        newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type] @shaderLoader, danceMaterial.params
+        newMaterial.loadTexture addDancer
+      else
+        addDancer new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params)
       return
     else
       return
