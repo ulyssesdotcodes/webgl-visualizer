@@ -7,6 +7,9 @@ audio/*
 # npm
 node_modules/
 
+# Ef orig files. 
+*.orig
+
 #############
 ## WebStorm
 #############
