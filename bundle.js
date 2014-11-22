@@ -1021,7 +1021,6 @@ window.ShaderMaterial = (function() {
           }
         };
         _this.material = new THREE.ShaderMaterial(shader);
-        _this.material.side = THREE.DoubleSide;
         _this.material.transparent = true;
         return next(_this);
       };
@@ -1029,29 +1028,27 @@ window.ShaderMaterial = (function() {
   };
 
   ShaderMaterial.prototype.update = function(audioWindow, dancer) {
-    var i, texture, _i, _ref;
+    var texture;
     if (dancer.body.material == null) {
       return;
     }
     this.reduceArrayToBuffer(audioWindow.frequencyBuffer);
-    for (i = _i = 0, _ref = this.target * 2; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      this.newTexArray[i] = this.buffer[i % this.target];
-    }
-    texture = new THREE.DataTexture(this.newTexArray, this.target, 2, THREE.LuminanceFormat, THREE.UnsignedByte);
+    this.mapWithOffset(this.buffer, this.newTexArray, 0);
+    this.reduceArrayToBuffer(audioWindow.dbBuffer);
+    this.mapWithOffset(this.buffer, this.newTexArray, this.target);
+    texture = new THREE.DataTexture(this.newTexArray, this.target, 2, THREE.LuminanceFormat, THREE.UnsignedByteType);
     texture.needsUpdate = true;
     texture.flipY = false;
     texture.generateMipmaps = false;
     texture.magFilter = THREE.LinearFilter;
     texture.minFilter = THREE.LinearFilter;
     texture.unpackAlignment = 1;
-    texture.anisotropy = 4;
     dancer.body.material.uniforms.freqTexture.value = texture;
-    return dancer.body.material.uniforms.time.value = audioWindow.bufferSize;
+    return dancer.body.material.uniforms.time.value = audioWindow.time;
   };
 
   ShaderMaterial.prototype.reduceArrayToBuffer = function(freqBuf) {
     var flooredRatio, i, movingSum, _i, _ref, _results;
-    this.buffer = new Array(this.target);
     movingSum = 0;
     flooredRatio = Math.floor(this.size / this.target);
     _results = [];
@@ -1063,6 +1060,15 @@ window.ShaderMaterial = (function() {
       } else {
         _results.push(void 0);
       }
+    }
+    return _results;
+  };
+
+  ShaderMaterial.prototype.mapWithOffset = function(buffer, out, offset) {
+    var i, _i, _ref, _results;
+    _results = [];
+    for (i = _i = 1, _ref = buffer.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+      _results.push(out[i + offset] = buffer[i]);
     }
     return _results;
   };

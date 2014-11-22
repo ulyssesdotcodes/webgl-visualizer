@@ -25,7 +25,6 @@ class window.ShaderMaterial
       }
 
       @material = new THREE.ShaderMaterial(shader)
-      @material.side = THREE.DoubleSide
       @material.transparent = true
       next(@)
 
@@ -34,26 +33,23 @@ class window.ShaderMaterial
       return
 
     @reduceArrayToBuffer(audioWindow.frequencyBuffer)
-    for i in [0...@target * 2]
-      @newTexArray[i] = @buffer[i % @target]
+    @mapWithOffset(@buffer, @newTexArray, 0)
 
+    @reduceArrayToBuffer(audioWindow.dbBuffer)
+    @mapWithOffset(@buffer, @newTexArray, @target)
 
-    texture = new THREE.DataTexture(@newTexArray, @target, 2, THREE.LuminanceFormat, THREE.UnsignedByte)
+    texture = new THREE.DataTexture(@newTexArray, @target, 2, THREE.LuminanceFormat, THREE.UnsignedByteType)
     texture.needsUpdate = true
     texture.flipY = false
     texture.generateMipmaps = false
     texture.magFilter = THREE.LinearFilter
     texture.minFilter = THREE.LinearFilter
     texture.unpackAlignment = 1
-    texture.anisotropy = 4
 
     dancer.body.material.uniforms.freqTexture.value = texture
     dancer.body.material.uniforms.time.value = audioWindow.time
 
   reduceArrayToBuffer: (freqBuf) ->
-
-    @buffer = new Array(@target)
-
     movingSum = 0
     flooredRatio = Math.floor(@size / @target)
     for i in [1...@size]
@@ -63,4 +59,6 @@ class window.ShaderMaterial
         @buffer[Math.floor(i  / flooredRatio)] = movingSum / flooredRatio
         movingSum = 0
 
-
+  mapWithOffset: (buffer, out, offset) ->
+    for i in [1..buffer.length]
+      out[i + offset] = buffer[i]
