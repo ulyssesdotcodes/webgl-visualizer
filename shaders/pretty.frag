@@ -13,9 +13,10 @@ varying vec2 vUv;
 #define V 1.  // Velocity
 void main() {
   vec2 c = vUv;
+  float t = time * 0.001;
   float freq = texture2D(freqTexture, vec2(c.x, 0.5)).r;
-	vec4 s = vec4(freq, freq, freq, 1.0);
-	c = vec2(0, A*s.y*sin((c.x*W+time*V)* 2.5)) + (c*2.-1.);
+	vec4 s = texture2D(freqTexture, c * 0.5);
+	c = vec2(0, A*s.y*sin((c.x*W+t*V)* 2.5)) + (c*2.-1.);
 	float g = max(abs(s.y/(pow(c.y, 2.1*sin(s.x*P))))*T,
 				  abs(.1/(c.y+E)));
 	gl_FragColor = vec4(g*g*s.y*.6, g*s.w*.44, g*g*.7, 1);

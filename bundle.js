@@ -1071,11 +1071,11 @@ window.ShaderMaterial = (function() {
     if (dancer.body.material == null) {
       return;
     }
-    this.reduceArrayToBuffer(audioWindow.frequencyBuffer);
+    this.reduceArrayToBuffer(audioWindow.frequencyBuffer, this.size / 2.5);
     this.mapChannel(this.buffer, this.newTexArray, 'r', this.channels);
     this.reduceArrayToBuffer(audioWindow.dbBuffer);
     this.mapChannel(this.buffer, this.newTexArray, 'g', this.channels);
-    this.reduceArrayToBuffer(audioWindow.smoothFrequencyBuffer);
+    this.reduceArrayToBuffer(audioWindow.smoothFrequencyBuffer, this.size / 2.5);
     this.mapChannel(this.buffer, this.newTexArray, 'b', this.channels);
     this.reduceArrayToBuffer(audioWindow.smoothDbBuffer);
     this.mapChannel(this.buffer, this.newTexArray, 'a', this.channels);
@@ -1090,18 +1090,34 @@ window.ShaderMaterial = (function() {
     return dancer.body.material.uniforms.time.value = audioWindow.time;
   };
 
-  ShaderMaterial.prototype.reduceArrayToBuffer = function(freqBuf) {
-    var flooredRatio, i, movingSum, _i, _ref, _results;
+  ShaderMaterial.prototype.reduceArrayToBuffer = function(arr, length) {
+    var flooredRatio, i, movingSum, n, ratio, _i, _results;
+    if (length == null) {
+      length = arr.length;
+    }
     movingSum = 0;
-    flooredRatio = Math.floor(freqBuf.length / this.target);
+    ratio = length > this.target ? length / this.target : this.target / length;
+    flooredRatio = Math.floor(ratio);
     _results = [];
-    for (i = _i = 1, _ref = freqBuf.length; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-      movingSum += freqBuf[i];
-      if (((i + 1) % flooredRatio) === 0) {
-        this.buffer[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
-        _results.push(movingSum = 0);
+    for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
+      if (length > this.target) {
+        movingSum += arr[i];
+        if (((i + 1) % flooredRatio) === 0) {
+          this.buffer[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
+          _results.push(movingSum = 0);
+        } else {
+          _results.push(void 0);
+        }
       } else {
-        _results.push(void 0);
+        n = 0;
+        _results.push((function() {
+          var _results1;
+          _results1 = [];
+          while (i * ratio + n < (i + 1) * ratio) {
+            _results1.push(this.buffer[Math.floor(i * ratio) + n++] = arr[i]);
+          }
+          return _results1;
+        }).call(this));
       }
     }
     return _results;

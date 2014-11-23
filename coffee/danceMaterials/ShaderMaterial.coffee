@@ -33,13 +33,13 @@ class window.ShaderMaterial
     if !dancer.body.material?
       return
 
-    @reduceArrayToBuffer(audioWindow.frequencyBuffer)
+    @reduceArrayToBuffer(audioWindow.frequencyBuffer, @size / 2.5)
     @mapChannel(@buffer, @newTexArray, 'r', @channels)
 
     @reduceArrayToBuffer(audioWindow.dbBuffer)
     @mapChannel(@buffer, @newTexArray, 'g', @channels)
 
-    @reduceArrayToBuffer(audioWindow.smoothFrequencyBuffer)
+    @reduceArrayToBuffer(audioWindow.smoothFrequencyBuffer, @size / 2.5)
     @mapChannel(@buffer, @newTexArray, 'b', @channels)
 
     @reduceArrayToBuffer(audioWindow.smoothDbBuffer)
@@ -56,15 +56,26 @@ class window.ShaderMaterial
     dancer.body.material.uniforms.freqTexture.value = texture
     dancer.body.material.uniforms.time.value = audioWindow.time
 
-  reduceArrayToBuffer: (freqBuf) ->
+  reduceArrayToBuffer: (arr, length) ->
+    if !length? then length = arr.length
     movingSum = 0
-    flooredRatio = Math.floor(freqBuf.length / @target)
-    for i in [1...freqBuf.length]
-      movingSum += freqBuf[i]
+    ratio = 
+      if length > @target
+        length / @target
+      else
+        @target / length
+    flooredRatio = Math.floor(ratio)
 
-      if ((i + 1) % flooredRatio) == 0
-        @buffer[Math.floor(i  / flooredRatio)] = movingSum / flooredRatio
-        movingSum = 0
+    for i in [0...length]
+      if length > @target
+        movingSum += arr[i]
+        if ((i + 1) % flooredRatio) == 0
+          @buffer[Math.floor(i  / flooredRatio)] = movingSum / flooredRatio
+          movingSum = 0
+      else
+        n = 0
+        while i * ratio + n < (i + 1) * ratio
+          @buffer[Math.floor(i * ratio) + n++] = arr[i]
 
   mapWithOffset: (buffer, out, offset) ->
     for i in [1..buffer.length]

@@ -1,5 +1,6 @@
 # vim swaps
 *.swp
+*.swo
 
 # Ignore audio files and compiled javascript
 audio/*
