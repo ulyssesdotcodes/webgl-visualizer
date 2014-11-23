@@ -13,7 +13,8 @@ class window.ShaderMaterial
     if options? then { @shaderName } = options
     @target = 256
     @size = AudioWindow.bufferSize
-    @newTexArray = new Uint8Array(@target * 2)
+    @channels = 4
+    @newTexArray = new Uint8Array(@target * @channels)
     @buffer = new Uint8Array(@target)
   
   loadTexture: (next) ->
@@ -32,13 +33,19 @@ class window.ShaderMaterial
     if !dancer.body.material?
       return
 
-    @reduceArrayToBuffer(audioWindow.frequencyBuffer)
-    @mapWithOffset(@buffer, @newTexArray, 0)
+    @reduceArrayToBuffer(audioWindow.frequencyBuffer, @size / 2.5)
+    @mapChannel(@buffer, @newTexArray, 'r', @channels)
 
     @reduceArrayToBuffer(audioWindow.dbBuffer)
-    @mapWithOffset(@buffer, @newTexArray, @target)
+    @mapChannel(@buffer, @newTexArray, 'g', @channels)
 
-    texture = new THREE.DataTexture(@newTexArray, @target, 2, THREE.LuminanceFormat, THREE.UnsignedByteType)
+    @reduceArrayToBuffer(audioWindow.smoothFrequencyBuffer, @size / 2.5)
+    @mapChannel(@buffer, @newTexArray, 'b', @channels)
+
+    @reduceArrayToBuffer(audioWindow.smoothDbBuffer)
+    @mapChannel(@buffer, @newTexArray, 'a', @channels)
+
+    texture = new THREE.DataTexture(@newTexArray, @target, 1, THREE.RGBAFormat, THREE.UnsignedByteType)
     texture.needsUpdate = true
     texture.flipY = false
     texture.generateMipmaps = false
@@ -49,16 +56,39 @@ class window.ShaderMaterial
     dancer.body.material.uniforms.freqTexture.value = texture
     dancer.body.material.uniforms.time.value = audioWindow.time
 
-  reduceArrayToBuffer: (freqBuf) ->
+  reduceArrayToBuffer: (arr, length) ->
+    if !length? then length = arr.length
     movingSum = 0
-    flooredRatio = Math.floor(@size / @target)
-    for i in [1...@size]
-      movingSum += freqBuf[i]
+    ratio = 
+      if length > @target
+        length / @target
+      else
+        @target / length
+    flooredRatio = Math.floor(ratio)
 
-      if ((i + 1) % flooredRatio) == 0
-        @buffer[Math.floor(i  / flooredRatio)] = movingSum / flooredRatio
-        movingSum = 0
+    for i in [0...length]
+      if length > @target
+        movingSum += arr[i]
+        if ((i + 1) % flooredRatio) == 0
+          @buffer[Math.floor(i  / flooredRatio)] = movingSum / flooredRatio
+          movingSum = 0
+      else
+        n = 0
+        while i * ratio + n < (i + 1) * ratio
+          @buffer[Math.floor(i * ratio) + n++] = arr[i]
 
   mapWithOffset: (buffer, out, offset) ->
     for i in [1..buffer.length]
       out[i + offset] = buffer[i]
+  
+  mapChannel: (buffer, out, channel, channels) ->
+    cIndex = 
+      switch channel
+        when 'r','x' then 0
+        when 'g','y' then 1
+        when 'b','z' then 2
+        when 'a' then 3
+        else channel
+
+    for i in [1..buffer.length]
+      out[i * channels + cIndex] = buffer[i]

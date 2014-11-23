@@ -1,29 +1,66 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 window.AudioWindow = (function() {
-  AudioWindow.bufferSize = 2048;
+  AudioWindow.bufferSize = 512;
 
   function AudioWindow(responsiveness) {
     this.responsiveness = responsiveness;
     this.frequencyBuffer = new Uint8Array(this.constructor.bufferSize);
     this.dbBuffer = new Uint8Array(this.constructor.bufferSize);
+    this.smoothFrequencyBuffer = new Uint8Array(this.constructor.bufferSize);
+    this.smoothDbBuffer = new Uint8Array(this.constructor.bufferSize);
+    this.fMax = new Uint8Array(this.constructor.bufferSize);
+    this.dbMax = new Uint8Array(this.constructor.bufferSize);
     this.time = 0;
     this.deltaTime = 0;
+    this.max = 0.0;
+    this.current = 0.0;
   }
 
   AudioWindow.prototype.update = function(analyser, time) {
-    var buf, newTime, rms, val, _i, _len, _ref;
+    var buf, deltaTimeS, diff, key, maxDiff, newTime, rms, sign, val, value, _i, _len, _ref, _ref1, _ref2;
     if (!analyser) {
       return;
     }
     newTime = time * 1000;
     this.deltaTime = newTime - this.time;
+    deltaTimeS = this.deltaTime * 0.001;
     this.time = newTime;
     analyser.getByteTimeDomainData(this.dbBuffer);
     analyser.getByteFrequencyData(this.frequencyBuffer);
+    _ref = this.frequencyBuffer;
+    for (key in _ref) {
+      value = _ref[key];
+      this.fMax[key] = Math.max(this.fMax[key], value);
+      if (this.smoothFrequencyBuffer[key] > this.fMax[key]) {
+        this.smoothFrequencyBuffer[key] = Math.min(Math.max(this.smoothFrequencyBuffer[key] - 256 * deltaTimeS * 0.6, this.fMax[key]), this.smoothFrequencyBuffer[key]);
+      } else {
+        this.smoothFrequencyBuffer[key] = Math.min(Math.max(this.smoothFrequencyBuffer[key] + 256 * deltaTimeS * 1.0, this.smoothFrequencyBuffer[key]), this.fMax[key]);
+      }
+      this.fMax[key] = Math.max(this.fMax[key] - deltaTimeS * 256.0 * 0.6, 0);
+    }
+    _ref1 = this.dbBuffer;
+    for (key in _ref1) {
+      value = _ref1[key];
+      this.dbMax[key] = Math.abs(value - 128) > Math.abs(this.dbMax[key] - 128) ? value : this.dbMax[key];
+      sign = Math.sign(this.smoothDbBuffer[key] - 128);
+      if (sign === 0) {
+        sign = 1;
+      }
+      diff = Math.abs(this.smoothDbBuffer[key] - 128);
+      maxDiff = Math.abs(this.dbMax[key] - 128);
+      if (diff > maxDiff) {
+        diff = Math.min(Math.max(256 * deltaTimeS, maxDiff), diff);
+        this.smoothDbBuffer[key] -= sign * diff;
+      } else {
+        diff = Math.min(Math.max(256 * deltaTimeS, diff), maxDiff);
+        this.smoothDbBuffer[key] += sign * diff;
+      }
+      this.dbMax[key] -= sign * Math.min(Math.abs(this.dbMax[key] - 128), deltaTimeS * 256.0 * 0.6);
+    }
     rms = 0;
-    _ref = this.dbBuffer;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      buf = _ref[_i];
+    _ref2 = this.dbBuffer;
+    for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+      buf = _ref2[_i];
       val = (buf - 128) / 128;
       rms += val * val;
     }
@@ -270,7 +307,8 @@ window.Player = (function() {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     this.audioContext = new AudioContext();
     this.analyser = this.audioContext.createAnalyser();
-    return this.analyser.fftSize = AudioWindow.bufferSize;
+    this.analyser.fftSize = AudioWindow.bufferSize;
+    return this.analyser.smoothingTimeConstant = 0;
   };
 
   Player.prototype.update = function() {
@@ -999,7 +1037,8 @@ window.ShaderMaterial = (function() {
     }
     this.target = 256;
     this.size = AudioWindow.bufferSize;
-    this.newTexArray = new Uint8Array(this.target * 2);
+    this.channels = 4;
+    this.newTexArray = new Uint8Array(this.target * this.channels);
     this.buffer = new Uint8Array(this.target);
   }
 
@@ -1032,11 +1071,15 @@ window.ShaderMaterial = (function() {
     if (dancer.body.material == null) {
       return;
     }
-    this.reduceArrayToBuffer(audioWindow.frequencyBuffer);
-    this.mapWithOffset(this.buffer, this.newTexArray, 0);
+    this.reduceArrayToBuffer(audioWindow.frequencyBuffer, this.size / 2.5);
+    this.mapChannel(this.buffer, this.newTexArray, 'r', this.channels);
     this.reduceArrayToBuffer(audioWindow.dbBuffer);
-    this.mapWithOffset(this.buffer, this.newTexArray, this.target);
-    texture = new THREE.DataTexture(this.newTexArray, this.target, 2, THREE.LuminanceFormat, THREE.UnsignedByteType);
+    this.mapChannel(this.buffer, this.newTexArray, 'g', this.channels);
+    this.reduceArrayToBuffer(audioWindow.smoothFrequencyBuffer, this.size / 2.5);
+    this.mapChannel(this.buffer, this.newTexArray, 'b', this.channels);
+    this.reduceArrayToBuffer(audioWindow.smoothDbBuffer);
+    this.mapChannel(this.buffer, this.newTexArray, 'a', this.channels);
+    texture = new THREE.DataTexture(this.newTexArray, this.target, 1, THREE.RGBAFormat, THREE.UnsignedByteType);
     texture.needsUpdate = true;
     texture.flipY = false;
     texture.generateMipmaps = false;
@@ -1047,18 +1090,34 @@ window.ShaderMaterial = (function() {
     return dancer.body.material.uniforms.time.value = audioWindow.time;
   };
 
-  ShaderMaterial.prototype.reduceArrayToBuffer = function(freqBuf) {
-    var flooredRatio, i, movingSum, _i, _ref, _results;
+  ShaderMaterial.prototype.reduceArrayToBuffer = function(arr, length) {
+    var flooredRatio, i, movingSum, n, ratio, _i, _results;
+    if (length == null) {
+      length = arr.length;
+    }
     movingSum = 0;
-    flooredRatio = Math.floor(this.size / this.target);
+    ratio = length > this.target ? length / this.target : this.target / length;
+    flooredRatio = Math.floor(ratio);
     _results = [];
-    for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-      movingSum += freqBuf[i];
-      if (((i + 1) % flooredRatio) === 0) {
-        this.buffer[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
-        _results.push(movingSum = 0);
+    for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
+      if (length > this.target) {
+        movingSum += arr[i];
+        if (((i + 1) % flooredRatio) === 0) {
+          this.buffer[Math.floor(i / flooredRatio)] = movingSum / flooredRatio;
+          _results.push(movingSum = 0);
+        } else {
+          _results.push(void 0);
+        }
       } else {
-        _results.push(void 0);
+        n = 0;
+        _results.push((function() {
+          var _results1;
+          _results1 = [];
+          while (i * ratio + n < (i + 1) * ratio) {
+            _results1.push(this.buffer[Math.floor(i * ratio) + n++] = arr[i]);
+          }
+          return _results1;
+        }).call(this));
       }
     }
     return _results;
@@ -1069,6 +1128,32 @@ window.ShaderMaterial = (function() {
     _results = [];
     for (i = _i = 1, _ref = buffer.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
       _results.push(out[i + offset] = buffer[i]);
+    }
+    return _results;
+  };
+
+  ShaderMaterial.prototype.mapChannel = function(buffer, out, channel, channels) {
+    var cIndex, i, _i, _ref, _results;
+    cIndex = (function() {
+      switch (channel) {
+        case 'r':
+        case 'x':
+          return 0;
+        case 'g':
+        case 'y':
+          return 1;
+        case 'b':
+        case 'z':
+          return 2;
+        case 'a':
+          return 3;
+        default:
+          return channel;
+      }
+    })();
+    _results = [];
+    for (i = _i = 1, _ref = buffer.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+      _results.push(out[i * channels + cIndex] = buffer[i]);
     }
     return _results;
   };
