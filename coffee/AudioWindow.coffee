@@ -4,11 +4,11 @@ class window.AudioWindow
 
   constructor: (responsiveness) ->
     @responsiveness = responsiveness
-    @frequencyBuffer = new Uint8Array(@constructor.bufferSize/2)
+    @frequencyBuffer = new Uint8Array(@constructor.bufferSize)
     @dbBuffer = new Uint8Array(@constructor.bufferSize)
-    @smoothFrequencyBuffer = new Uint8Array(@constructor.bufferSize/2)
+    @smoothFrequencyBuffer = new Uint8Array(@constructor.bufferSize)
     @smoothDbBuffer = new Uint8Array(@constructor.bufferSize)
-    @fMax = new Uint8Array(@constructor.bufferSize/2)
+    @fMax = new Uint8Array(@constructor.bufferSize)
     @dbMax = new Uint8Array(@constructor.bufferSize)
     @time = 0
     @deltaTime = 0

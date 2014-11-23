@@ -4,11 +4,11 @@ window.AudioWindow = (function() {
 
   function AudioWindow(responsiveness) {
     this.responsiveness = responsiveness;
-    this.frequencyBuffer = new Uint8Array(this.constructor.bufferSize / 2);
+    this.frequencyBuffer = new Uint8Array(this.constructor.bufferSize);
     this.dbBuffer = new Uint8Array(this.constructor.bufferSize);
-    this.smoothFrequencyBuffer = new Uint8Array(this.constructor.bufferSize / 2);
+    this.smoothFrequencyBuffer = new Uint8Array(this.constructor.bufferSize);
     this.smoothDbBuffer = new Uint8Array(this.constructor.bufferSize);
-    this.fMax = new Uint8Array(this.constructor.bufferSize / 2);
+    this.fMax = new Uint8Array(this.constructor.bufferSize);
     this.dbMax = new Uint8Array(this.constructor.bufferSize);
     this.time = 0;
     this.deltaTime = 0;
