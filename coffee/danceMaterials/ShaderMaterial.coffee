@@ -13,7 +13,8 @@ class window.ShaderMaterial
     if options? then { @shaderName } = options
     @target = 256
     @size = AudioWindow.bufferSize
-    @newTexArray = new Uint8Array(@target * 2)
+    @channels = 4
+    @newTexArray = new Uint8Array(@target * @channels)
     @buffer = new Uint8Array(@target)
   
   loadTexture: (next) ->
@@ -33,12 +34,18 @@ class window.ShaderMaterial
       return
 
     @reduceArrayToBuffer(audioWindow.frequencyBuffer)
-    @mapWithOffset(@buffer, @newTexArray, 0)
+    @mapChannel(@buffer, @newTexArray, 'r', @channels)
 
     @reduceArrayToBuffer(audioWindow.dbBuffer)
-    @mapWithOffset(@buffer, @newTexArray, @target)
+    @mapChannel(@buffer, @newTexArray, 'g', @channels)
 
-    texture = new THREE.DataTexture(@newTexArray, @target, 2, THREE.LuminanceFormat, THREE.UnsignedByteType)
+    @reduceArrayToBuffer(audioWindow.smoothFrequencyBuffer)
+    @mapChannel(@buffer, @newTexArray, 'b', @channels)
+
+    @reduceArrayToBuffer(audioWindow.smoothDbBuffer)
+    @mapChannel(@buffer, @newTexArray, 'a', @channels)
+
+    texture = new THREE.DataTexture(@newTexArray, @target, 1, THREE.RGBAFormat, THREE.UnsignedByteType)
     texture.needsUpdate = true
     texture.flipY = false
     texture.generateMipmaps = false
@@ -51,8 +58,8 @@ class window.ShaderMaterial
 
   reduceArrayToBuffer: (freqBuf) ->
     movingSum = 0
-    flooredRatio = Math.floor(@size / @target)
-    for i in [1...@size]
+    flooredRatio = Math.floor(freqBuf.length / @target)
+    for i in [1...freqBuf.length]
       movingSum += freqBuf[i]
 
       if ((i + 1) % flooredRatio) == 0
@@ -62,3 +69,15 @@ class window.ShaderMaterial
   mapWithOffset: (buffer, out, offset) ->
     for i in [1..buffer.length]
       out[i + offset] = buffer[i]
+  
+  mapChannel: (buffer, out, channel, channels) ->
+    cIndex = 
+      switch channel
+        when 'r','x' then 0
+        when 'g','y' then 1
+        when 'b','z' then 2
+        when 'a' then 3
+        else channel
+
+    for i in [1..buffer.length]
+      out[i * channels + cIndex] = buffer[i]

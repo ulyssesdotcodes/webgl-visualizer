@@ -13,6 +13,7 @@ class window.Player
     @audioContext = new AudioContext()
     @analyser = @audioContext.createAnalyser()
     @analyser.fftSize = AudioWindow.bufferSize
+    @analyser.smoothingTimeConstant = 0
 
   update: () ->
     @audioWindow.update(@analyser, @audioContext.currentTime)
