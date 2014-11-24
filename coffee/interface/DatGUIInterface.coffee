@@ -33,7 +33,7 @@ class window.DatGUIInterface
           else
             param.default
 
-        folder.add(params, param.name)
+        folder.add(params, param.name, param.selectionValues)
 
     [dancerController, dancerFolder] = setupFolder('Dancer parameters', 'dancer', Object.keys(Visualizer.dancerTypes))
 

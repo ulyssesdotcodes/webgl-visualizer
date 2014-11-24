@@ -57,6 +57,7 @@ class window.Viewer
           newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type] @shaderLoader, danceMaterial.params
           newMaterial.loadTexture (shaderMaterial) =>
             addDancer newDance, shaderMaterial
+          return
 
         newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params)
       else

@@ -4,6 +4,7 @@ class window.ShaderMaterial
       {
         name: "shaderName"
         default: "simple_frequency"
+        selectionValues: ["simple_frequency", "pretty"]
       }
     ]
 
