@@ -1026,7 +1026,7 @@ window.ShaderMaterial = (function() {
     {
       name: "shaderName",
       "default": "simple_frequency",
-      selectionValues: ["simple_frequency", "pretty"]
+      selectionValues: ["simple_frequency", "pretty", "fft_matrix_product"]
     }
   ];
 
