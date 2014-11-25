@@ -90,7 +90,7 @@ window.ChoreographyRoutine = (function() {
   }
 
   ChoreographyRoutine.prototype.preview = function() {
-    return this.visualizer.receiveChoreography({
+    return this.visualizer.receiveChoreography(false, {
       id: this.id,
       dancer: {
         type: this.dancer,
@@ -108,7 +108,8 @@ window.ChoreographyRoutine = (function() {
   };
 
   ChoreographyRoutine.prototype.add = function() {
-    this.routineMoment.push({
+    var moment;
+    moment = {
       id: this.id,
       dancer: {
         type: this.dancer,
@@ -122,7 +123,9 @@ window.ChoreographyRoutine = (function() {
         type: this.danceMaterial,
         params: this.danceMaterialParams
       }
-    });
+    };
+    this.routineMoment.push(moment);
+    this.visualizer.receiveChoreography(true, moment);
     return this.updateText();
   };
 
@@ -141,7 +144,7 @@ window.ChoreographyRoutine = (function() {
     _ref = this.routineMoment;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       change = _ref[_i];
-      this.visualizer.receiveChoreography(change);
+      this.visualizer.receiveChoreography(true, change);
     }
     return this.updateText();
   };
@@ -169,7 +172,7 @@ window.ChoreographyRoutine = (function() {
     this.routine = [];
     this.routineMoment = [];
     this.routineBeat = -1;
-    this.visualizer.receiveChoreography({
+    this.visualizer.receiveChoreography(true, {
       id: -1
     });
     return this.updateText();
@@ -862,7 +865,7 @@ window.Visualizer = (function() {
       };
     })(this));
     this.soundCloudLoader = new SoundCloudLoader(this["interface"].audioView);
-    url = window.location.hash === ("" != null) ? "https://soundcloud.com/" + window.location.hash.substring(1) : "https://soundcloud.com/redviolin/swing-tape-3";
+    url = window.location.hash !== ("" != null) ? "https://soundcloud.com/" + window.location.hash.substring(1) : "https://soundcloud.com/redviolin/swing-tape-3";
     this.soundCloudLoader.loadStream(url, (function(_this) {
       return function() {
         return console.log("Playing some music");
@@ -871,9 +874,9 @@ window.Visualizer = (function() {
     this.choreographyRoutine.playNext();
   }
 
-  Visualizer.prototype.receiveChoreography = function(move) {
+  Visualizer.prototype.receiveChoreography = function(send, move) {
     this.viewer.receiveChoreography(move);
-    if (this["interface"].popup != null) {
+    if (send && (this["interface"].popup != null)) {
       return this["interface"].popup.postMessage(this.wrapMessage('choreography', move), this["interface"].domain);
     }
   };

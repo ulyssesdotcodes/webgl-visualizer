@@ -34,7 +34,7 @@ class window.Visualizer
     @soundCloudLoader = new SoundCloudLoader(@interface.audioView)
 
     url = 
-      if window.location.hash == ""?
+      if window.location.hash != ""?
         "https://soundcloud.com/" + window.location.hash.substring(1)
       else
         "https://soundcloud.com/redviolin/swing-tape-3"
@@ -43,9 +43,9 @@ class window.Visualizer
 
     @choreographyRoutine.playNext()
 
-  receiveChoreography: (move) ->
+  receiveChoreography: (send, move) ->
     @viewer.receiveChoreography move
-    if @interface.popup? then @interface.popup.postMessage(@wrapMessage('choreography', move), @interface.domain)
+    if send && @interface.popup? then @interface.popup.postMessage(@wrapMessage('choreography', move), @interface.domain)
 
   render: () ->
     if !@player.playing && !@player.miked

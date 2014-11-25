@@ -120,7 +120,7 @@ class window.ChoreographyRoutine
   # Individual moment methods
 
   preview: () ->
-    @visualizer.receiveChoreography
+    @visualizer.receiveChoreography false,
       id: @id
       dancer:
         type: @dancer
@@ -133,7 +133,7 @@ class window.ChoreographyRoutine
         params: @danceMaterialParams
 
   add: () ->
-    @routineMoment.push
+    moment = 
       id: @id
       dancer:
         type: @dancer
@@ -145,6 +145,8 @@ class window.ChoreographyRoutine
         type: @danceMaterial
         params: @danceMaterialParams
 
+    @routineMoment.push moment
+    @visualizer.receiveChoreography true, moment
     @updateText()
 
   insertBeat: () ->
@@ -158,7 +160,7 @@ class window.ChoreographyRoutine
 
     @routineMoment = @routine[++@routineBeat]
     for change in @routineMoment
-      @visualizer.receiveChoreography change
+      @visualizer.receiveChoreography true, change
 
     @updateText()
 
@@ -182,14 +184,8 @@ class window.ChoreographyRoutine
     @routine = []
     @routineMoment = []
     @routineBeat = -1
-    @visualizer.receiveChoreography({ id: -1 })
+    @visualizer.receiveChoreography(true, { id: -1 })
     @updateText()
 
   updateText: () ->
     @visualizer.interface.updateText()
-
-
-
-
-
-
