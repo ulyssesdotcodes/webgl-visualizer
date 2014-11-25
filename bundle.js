@@ -865,7 +865,7 @@ window.Visualizer = (function() {
       };
     })(this));
     this.soundCloudLoader = new SoundCloudLoader(this["interface"].audioView);
-    url = window.location.hash !== ("" != null) ? "https://soundcloud.com/" + window.location.hash.substring(1) : "https://soundcloud.com/redviolin/swing-tape-3";
+    url = window.location.hash !== "" ? "https://soundcloud.com/" + window.location.hash.substring(1) : "https://soundcloud.com/redviolin/swing-tape-3";
     this.soundCloudLoader.loadStream(url, (function(_this) {
       return function() {
         return console.log("Playing some music");
