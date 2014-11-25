@@ -1606,6 +1606,7 @@ window.DatGUIInterface = (function() {
       };
     })(this);
     dancerController.onChange(updateDancerFolder);
+    updateDancerFolder(dancerController.initialValue);
     _ref1 = setupFolder('Dance parameters', 'dance', Object.keys(Visualizer.danceTypes)), danceController = _ref1[0], danceFolder = _ref1[1];
     updateDanceFolder = (function(_this) {
       return function(value, obj) {
@@ -1613,6 +1614,7 @@ window.DatGUIInterface = (function() {
       };
     })(this);
     danceController.onChange(updateDanceFolder);
+    updateDanceFolder(danceController.initialValue);
     _ref2 = setupFolder('Dance material paramaters', 'danceMaterial', Object.keys(Visualizer.danceMaterialTypes)), danceMaterialController = _ref2[0], danceMaterialFolder = _ref2[1];
     updateDanceMaterialFolder = (function(_this) {
       return function(value, obj) {
@@ -1620,6 +1622,7 @@ window.DatGUIInterface = (function() {
       };
     })(this);
     danceMaterialController.onChange(updateDanceMaterialFolder);
+    updateDanceMaterialFolder(danceMaterialController.initialValue);
     idController.onChange((function(_this) {
       return function(value) {
         var controller, idDancer, _i, _len, _ref3;

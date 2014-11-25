@@ -37,15 +37,18 @@ class window.DatGUIInterface
 
     [dancerController, dancerFolder] = setupFolder('Dancer parameters', 'dancer', Object.keys(Visualizer.dancerTypes))
 
+    # These have obj for our own use. The even callback only uses value
     updateDancerFolder = (value, obj) =>
       updateFolder(Visualizer.dancerTypes, dancerFolder, @choreographyRoutine.dancerParams, value, obj)
     dancerController.onChange updateDancerFolder
+    updateDancerFolder dancerController.initialValue
 
     [danceController, danceFolder] = setupFolder('Dance parameters', 'dance', Object.keys(Visualizer.danceTypes))
 
     updateDanceFolder = (value, obj) =>
       updateFolder(Visualizer.danceTypes, danceFolder, @choreographyRoutine.danceParams, value, obj)
     danceController.onChange updateDanceFolder
+    updateDanceFolder danceController.initialValue
 
     [danceMaterialController, danceMaterialFolder] = setupFolder('Dance material paramaters', 'danceMaterial',
       Object.keys(Visualizer.danceMaterialTypes))
@@ -54,6 +57,7 @@ class window.DatGUIInterface
       updateFolder(Visualizer.danceMaterialTypes, danceMaterialFolder, @choreographyRoutine.danceMaterialParams, value,
         obj)
     danceMaterialController.onChange updateDanceMaterialFolder
+    updateDanceMaterialFolder danceMaterialController.initialValue
 
     idController.onChange (value) =>
       idDancer = @viewer.getDancer(value)
