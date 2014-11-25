@@ -766,6 +766,7 @@ window.Viewer = (function() {
               return addDancer(newDance, shaderMaterial);
             };
           })(this));
+          return;
         }
         newMaterial = new Visualizer.danceMaterialTypes[danceMaterial.type](danceMaterial.params);
       } else {
@@ -1027,7 +1028,8 @@ window.ShaderMaterial = (function() {
   ShaderMaterial.params = [
     {
       name: "shaderName",
-      "default": "simple_frequency"
+      "default": "simple_frequency",
+      selectionValues: ["simple_frequency", "pretty", "fft_matrix_product"]
     }
   ];
 
@@ -1595,7 +1597,7 @@ window.DatGUIInterface = (function() {
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         param = _ref[_i];
         params[param.name] = (obj != null ? (_ref1 = obj.options) != null ? _ref1[param.name] : void 0 : void 0) ? obj.options[param.name] : param["default"];
-        _results.push(folder.add(params, param.name));
+        _results.push(folder.add(params, param.name, param.selectionValues));
       }
       return _results;
     };
