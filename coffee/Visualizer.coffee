@@ -7,6 +7,7 @@ require './dancers/PointCloudDancer.coffee'
 require './dances/ScaleDance.coffee'
 require './dances/PositionDance.coffee'
 require './dances/RotateDance.coffee'
+require './dances/StrawmanDance.coffee'
 require './danceMaterials/ColorDanceMaterial.coffee'
 require './danceMaterials/ShaderMaterial.coffee'
 
@@ -77,6 +78,7 @@ class window.Visualizer
     ScaleDance: ScaleDance
     PositionDance: PositionDance
     RotateDance: RotateDance
+    StrawmanDance: StrawmanDance
 
   @danceMaterialTypes:
     ColorDanceMaterial: ColorDanceMaterial
