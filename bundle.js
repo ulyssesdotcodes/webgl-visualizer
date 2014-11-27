@@ -30,6 +30,7 @@ window.AudioWindow = (function() {
     _ref = this.frequencyBuffer;
     for (key in _ref) {
       value = _ref[key];
+      this.frequencyBuffer[key] = value * this.responsiveness;
       this.fMax[key] = Math.max(this.fMax[key], value);
       if (this.smoothFrequencyBuffer[key] > this.fMax[key]) {
         this.smoothFrequencyBuffer[key] = Math.min(Math.max(this.smoothFrequencyBuffer[key] - 256 * deltaTimeS * 0.6, this.fMax[key]), this.smoothFrequencyBuffer[key]);
@@ -41,6 +42,7 @@ window.AudioWindow = (function() {
     _ref1 = this.dbBuffer;
     for (key in _ref1) {
       value = _ref1[key];
+      this.dbBuffer[key] = value * this.responsiveness;
       this.dbMax[key] = Math.abs(value - 128) > Math.abs(this.dbMax[key] - 128) ? value : this.dbMax[key];
       sign = Math.sign(this.smoothDbBuffer[key] - 128);
       if (sign === 0) {

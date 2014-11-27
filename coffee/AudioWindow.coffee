@@ -29,6 +29,10 @@ class window.AudioWindow
     analyser.getByteFrequencyData(@frequencyBuffer)
 
     for key,value of @frequencyBuffer
+      # First make buffer change with responsiveness
+      @frequencyBuffer[key] = value * @responsiveness
+
+      # Then deal with smoothing
       @fMax[key] = Math.max(@fMax[key], value)
 
       if @smoothFrequencyBuffer[key] > @fMax[key]
@@ -45,6 +49,10 @@ class window.AudioWindow
       @fMax[key] = Math.max(@fMax[key] - deltaTimeS * 256.0 * 0.6, 0)
 
     for key,value of @dbBuffer
+      # First make buffer change with responsivenes
+      @dbBuffer[key] = value * @responsiveness
+      
+      # Then deal with smoothing
       @dbMax[key] = 
         if Math.abs(value - 128) > Math.abs(@dbMax[key] - 128)
           value
