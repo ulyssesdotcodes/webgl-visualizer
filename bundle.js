@@ -295,7 +295,7 @@ $(function() {
 
 
 
-},{"../javascript/OrbitControls":24,"./Viewer.coffee":9,"./Visualizer.coffee":10,"./interface/DatGUIInterface.coffee":21}],4:[function(require,module,exports){
+},{"../javascript/OrbitControls":25,"./Viewer.coffee":9,"./Visualizer.coffee":10,"./interface/DatGUIInterface.coffee":22}],4:[function(require,module,exports){
 require('./AudioWindow.coffee');
 
 window.Player = (function() {
@@ -822,7 +822,7 @@ window.Viewer = (function() {
 
 
 
-},{"../javascript/Queue.js":25,"./ShaderLoader.coffee":7}],10:[function(require,module,exports){
+},{"../javascript/Queue.js":26,"./ShaderLoader.coffee":7}],10:[function(require,module,exports){
 require('./Player.coffee');
 
 require('./SoundCloudLoader.coffee');
@@ -840,6 +840,8 @@ require('./dances/ScaleDance.coffee');
 require('./dances/PositionDance.coffee');
 
 require('./dances/RotateDance.coffee');
+
+require('./dances/StrawmanDance.coffee');
 
 require('./danceMaterials/ColorDanceMaterial.coffee');
 
@@ -918,7 +920,8 @@ window.Visualizer = (function() {
   Visualizer.danceTypes = {
     ScaleDance: ScaleDance,
     PositionDance: PositionDance,
-    RotateDance: RotateDance
+    RotateDance: RotateDance,
+    StrawmanDance: StrawmanDance
   };
 
   Visualizer.danceMaterialTypes = {
@@ -940,7 +943,7 @@ window.Visualizer = (function() {
 
 
 
-},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./SoundCloudLoader.coffee":8,"./danceMaterials/ColorDanceMaterial.coffee":11,"./danceMaterials/ShaderMaterial.coffee":12,"./dancers/CubeDancer.coffee":13,"./dancers/PointCloudDancer.coffee":15,"./dancers/SphereDancer.coffee":16,"./dances/PositionDance.coffee":17,"./dances/RotateDance.coffee":18,"./dances/ScaleDance.coffee":19}],11:[function(require,module,exports){
+},{"./ChoreographyRoutine.coffee":2,"./Player.coffee":4,"./SoundCloudLoader.coffee":8,"./danceMaterials/ColorDanceMaterial.coffee":11,"./danceMaterials/ShaderMaterial.coffee":12,"./dancers/CubeDancer.coffee":13,"./dancers/PointCloudDancer.coffee":15,"./dancers/SphereDancer.coffee":16,"./dances/PositionDance.coffee":17,"./dances/RotateDance.coffee":18,"./dances/ScaleDance.coffee":19,"./dances/StrawmanDance.coffee":20}],11:[function(require,module,exports){
 window.ColorDanceMaterial = (function() {
   ColorDanceMaterial.params = [
     {
@@ -1503,6 +1506,23 @@ window.ScaleDance = (function() {
 
 
 },{}],20:[function(require,module,exports){
+window.StrawmanDance = (function() {
+  StrawmanDance.name = "StrawmanDance";
+
+  function StrawmanDance(options) {
+    this.options = options;
+    return;
+  }
+
+  StrawmanDance.prototype.update = function(audioWindow, dancer) {};
+
+  return StrawmanDance;
+
+})();
+
+
+
+},{}],21:[function(require,module,exports){
 window.AudioView = (function() {
   function AudioView() {}
 
@@ -1551,7 +1571,7 @@ window.AudioView = (function() {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 require('./QueueView.coffee');
 
 require('./RoutinesView.coffee');
@@ -1725,7 +1745,7 @@ window.DatGUIInterface = (function() {
 
 
 
-},{"../RoutinesController.coffee":5,"./AudioView.coffee":20,"./QueueView.coffee":22,"./RoutinesView.coffee":23}],22:[function(require,module,exports){
+},{"../RoutinesController.coffee":5,"./AudioView.coffee":21,"./QueueView.coffee":23,"./RoutinesView.coffee":24}],23:[function(require,module,exports){
 window.QueueView = (function() {
   function QueueView(choreographyRoutine) {
     this.choreographyRoutine = choreographyRoutine;
@@ -1835,7 +1855,7 @@ window.QueueView = (function() {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 window.RoutinesView = (function() {
   function RoutinesView(choreographyRoutine, routinesController) {
     this.choreographyRoutine = choreographyRoutine;
@@ -1923,7 +1943,7 @@ window.RoutinesView = (function() {
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /**
  * @author qiao / https://github.com/qiao
  * @author mrdoob / http://mrdoob.com
@@ -2585,7 +2605,7 @@ THREE.OrbitControls = function (object, domElement) {
 };
 
 THREE.OrbitControls.prototype = Object.create(THREE.EventDispatcher.prototype);
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function () {
     window.Queue = (function () {
         function Queue() {
